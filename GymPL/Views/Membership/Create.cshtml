@@ -1,0 +1,96 @@
+@model GymBLL.ModelVM.External.MembershipVM
+
+@{
+    ViewData["Title"] = "Create Membership";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Create Membership</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Membership Details</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="form-group">
+                    <label asp-for="MembershipType" class="control-label"></label>
+                    <input asp-for="MembershipType" class="form-control" />
+                    <span asp-validation-for="MembershipType" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="Price" class="control-label"></label>
+                        <input asp-for="Price" class="form-control" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label asp-for="DurationInMonths" class="control-label"></label>
+                        <input asp-for="DurationInMonths" class="form-control" />
+                        <span asp-validation-for="DurationInMonths" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="HasDietPlan" />
+                            <label class="form-check-label" asp-for="HasDietPlan"></label>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="HasWorkoutPlan" />
+                            <label class="form-check-label" asp-for="HasWorkoutPlan"></label>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="HasNotification" />
+                            <label class="form-check-label" asp-for="HasNotification"></label>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="IsFollowedByTrainer" />
+                            <label class="form-check-label" asp-for="IsFollowedByTrainer"></label>
+                        </div>
+                    </div>
+                </div>
+
+                @* <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="DietPlanId" class="control-label">Default Diet Plan (Optional)</label>
+                        <select asp-for="DietPlanId" class="form-control" asp-items="ViewBag.DietPlans">
+                            <option value="">-- Select Diet Plan --</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label asp-for="WorkoutPlanId" class="control-label">Default Workout Plan (Optional)</label>
+                        <select asp-for="WorkoutPlanId" class="form-control" asp-items="ViewBag.WorkoutPlans">
+                            <option value="">-- Select Workout Plan --</option>
+                        </select>
+                    </div>
+                </div> *@
+
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,112 @@
+@model GymBLL.ModelVM.External.RenewSubscriptionVM
+
+@{
+    ViewData["Title"] = "Renew Subscription";
+}
+
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div class="card" style="background: var(--tile); border-radius: var(--radius); border: 1px solid var(--frame); padding: 2rem;">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: var(--ink); margin-bottom: 0.5rem;">
+                <i class="fas fa-sync-alt" style="color: var(--main-color);"></i>
+                Renew Your Subscription
+            </h2>
+            <p style="color: var(--muted);">Continue enjoying your membership benefits</p>
+        </div>
+
+        <!-- Subscription Summary -->
+        <div style="background: linear-gradient(135deg, var(--main-color), var(--secondary-color)); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; color: var(--accent-ink);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Current Plan</div>
+                    <div style="font-size: 1.3rem; font-weight: 700;">@Model.MembershipType</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Renewal Amount</div>
+                    <div style="font-size: 1.3rem; font-weight: 700;">$@Model.Amount</div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                    <span>Current Expiry:</span>
+                    <span style="font-weight: 600;">@Model.CurrentEndDate.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-top: 0.5rem;">
+                    <span>New Expiry:</span>
+                    <span style="font-weight: 600;">@Model.NewEndDate.ToString("MMM dd, yyyy")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Renewal Form -->
+        <form asp-action="RenewSubscription" method="post">
+            <input type="hidden" asp-for="SubscriptionId" />
+            <input type="hidden" asp-for="MemberId" />
+            <input type="hidden" asp-for="MembershipId" />
+            <input type="hidden" asp-for="MembershipType" />
+            <input type="hidden" asp-for="Amount" />
+            <input type="hidden" asp-for="CurrentEndDate" />
+            <input type="hidden" asp-for="NewEndDate" />
+            <input type="hidden" asp-for="DurationInMonths" />
+
+            <div class="form-section" style="margin-bottom: 2rem;">
+                <h4 style="color: var(--ink); margin-bottom: 1rem;">Payment Information</h4>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label asp-for="PaymentMethod" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Payment Method</label>
+                    <select asp-for="PaymentMethod" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);">
+                        <option value="">Select Payment Method</option>
+                        <option value="CreditCard">Credit Card</option>
+                        <option value="DebitCard">Debit Card</option>
+                        <option value="Cash">Cash</option>
+                        <option value="BankTransfer">Bank Transfer</option>
+                    </select>
+                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-bottom: 2rem;">
+                <h4 style="color: var(--ink); margin-bottom: 1rem;">Billing Details</h4>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label asp-for="BillingName" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Full Name</label>
+                    <input asp-for="BillingName" class="form-control" placeholder="John Doe" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
+                    <span asp-validation-for="BillingName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label asp-for="BillingEmail" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Email</label>
+                    <input asp-for="BillingEmail" type="email" class="form-control" placeholder="john@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
+                    <span asp-validation-for="BillingEmail" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label asp-for="BillingAddress" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Address</label>
+                    <textarea asp-for="BillingAddress" class="form-control" rows="3" placeholder="123 Main St, City, Country" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
+                    <span asp-validation-for="BillingAddress" class="text-danger"></span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label asp-for="Notes" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Notes (Optional)</label>
+                    <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Any additional notes..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <a asp-action="Dashboard" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-check"></i> Confirm Renewal - $@Model.Amount
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

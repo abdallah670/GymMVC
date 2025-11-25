@@ -1,0 +1,30 @@
+﻿<header>
+    <div class="bar">
+        <div class="brand">
+            <h1 class="logo">Meno<span>Pro</span></h1>
+        </div>
+      
+		
+            <!-- Non-authenticated Users -->
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="/#features"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="/#services"><i class="fas fa-dumbbell"></i> Services</a></li>
+                    <li><a href="/#membership"><i class="fas fa-dollar-sign"></i> Pricing</a></li>
+                    <li><a href="/#footer-content"><i class="fas fa-envelope"></i> Contact</a></li>
+                    <li><a href="/Account/Login" class="cta-button"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="/Member/Create" id="joinLink" class="cta-button"><i class="fas fa-user-plus"></i> Join Now</a></li>
+                </ul>
+            </nav>
+        
+    </div>
+</header>
+<script>
+    // Check if user is logged in (you'll implement proper auth later)
+    const isLoggedIn = localStorage.getItem('memberLoggedIn');
+    if (isLoggedIn) {
+        document.getElementById('joinLink').style.display = 'none';
+        document.getElementById('dashboardLink').style.display = 'block';
+    }
+</script>

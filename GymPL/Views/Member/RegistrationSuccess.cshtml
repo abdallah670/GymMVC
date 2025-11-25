@@ -1,0 +1,30 @@
+﻿
+@{
+    ViewData["Title"] = "Registration Successful";
+}
+
+<section class="success-page" style="max-width: var(--maxw); margin: 0 auto; padding: 4rem 1rem; text-align: center;">
+    <div class="success-icon" style="width: 100px; height: 100px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 3rem; color: white;">
+        <i class="fas fa-check"></i>
+    </div>
+
+    <h1 style="margin-bottom: 1rem; color: var(--ink);">Welcome to MenoPro!</h1>
+    <p style="color: var(--muted); margin-bottom: 2rem; font-size: 1.2rem;">
+        Your registration was successful. Your member ID is <strong style="color: var(--main-color);">MP2024001</strong>
+    </p>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="/Membership/Dashboard" class="btn btn-primary">
+            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+        </a>
+        <a href="/" class="btn btn-secondary">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
+    </div>
+</section>
+
+<script>
+    // Mark user as logged in
+    localStorage.setItem('memberLoggedIn', 'true');
+    localStorage.setItem('memberName', 'John'); // You'd get this from your backend
+</script>

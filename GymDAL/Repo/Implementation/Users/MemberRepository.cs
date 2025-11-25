@@ -1,0 +1,75 @@
+
+
+
+
+
+
+using GymDAL.Repo.Abstract.Users;
+
+namespace GymDAL.Repo.Implementation
+{
+    public class MemberRepository : Repository<Member>, IMemberRepository
+    {
+        IApplicationUserRepository _applicationUserRepository;
+        GymDbContext gymDbContext;
+
+        public MemberRepository(GymDbContext context, IMapper mapper) : base(context, mapper)
+        {
+        }
+        public override async Task<Member> GetByIdAsync(string id)
+        {
+            try
+            {
+                var member = await base._context.Members
+               .Include(m => m.FitnessGoal) // Include the FitnessGoal navigation property
+                .FirstOrDefaultAsync(m => m.Id == id);
+                if (member != null)
+                {
+                    return member;
+
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+          
+
+        }
+        public override async Task<IEnumerable<Member>> GetAllAsync()
+        {
+            try
+            {
+                var members = await base._context.Members
+                    .Include(m => m.FitnessGoal) // Include the FitnessGoal navigation property
+                    .ToListAsync();
+
+                return members;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public override Task<IEnumerable<Member>> FindAsync(Expression<Func<Member, bool>> predicate)
+        {
+            try
+            {
+                var members = base._context.Members
+               .Include(m => m.FitnessGoal) // Include the FitnessGoal navigation property
+               .Where(predicate);
+                return Task.FromResult(members.AsEnumerable());
+            }
+            catch (Exception ex)
+            {
+                throw;
+
+            }
+        }
+
+
+
+
+    }
+}

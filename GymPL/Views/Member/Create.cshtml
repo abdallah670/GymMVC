@@ -1,0 +1,203 @@
+﻿@using GymBLL.ModelVM.External
+@using GymBLL.ModelVM.User.Member
+@model MemberDetailsVM
+@{
+    ViewData["Title"] = "Join MenoPro Gym";
+    var memberships = ViewBag.Memberships as List<MembershipVM> ?? new List<MembershipVM>();
+}
+
+<section class="membership-register" style="max-width: var(--maxw); margin: 0 auto; padding: 4rem 1rem;">
+    <div class="section-header">
+        <h2 class="section-title">Join MenoPro Gym</h2>
+        <p class="section-subtitle">Start your fitness journey today!</p>
+    </div>
+
+    <div class="register-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
+        <!-- Registration Form -->
+        <div class="register-form">
+            <form id="Create" method="post" asp-action="Create" asp-controller="Member">
+                @Html.AntiForgeryToken()
+                
+
+                <h3 style="margin-bottom: 1.5rem; color: var(--ink);">Personal Information</h3>
+
+                <div style="display: grid; gap: 1rem;">
+                    <!-- Full Name -->
+                    <div>
+                        <label asp-for="FullName" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Full Name</label>
+                        <input asp-for="FullName" type="text" required value="Ahmed"
+                               style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label asp-for="Email" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Email</label>
+                        <input asp-for="Email" type="email" required value="hnbg14006@gmail.com"
+                               style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label asp-for="Phone" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Phone</label>
+						<input asp-for="Phone" type="tel" required value="01234567890"
+                               style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="Password" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Password</label>
+                        <input type="password" id="Password" name="Password" required value="1234"
+                               style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="ConfirmPassword" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Confirm Password</label>
+                        <input type="password" id="ConfirmPassword" name="ConfirmPassword" required value="1234"
+                               style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                    </div>
+
+                    <!-- Membership Plan -->
+                    <div>
+                        <label asp-for="MembershipId" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Membership Plan</label>
+                        <select asp-for="MembershipId" id="MembershipId" name="MembershipId" required 
+                                style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                            <option value="">Select a plan</option>
+                            @foreach (var membership in memberships)
+                            {
+                                <option value="@membership.Id"
+                                        data-price="@membership.Price"
+                                        data-name="@membership.MembershipType"
+                                        data-features="@membership.Features">
+                                    @membership.MembershipType - $@membership.Price/month
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="MembershipId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h3 style="margin: 2rem 0 1.5rem 0; color: var(--ink);">Payment Information</h3>
+
+                <div style="display: grid; gap: 1rem;">
+                    <div>
+                        <label  for="CardNumber" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Card Number</label>
+                        <input type="text" id="CardNumber" name="CardNumber" placeholder="1234 5678 9012 3456" required value="1"
+                               style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label for="ExpiryDate" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">Expiry Date</label>
+                            <input type="text" id="ExpiryDate" name="ExpiryDate" placeholder="MM/YY" required value="1"
+                                   style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                        </div>
+                        <div>
+                            <label for="CVV" style="display: block; margin-bottom: 0.5rem; color: var(--ink);">CVV</label>
+                            <input type="text" id="CVV" name="CVV" placeholder="123" required value="1"
+                                   style="width: 100%; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 2rem;">
+                    <i class="fas fa-lock"></i> Complete Registration & Pay
+                </button>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary" style="background: var(--tile); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--frame);">
+            <h3 style="margin-bottom: 1.5rem; color: var(--ink);">Order Summary</h3>
+
+            <div id="planDetails">
+                <div class="plan-summary" style="padding: 1rem; background: color-mix(in srgb, var(--tile) 80%, transparent); border-radius: var(--radius); margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--main-color); margin-bottom: 0.5rem;">Selected Plan</h4>
+                    <p style="color: var(--muted);">Please select a plan to see details</p>
+                </div>
+            </div>
+
+            <div class="benefits" style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--ink);">All Plans Include</h4>
+                <ul style="list-style: none; color: var(--muted);">
+                    <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-check" style="color: var(--success);"></i> 24/7 Gym Access
+                    </li>
+                    <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-check" style="color: var(--success);"></i> Free Fitness Assessment
+                    </li>
+                    <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-check" style="color: var(--success);"></i> Personalized Workout Plan
+                    </li>
+                    <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-check" style="color: var(--success);"></i> Nutritional Guidance
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Update plan details when selection changes
+        document.getElementById('MembershipId').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const planDetails = document.getElementById('planDetails');
+
+            if (selectedOption.value) {
+                const planName = selectedOption.getAttribute('data-name');
+                const planPrice = selectedOption.getAttribute('data-price');
+                const planFeatures = selectedOption.getAttribute('data-features').split('|');
+
+                planDetails.innerHTML = `
+                    <div class="plan-summary" style="padding: 1.5rem; background: color-mix(in srgb, var(--tile) 80%, transparent); border-radius: var(--radius); margin-bottom: 1.5rem; border: 2px solid var(--main-color);">
+                        <h4 style="color: var(--main-color); margin-bottom: 0.5rem; font-size: 1.5rem;">${planName} Plan</h4>
+                        <div style="font-size: 2.5rem; font-weight: 700; color: var(--main-color); margin-bottom: 1.5rem;">
+                            $${planPrice}<span style="font-size: 1rem; color: var(--muted);">/month</span>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <h5 style="color: var(--ink); margin-bottom: 0.5rem; font-weight: 600;">Plan Features:</h5>
+                            <ul style="list-style: none; color: var(--muted);">
+                                ${planFeatures.map(feature => `
+                                    <li style="padding: 0.5rem 0; display: flex; align-items: start; gap: 0.75rem; border-bottom: 1px solid var(--rule);">
+                                        <i class="fas fa-check" style="color: var(--success); margin-top: 0.25rem; flex-shrink: 0;"></i>
+                                        <span>${feature}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else {
+                planDetails.innerHTML = `
+                    <div class="plan-summary" style="padding: 1rem; background: color-mix(in srgb, var(--tile) 80%, transparent); border-radius: var(--radius); margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--main-color); margin-bottom: 0.5rem;">Selected Plan</h4>
+                        <p style="color: var(--muted);">Please select a plan to see details</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Password confirmation validation
+        document.getElementById('Create').addEventListener('submit', function(e) {
+            const password = document.getElementById('Password').value;
+            const confirmPassword = document.getElementById('ConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+
+           
+        });
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

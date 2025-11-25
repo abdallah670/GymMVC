@@ -1,0 +1,71 @@
+﻿@using MenoBLL.ModelVM.AccountVM
+@model RegisterUserVM
+
+<section id="owner-setup" class="setup-container">
+    <div class="setup-card">
+        <div class="setup-header">
+            <div class="setup-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h1 class="setup-title">Gym Management Setup</h1>
+            <p class="setup-subtitle">Welcome! Create your owner account to get started</p>
+        </div>
+
+        <form asp-action="CreateOwner" method="post" class="setup-form">
+            <div class="form-grid">
+                <!-- Email -->
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">
+                        <i class="fas fa-envelope me-2"></i>Email Address
+                    </label>
+                    <input asp-for="Email" class="form-control-custom" value="fikri18005@gmail.com" />
+                    <span asp-validation-for="Email" class="validation-error"></span>
+                </div>
+
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label asp-for="FullName" class="form-label">
+                        <i class="fas fa-user me-2"></i>Full Name
+                    </label>
+                    <input asp-for="FullName" class="form-control-custom" value="Meno" />
+                    <span asp-validation-for="FullName" class="validation-error"></span>
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label asp-for="Phone" class="form-label">
+                        <i class="fas fa-phone me-2"></i>Phone Number
+                    </label>
+                    <input asp-for="Phone" class="form-control-custom" value="01205450824" />
+                    <span asp-validation-for="Phone" class="validation-error"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Password
+                    </label>
+                    <input asp-for="Password" class="form-control-custom" type="password" value="1234" />
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Confirm Password
+                    </label>
+                    <input asp-for="ConfirmPassword" class="form-control-custom" type="password" value="1234" />
+                    <span asp-validation-for="ConfirmPassword" class="validation-error"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary setup-submit">
+                <i class="fas fa-rocket me-2"></i>Create Owner Account
+            </button>
+        </form>
+
+        <div class="setup-footer">
+            <p><i class="fas fa-shield-alt me-2"></i>Your data is secure and encrypted</p>
+        </div>
+    </div>
+</section>

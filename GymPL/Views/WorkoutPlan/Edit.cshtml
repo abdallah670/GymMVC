@@ -1,0 +1,65 @@
+@model GymBLL.ModelVM.Workout.WorkoutPlanVM
+
+@{
+    ViewData["Title"] = "Edit Workout Plan";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Edit Workout Plan</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Plan Details</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="DurationWeeks" class="control-label"></label>
+                        <input asp-for="DurationWeeks" class="form-control" />
+                        <span asp-validation-for="DurationWeeks" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label asp-for="Difficulty" class="control-label"></label>
+                        <select asp-for="Difficulty" class="form-control">
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                        <span asp-validation-for="Difficulty" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

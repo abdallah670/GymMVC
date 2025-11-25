@@ -1,0 +1,462 @@
+﻿@{
+    ViewData["Title"] = "Account Settings";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-3">
+            <!-- Settings Sidebar -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Settings</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="#account" class="list-group-item list-group-item-action active"
+                           onclick="showSection('account')">
+                            <i class="fas fa-user-cog me-2"></i> Account
+                        </a>
+                        <a href="#notifications" class="list-group-item list-group-item-action"
+                           onclick="showSection('notifications')">
+                            <i class="fas fa-bell me-2"></i> Notifications
+                        </a>
+                        <a href="#privacy" class="list-group-item list-group-item-action"
+                           onclick="showSection('privacy')">
+                            a
+                            <i class="fas fa-shield-alt me-2"></i> Privacy & Security
+                        </a>
+                        <a href="#preferences" class="list-group-item list-group-item-action"
+                           onclick="showSection('preferences')">
+                            <i class="fas fa-sliders-h me-2"></i> Preferences
+                        </a>
+                        <a href="#integrations" class="list-group-item list-group-item-action"
+                           onclick="showSection('integrations')">
+                            <i class="fas fa-plug me-2"></i> Integrations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <!-- Account Settings -->
+            <div class="card mb-4" id="account-section">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-cog me-2"></i>Account Settings</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Email Notifications -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Email Notifications</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="emailAppointments">
+                            <label class="form-check-label" for="emailAppointments">
+                                Appointment reminders and updates
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="emailPromotions" checked>
+                            <label class="form-check-label" for="emailPromotions">
+                                Promotions and announcements
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailNewsletter" checked>
+                            <label class="form-check-label" for="emailNewsletter">
+                                Weekly newsletter
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <h6 class="mb-3">Account Actions</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deactivateModal">
+                            <i class="fas fa-user-slash me-1"></i> Deactivate Account
+                        </button>
+                        <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="fas fa-download me-1"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="card mb-4 d-none" id="notifications-section">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Push Notifications -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Push Notifications</h6>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="pushMessages" checked>
+                            <label class="form-check-label" for="pushMessages">
+                                New messages
+                            </label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="pushAppointments" checked>
+                            <label class="form-check-label" for="pushAppointments">
+                                Appointment reminders
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="pushSystem" checked>
+                            <label class="form-check-label" for="pushSystem">
+                                System updates
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- SMS Notifications -->
+                    <h6 class="mb-3">SMS Notifications</h6>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Standard messaging rates may apply
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="smsReminders">
+                        <label class="form-check-label" for="smsReminders">
+                            Send SMS reminders for appointments
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy & Security -->
+            <div class="card mb-4 d-none" id="privacy-section">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Privacy & Security</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Session Management -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Active Sessions</h6>
+                        <div class="session-item bg-light p-3 rounded mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Current Session</strong>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-desktop me-1"></i> Windows • Chrome
+                                    </div>
+                                    <div class="text-muted small">Logged in just now</div>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout Other Devices
+                        </button>
+                    </div>
+
+                    <!-- Data Privacy -->
+                    <h6 class="mb-3">Data Privacy</h6>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="dataAnalytics" checked>
+                        <label class="form-check-label" for="dataAnalytics">
+                            Allow usage analytics (helps improve the service)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="personalizedAds">
+                        <label class="form-check-label" for="personalizedAds">
+                            Show personalized content and ads
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="card mb-4 d-none" id="preferences-section">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Preferences</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Display Settings -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Display Settings</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Theme</label>
+                                <select class="form-select" id="themeSelect">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto (System)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Time Zone</label>
+                                <select class="form-select" id="timezoneSelect">
+                                    <option value="EST">Eastern Time (EST)</option>
+                                    <option value="CST">Central Time (CST)</option>
+                                    <option value="PST">Pacific Time (PST)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Language -->
+                    <h6 class="mb-3">Language</h6>
+                    <select class="form-select mb-4" style="max-width: 300px;">
+                        <option selected>English (US)</option>
+                        <option>Español</option>
+                        <option>Français</option>
+                    </select>
+
+                    <!-- Save Button -->
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save me-1"></i> Save Preferences
+                    </button>
+                </div>
+            </div>
+
+            <!-- Integrations -->
+            <div class="card d-none" id="integrations-section">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Integrations</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Calendar Integration -->
+                    <div class="integration-item mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="integration-icon bg-primary rounded-circle p-2 me-3">
+                                <i class="fas fa-calendar-alt text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Google Calendar</h6>
+                                <p class="text-muted mb-0 small">Sync your appointments with Google Calendar</p>
+                            </div>
+                            <button class="btn btn-outline-primary">
+                                <i class="fab fa-google me-1"></i> Connect
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fitness Trackers -->
+                    <div class="integration-item mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="integration-icon bg-success rounded-circle p-2 me-3">
+                                <i class="fas fa-heartbeat text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Fitbit</h6>
+                                <p class="text-muted mb-0 small">Connect your Fitbit device</p>
+                            </div>
+                            <button class="btn btn-outline-success">
+                                <i class="fab fa-fitbit me-1"></i> Connect
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        More integrations coming soon!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deactivate Account Modal -->
+<div class="modal fade" id="deactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Deactivate Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone
+                </div>
+                <p>Are you sure you want to deactivate your account? You will lose access to:</p>
+                <ul>
+                    <li>All your workout plans</li>
+                    <li>Client history and data</li>
+                    <li>Scheduled appointments</li>
+                    <li>Progress tracking</li>
+                </ul>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDeactivate">
+                    <label class="form-check-label" for="confirmDeactivate">
+                        I understand and want to deactivate my account
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="deactivateBtn" disabled>
+                    Deactivate Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Data Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Your Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select what data you'd like to export:</p>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportProfile" checked>
+                    <label class="form-check-label" for="exportProfile">
+                        Profile information
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportWorkouts" checked>
+                    <label class="form-check-label" for="exportWorkouts">
+                        Workout plans and history
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="exportAppointments" checked>
+                    <label class="form-check-label" for="exportAppointments">
+                        Appointment history
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="exportMessages">
+                    <label class="form-check-label" for="exportMessages">
+                        Message history
+                    </label>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    The export will be sent to your email address and may take up to 24 hours to process.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">
+                    <i class="fas fa-download me-1"></i> Request Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Section navigation
+    function showSection(sectionId) {
+        // Hide all sections
+        document.querySelectorAll('[id$="-section"]').forEach(section => {
+            section.classList.add('d-none');
+        });
+
+        // Show selected section
+        document.getElementById(sectionId + '-section').classList.remove('d-none');
+
+        // Update active link
+        document.querySelectorAll('.list-group-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+
+    // Settings save function
+    function saveSettings() {
+        const settings = {
+            emailAppointments: document.getElementById('emailAppointments').checked,
+            emailPromotions: document.getElementById('emailPromotions').checked,
+            emailNewsletter: document.getElementById('emailNewsletter').checked,
+            pushMessages: document.getElementById('pushMessages').checked,
+            pushAppointments: document.getElementById('pushAppointments').checked,
+            pushSystem: document.getElementById('pushSystem').checked,
+            smsReminders: document.getElementById('smsReminders').checked,
+            dataAnalytics: document.getElementById('dataAnalytics').checked,
+            personalizedAds: document.getElementById('personalizedAds').checked,
+            theme: document.getElementById('themeSelect').value,
+            timezone: document.getElementById('timezoneSelect').value
+        };
+
+        // Save to server
+        fetch('/Account/SaveSettings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Settings saved successfully!');
+                // Apply theme if changed
+                if (settings.theme === 'dark') {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else if (settings.theme === 'light') {
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                } else {
+                    document.documentElement.removeAttribute('data-bs-theme');
+                }
+            } else {
+                alert('Failed to save settings: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error saving settings');
+        });
+    }
+
+    // Deactivate account confirmation
+    document.getElementById('confirmDeactivate')?.addEventListener('change', function() {
+        document.getElementById('deactivateBtn').disabled = !this.checked;
+    });
+
+    document.getElementById('deactivateBtn')?.addEventListener('click', function() {
+        if (confirm('Are you absolutely sure? This cannot be undone!')) {
+            fetch('/Account/Deactivate', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Account deactivated. You will be logged out.');
+                    window.location.href = '/Account/Logout';
+                } else {
+                    alert('Failed to deactivate account');
+                }
+            })
+            .catch(() => alert('Error deactivating account'));
+        }
+    });
+
+    // Export data
+    function exportData() {
+        const exportOptions = {
+            profile: document.getElementById('exportProfile').checked,
+            workouts: document.getElementById('exportWorkouts').checked,
+            appointments: document.getElementById('exportAppointments').checked,
+            messages: document.getElementById('exportMessages').checked
+        };
+
+        fetch('/Account/ExportData', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(exportOptions)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Export requested! You will receive an email when it\'s ready.');
+                $('#exportModal').modal('hide');
+            } else {
+                alert('Failed to request export');
+            }
+        })
+        .catch(() => alert('Error requesting export'));
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show account section by default
+        showSection('account');
+    });
+</script>

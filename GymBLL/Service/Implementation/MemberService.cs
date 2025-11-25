@@ -1,0 +1,311 @@
+using AutoMapper;
+using GymBLL.ModelVM.External;
+using GymBLL.ModelVM.User.AppUser;
+using GymBLL.ModelVM.User.Member;
+using GymBLL.Service.Abstract;
+using GymDAL.Entities.Users;
+using GymDAL.Repo.Abstract;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace GymBLL.Service.Implementation
+{
+    public class MemberService : IMemberService
+    {
+        public IMapper Mapper { get; }
+        public IUnitOfWork UnitOfWork { get; }
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public MemberService(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _userManager = userManager;
+            UnitOfWork = unitOfWork;
+            Mapper = mapper;
+        }
+
+        public async Task<IdentityResult> Register(RegisterUserVM user)
+        {
+            try
+            {
+                var member = Mapper.Map<Member>(user);
+                member.UserName = user.Email;
+                member.EmailConfirmed = true;
+                member.JoinDate = DateTime.UtcNow;
+
+                var result = await _userManager.CreateAsync(member, user.Password);
+                if (result.Succeeded)
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(member, "Member");
+                    if (!roleResult.Succeeded)
+                    {
+                        return IdentityResult.Failed(roleResult.Errors.ToArray());
+                    }
+                }
+
+                await UnitOfWork.CommitTransactionAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                UnitOfWork.RollbackTransaction();
+                throw;
+            }
+        }
+
+        public async Task<Response<MemberVM>> GetMemberByIdAsync(string memberId)
+        {
+            try
+            {
+                var member = await UnitOfWork.Members.GetByIdAsync(memberId);
+                if (member != null)
+                {
+                    var memberVm = Mapper.Map<MemberVM>(member);
+                    memberVm.FitnessGoal = new FitnessGoalsVM();
+                    memberVm.FitnessGoal.GoalName = member.FitnessGoal?.GoalsName;
+                    memberVm.FitnessGoal.GoalDescription = member.FitnessGoal?.GoalsDescription;
+                    memberVm.FitnessGoal.Id = member.FitnessGoal?.Id;    
+                
+                    return new Response<MemberVM>(memberVm, null, false);
+                }
+                else
+                {
+                    return new Response<MemberVM>(null, "Member not found.", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<MemberVM>(null, $"Failed to get member: {ex.Message}", true);
+            }
+        }
+
+        public async Task<Response<MemberVM>> GetMemberByEmailAsync(string email)
+        {
+            try
+            {
+                var member = await UnitOfWork.Members.FirstOrDefaultAsync(m => m.Email == email);
+                if (member != null)
+                {
+                    var memberVm = Mapper.Map<MemberVM>(member);
+                    return new Response<MemberVM>(memberVm, null, false);
+                }
+                else
+                {
+                    return new Response<MemberVM>(null, "Member not found.", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<MemberVM>(null, $"Failed to get member: {ex.Message}", true);
+            }
+        }
+
+        public async Task<Response<MemberVM>> UpdateMemberAsync(MemberVM memberVm)
+        {
+            try
+            {
+                var existingMember = await UnitOfWork.Members.GetByIdAsync(memberVm.Id);
+
+                if (existingMember == null)
+                {
+                    return new Response<MemberVM>(null, "Member not found.", true);
+                }
+
+                existingMember.FullName = memberVm.FullName;
+                existingMember.Phone = memberVm.Phone;
+                existingMember.ProfilePicture = memberVm.ProfilePicture;
+                
+                UnitOfWork.Members.Update(existingMember);
+
+                var result = await UnitOfWork.SaveAsync();
+                if (result > 0)
+                {
+                    return new Response<MemberVM>(memberVm, null, false);
+                }
+                else
+                {
+                    return new Response<MemberVM>(null, "Failed to update member.", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<MemberVM>(null, $"Failed to update member: {ex.Message}", true);
+            }
+        }
+
+        public async Task<Response<bool>> DeleteMemberAsync(string memberId)
+        {
+            try
+            {
+                var member = await UnitOfWork.Members.GetByIdAsync(memberId);
+                if (member == null)
+                {
+                    return new Response<bool>(false, "Member not found.", true);
+                }
+
+                member.IsActive = false;
+                UnitOfWork.Members.Update(member);
+
+                var result = await UnitOfWork.SaveAsync();
+                if (result > 0)
+                {
+                    return new Response<bool>(true, null, false);
+                }
+                else
+                {
+                    return new Response<bool>(false, "Failed to delete member.", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, $"Failed to delete member: {ex.Message}", true);
+            }
+        }
+
+        public async Task<Response<List<MemberVM>>> GetAllMembersAsync()
+        {
+            try
+            {
+                var members = await UnitOfWork.Members.GetAllAsync();
+                var memberVms = members.Select(m => new MemberVM
+                {
+                    Id = m.Id,
+                    Email = m.Email,
+                    FullName = m.FullName,
+                    Phone = m.Phone,
+                    ProfilePicture = m.ProfilePicture,
+                    JoinDate = m.JoinDate,
+                    CurrentHeight = m.Height,
+                    CurrentWeight = m.CurrentWeight,
+                    Gender = m.Gender,
+                    FitnessGoal = new FitnessGoalsVM
+                    {
+                        GoalName=m.FitnessGoal?.GoalsName,
+                        Id=m.FitnessGoal?.Id,
+                        GoalDescription=m.FitnessGoal?.GoalsDescription
+
+                    }
+
+                }).ToList();
+                return new Response<List<MemberVM>>(memberVms, null, false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<MemberVM>>(null, $"Failed to get members: {ex.Message}", true);
+            }
+        }
+
+        public Task<IdentityResult> Register(MemberDetailsVM user)
+        {
+            try
+            {
+                var member = Mapper.Map<RegisterUserVM>(user);
+
+                return Register(member);
+            }
+            catch (Exception ex)
+            {
+                UnitOfWork.RollbackTransaction();
+                throw;
+            }
+        }
+        public async Task<Response<MemberVM>> CompleteProfileAsync(MemberProfileVM model)
+        {
+            try
+            {
+                UnitOfWork.BeginTransaction();
+                var member = await UnitOfWork.Members.GetByIdAsync(model.Id);
+                if (member == null)
+                    return new Response<MemberVM>(null, "Failed to get member", true);
+
+                var updatedMember = Mapper.Map<MemberProfileVM, Member>(model, member);
+                UnitOfWork.Members.Update(updatedMember);
+                await UnitOfWork.CommitTransactionAsync();
+                var memberVM = Mapper.Map<MemberVM>(updatedMember);
+
+                return new Response<MemberVM>(memberVM, null, false);
+
+            }
+            catch (Exception ex)
+            {
+                UnitOfWork.RollbackTransaction();
+                return new Response<MemberVM>(null, $"Failed to complete profile: {ex.Message}", true);
+
+            }
+        }
+
+        public async Task<bool> HasCompletedProfileAsync(string memberId)
+        {
+            var member = await UnitOfWork.Members.GetByIdAsync(memberId);
+            return member?.HasCompletedProfile ?? false;
+        }
+
+        public async Task<Response<List<MemberVM>>> GetActiveMembersAsync()
+        {
+            try
+            {
+               
+                var members = await UnitOfWork.Members.FindAsync(m => m.IsActive);
+                var memberVms = members.Select(m => new MemberVM
+                {
+                    Id = m.Id,
+                    Email = m.Email,
+                    FullName = m.FullName,
+                    Phone = m.Phone,
+                    ProfilePicture = m.ProfilePicture,
+                    JoinDate = m.JoinDate,
+                    CurrentHeight = m.Height,
+                    CurrentWeight = m.CurrentWeight,
+                    Gender = m.Gender,
+                    FitnessGoal = new FitnessGoalsVM
+                    {
+                        GoalName = m.FitnessGoal.GoalsName,
+                        Id = m.FitnessGoal.Id,
+                        GoalDescription = m.FitnessGoal.GoalsDescription
+
+                    }
+                }).ToList();
+                return new Response<List<MemberVM>>(memberVms, null, false);
+
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<MemberVM>>(null, $"Failed to get members: {ex.Message}", true);
+            }
+        }
+        public async Task<Response<List<MemberVM>>> GetNotActiveMembersAsync()
+        {
+          
+            try
+            {
+                var members = await UnitOfWork.Members.FindAsync(m => !m.IsActive);
+                var memberVms = members.Select(m => new MemberVM
+                {
+                    Id = m.Id,
+                    Email = m.Email,
+                    FullName = m.FullName,
+                    Phone = m.Phone,
+                    ProfilePicture = m.ProfilePicture,
+                    JoinDate = m.JoinDate,
+                    CurrentHeight = m.Height,
+                    CurrentWeight = m.CurrentWeight,
+                    Gender = m.Gender,
+                    FitnessGoal = new FitnessGoalsVM
+                    {
+                        GoalName = m.FitnessGoal.GoalsName,
+                        Id = m.FitnessGoal.Id,
+                        GoalDescription = m.FitnessGoal.GoalsDescription
+                    }
+                }).ToList();
+                return new Response<List<MemberVM>>(memberVms, null, false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<MemberVM>>(null, $"Failed to get not active members: {ex.Message}", true);
+            }
+        }
+    }
+}

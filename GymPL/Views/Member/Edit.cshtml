@@ -1,0 +1,67 @@
+@model GymBLL.ModelVM.User.Member.MemberVM
+
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Edit Member</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Member Details</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="form-group">
+                    <label asp-for="FullName" class="control-label"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" readonly />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Phone" class="control-label"></label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="FitnessGoal.GoalName" class="control-label"></label>
+                    <textarea asp-for="FitnessGoal.GoalName" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="FitnessGoal.GoalName" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="CurrentWeight" class="control-label"></label>
+                        <input asp-for="CurrentWeight" class="form-control" />
+                        <span asp-validation-for="CurrentWeight" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label asp-for="CurrentHeight" class="control-label"></label>
+                        <input asp-for="CurrentHeight" class="form-control" />
+                        <span asp-validation-for="CurrentHeight" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

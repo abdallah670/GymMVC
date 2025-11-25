@@ -1,0 +1,48 @@
+@model GymBLL.ModelVM.External.MembershipVM
+
+@{
+    ViewData["Title"] = "Membership Details";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Membership Details</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">@Model.MembershipType</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Type</dt>
+                <dd class="col-sm-9">@Model.MembershipType</dd>
+
+                <dt class="col-sm-3">Price</dt>
+                <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+
+                <dt class="col-sm-3">Duration</dt>
+                <dd class="col-sm-9">@Model.DurationInMonths months</dd>
+
+                <dt class="col-sm-3">Features</dt>
+                <dd class="col-sm-9">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-@(Model.HasDietPlan ? "check text-success" : "times text-danger")"></i> Diet Plan</li>
+                        <li><i class="fas fa-@(Model.HasWorkoutPlan ? "check text-success" : "times text-danger")"></i> Workout Plan</li>
+                        <li><i class="fas fa-@(Model.HasNotification == true ? "check text-success" : "times text-danger")"></i> Notifications</li>
+                        <li><i class="fas fa-@(Model.IsFollowedByTrainer == true ? "check text-success" : "times text-danger")"></i> Trainer Support</li>
+                    </ul>
+                </dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    <span class="badge badge-@(Model.IsActive ? "success" : "secondary")">
+                        @(Model.IsActive ? "Active" : "Inactive")
+                    </span>
+                </dd>
+            </dl>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>

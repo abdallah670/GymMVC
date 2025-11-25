@@ -1,0 +1,157 @@
+@model GymBLL.ModelVM.External.UpgradeSubscriptionVM
+
+@{
+    ViewData["Title"] = "Upgrade Subscription";
+}
+
+<div class="container" style="max-width: 1000px; margin: 2rem auto; padding: 0 1rem;">
+    <div class="card" style="background: var(--tile); border-radius: var(--radius); border: 1px solid var(--frame); padding: 2rem;">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: var(--ink); margin-bottom: 0.5rem;">
+                <i class="fas fa-arrow-up" style="color: var(--main-color);"></i>
+                Upgrade Your Membership
+            </h2>
+            <p style="color: var(--muted);">Unlock more benefits with a premium plan</p>
+        </div>
+
+        <!-- Current Plan -->
+        <div style="background: var(--frame); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem;">
+            <h4 style="color: var(--ink); margin-bottom: 1rem;">Current Plan</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--ink);">@Model.CurrentMembershipType</div>
+                    <div style="color: var(--muted); font-size: 0.9rem;">Expires: @Model.CurrentEndDate.ToString("MMM dd, yyyy")</div>
+                </div>
+                <div style="font-size: 1.3rem; font-weight: 700; color: var(--main-color);">$@Model.CurrentPrice</div>
+            </div>
+        </div>
+
+        <!-- Available Upgrades -->
+        @if (Model.AvailableUpgrades != null && Model.AvailableUpgrades.Any())
+        {
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: var(--ink); margin-bottom: 1rem;">Choose Your New Plan</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    @foreach (var membership in Model.AvailableUpgrades)
+                    {
+                        <div class="membership-card" style="background: var(--tile); border: 2px solid var(--frame); border-radius: var(--radius); padding: 1.5rem; cursor: pointer; transition: all 0.3s;" onclick="selectPlan(@membership.Id, '@membership.MembershipType', @membership.Price)">
+                            <div style="text-align: center;">
+                                <h5 style="color: var(--ink); margin-bottom: 0.5rem;">@membership.MembershipType</h5>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--main-color); margin: 1rem 0;">$@membership.Price</div>
+                                <div style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;">per month</div>
+                                
+                                @if (!string.IsNullOrEmpty(membership.Features))
+                                {
+                                    <div style="text-align: left; color: var(--ink); font-size: 0.9rem;">
+                                        @foreach (var feature in membership.Features.Split(','))
+                                        {
+                                            <div style="margin-bottom: 0.5rem;">
+                                                <i class="fas fa-check" style="color: var(--success);"></i> @feature.Trim()
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--frame); color: var(--secondary-color); font-weight: 600;">
+                                    Upgrade: +$@((membership.Price - Model.CurrentPrice).ToString("F2"))
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Upgrade Form -->
+            <form asp-action="UpgradeSubscription" method="post" id="upgradeForm">
+                <input type="hidden" asp-for="CurrentSubscriptionId" />
+                <input type="hidden" asp-for="MemberId" />
+                <input type="hidden" asp-for="CurrentMembershipId" />
+                <input type="hidden" asp-for="CurrentMembershipType" />
+                <input type="hidden" asp-for="CurrentPrice" />
+                <input type="hidden" asp-for="CurrentEndDate" />
+                <input type="hidden" asp-for="NewMembershipId" id="selectedPlanId" />
+                <input type="hidden" asp-for="NewMembershipType" id="selectedPlanName" />
+                <input type="hidden" asp-for="NewPrice" id="selectedPlanPrice" />
+
+                <div id="paymentSection" style="display: none;">
+                    <div class="form-section" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--frame); border-radius: var(--radius);">
+                        <h4 style="color: var(--ink); margin-bottom: 1rem;">Payment Information</h4>
+                        
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label asp-for="PaymentMethod" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Payment Method</label>
+                            <select asp-for="PaymentMethod" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);">
+                                <option value="">Select Payment Method</option>
+                                <option value="CreditCard">Credit Card</option>
+                                <option value="DebitCard">Debit Card</option>
+                                <option value="Cash">Cash</option>
+                                <option value="BankTransfer">Bank Transfer</option>
+                            </select>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label asp-for="BillingName" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Full Name</label>
+                            <input asp-for="BillingName" class="form-control" placeholder="John Doe" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label asp-for="BillingEmail" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Email</label>
+                            <input asp-for="BillingEmail" type="email" class="form-control" placeholder="john@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label asp-for="BillingAddress" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Address</label>
+                            <textarea asp-for="BillingAddress" class="form-control" rows="2" placeholder="123 Main St, City, Country" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <a asp-action="Dashboard" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                            <i class="fas fa-check"></i> Confirm Upgrade
+                        </button>
+                    </div>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 2rem; color: var(--muted);">
+                <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>No upgrade options available at this time.</p>
+                <a asp-action="Dashboard" class="btn btn-primary" style="margin-top: 1rem;">Return to Dashboard</a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function selectPlan(id, name, price) {
+            // Update hidden fields
+            document.getElementById('selectedPlanId').value = id;
+            document.getElementById('selectedPlanName').value = name;
+            document.getElementById('selectedPlanPrice').value = price;
+            
+            // Remove previous selection
+            document.querySelectorAll('.membership-card').forEach(card => {
+                card.style.borderColor = 'var(--frame)';
+                card.style.background = 'var(--tile)';
+            });
+            
+            // Highlight selected card
+            event.currentTarget.style.borderColor = 'var(--main-color)';
+            event.currentTarget.style.background = 'color-mix(in srgb, var(--main-color) 5%, var(--tile))';
+            
+            // Show payment section
+            document.getElementById('paymentSection').style.display = 'block';
+            document.getElementById('paymentSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+}

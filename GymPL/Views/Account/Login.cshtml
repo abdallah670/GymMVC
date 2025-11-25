@@ -1,0 +1,98 @@
+﻿@model MenoBLL.ModelVM.AccountVM.LoginUserVM
+
+@{
+    ViewData["Title"] = "Login";
+  
+}
+
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="gym-icon">
+            <i class="fas fa-dumbbell"></i>
+        </div>
+
+        <div class="login-header">
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to your MenoPro account</p>
+        </div>
+
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">
+                    <i class="fas fa-envelope me-1"></i>Email Address
+                </label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input asp-for="Email" class="form-control-custom" placeholder="Enter your email" value="fikri18005@gmail.com" />
+                </div>
+                <span asp-validation-for="Email" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label">
+                    <i class="fas fa-lock me-1"></i>Password
+                </label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input asp-for="Password" type="password" class="form-control-custom" placeholder="Enter your password" value="1234" />
+                </div>
+                <span asp-validation-for="Password" class="validation-error"></span>
+            </div>
+
+            <div class="checkbox-container">
+                <input asp-for="RememberMe" class="checkbox-custom" id="rememberMe" type="checkbox" checked="checked" />
+                <label class="checkbox-label" for="rememberMe">
+                    Keep me signed in
+                </label>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p>New to MenoPro?</p>
+            <a href="@Url.Action("Create", "Member")" class="join-link">
+                <i class="fas fa-user-plus"></i>
+                Create your account
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Add focus effects
+               // Add this script to ensure checkbox works
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkbox = document.getElementById('rememberMe');
+            const label = document.querySelector('label[for="rememberMe"]');
+
+            // Ensure checkbox toggles when label is clicked
+            if (label) {
+                label.addEventListener('click', function(e) {
+                    // This ensures the checkbox state changes
+                    checkbox.checked = !checkbox.checked;
+
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    checkbox.dispatchEvent(event);
+                });
+            }
+
+            // Debug: log checkbox state changes
+            checkbox.addEventListener('change', function() {
+                console.log('Checkbox checked:', this.checked);
+            });
+        });
+    </script>
+}

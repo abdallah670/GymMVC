@@ -1,0 +1,359 @@
+@{
+    ViewData["Title"] = "Help & Support";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h1 class="display-5 mb-3"><i class="fas fa-hands-helping text-primary me-3"></i>Help & Support</h1>
+            <p class="lead">We're here to help you get the most out of MenoPro</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Quick Help -->
+        <div class="col-lg-8">
+            <!-- FAQ Accordion -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- FAQ Item 1 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How do I schedule an appointment with my trainer?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>To schedule an appointment:</p>
+                                    <ol>
+                                        <li>Go to your Dashboard</li>
+                                        <li>Click on "Schedule" in the navigation</li>
+                                        <li>Select an available time slot</li>
+                                        <li>Choose the type of session (in-person or virtual)</li>
+                                        <li>Click "Book Appointment"</li>
+                                    </ol>
+                                    <p>Your trainer will receive a notification and can confirm the appointment.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 2 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    How can I update my workout plans?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Trainers can update workout plans by:</p>
+                                    <ul>
+                                        <li>Going to "Workout Plans" in the navigation</li>
+                                        <li>Selecting a client or creating a new plan</li>
+                                        <li>Adding exercises with sets, reps, and instructions</li>
+                                        <li>Saving the plan - it will be available to your client immediately</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 3 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    How do I reset my password?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>If you've forgotten your password:</p>
+                                    <ol>
+                                        <li>Go to the login page</li>
+                                        <li>Click "Forgot Password"</li>
+                                        <li>Enter your email address</li>
+                                        <li>Check your email for a reset link</li>
+                                        <li>Follow the link to create a new password</li>
+                                    </ol>
+                                    <p>If you're logged in, you can change your password from your Profile → Settings.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 4 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    Can I cancel or reschedule an appointment?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Yes!</strong> You can cancel or reschedule appointments:</p>
+                                    <ul>
+                                        <li><strong>To cancel:</strong> Go to Schedule → Find the appointment → Click "Cancel"</li>
+                                        <li><strong>To reschedule:</strong> Cancel the existing appointment and book a new one</li>
+                                    </ul>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Cancellation Policy:</strong> Please cancel at least 24 hours in advance to avoid cancellation fees.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support Form -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-envelope me-2"></i>Contact Support</h5>
+                </div>
+                <div class="card-body">
+                    <form id="supportForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Name *</label>
+                                <input type="text" class="form-control" 
+                                       value="@User.Identity.Name" 
+                                       readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" 
+                                       value="@User.GetUserEmail()" 
+                                       readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Subject *</label>
+                            <select class="form-select" id="supportSubject" required>
+                                <option value="">Select a category</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="billing">Billing & Payments</option>
+                                <option value="account">Account Management</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Message *</label>
+                            <textarea class="form-control" 
+                                      id="supportMessage" 
+                                      rows="5" 
+                                      required
+                                      placeholder="Please describe your issue in detail..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Attachments (Optional)</label>
+                            <input type="file" class="form-control" 
+                                   id="supportAttachments" 
+                                   multiple
+                                   accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                            <div class="form-text">
+                                You can attach screenshots or documents (Max 10MB total)
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="urgentSupport">
+                                <label class="form-check-label" for="urgentSupport">
+                                    This is urgent
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Quick Links & Resources -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Profile")" class="btn btn-outline-primary">
+                            <i class="fas fa-user me-2"></i>Update Profile
+                        </a>
+                        <a href="@Url.Action("Settings", "Account")" class="btn btn-outline-primary">
+                            <i class="fas fa-cog me-2"></i>Account Settings
+                        </a>
+                        <a href="@Url.Action("ChangePassword", "Account")" class="btn btn-outline-primary">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </a>
+                        <a href="/trainer/dashboard" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4"><i class="fas fa-phone me-2"></i>Contact Information</h5>
+                    <div class="contact-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon bg-primary rounded-circle p-2 me-3">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Email Support</h6>
+                                <p class="mb-0 small">support@menopro.com</p>
+                                <p class="mb-0 small text-muted">Response time: 24-48 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon bg-success rounded-circle p-2 me-3">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Phone Support</h6>
+                                <p class="mb-0 small">1-800-MENO-PRO</p>
+                                <p class="mb-0 small text-muted">Mon-Fri 9AM-5PM EST</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon bg-info rounded-circle p-2 me-3">
+                                <i class="fas fa-comments text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Live Chat</h6>
+                                <p class="mb-0 small">Available 24/7</p>
+                                <button class="btn btn-sm btn-outline-info mt-2" onclick="openLiveChat()">
+                                    <i class="fas fa-comment-dots me-1"></i>Start Chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4"><i class="fas fa-server me-2"></i>System Status</h5>
+                    <div class="system-status">
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span>Application</span>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span>API Services</span>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span>Database</span>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center">
+                            <span>Email Services</span>
+                            <span class="badge bg-warning">Degraded</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 small text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Last updated: @DateTime.Now.ToString("MMM dd, HH:mm")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.contact-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.system-status .badge {
+    min-width: 100px;
+    text-align: center;
+}
+</style>
+
+<script>
+// Support form submission
+document.getElementById('supportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('subject', document.getElementById('supportSubject').value);
+    formData.append('message', document.getElementById('supportMessage').value);
+    formData.append('urgent', document.getElementById('urgentSupport').checked);
+    
+    const attachments = document.getElementById('supportAttachments').files;
+    for (let i = 0; i < attachments.length; i++) {
+        formData.append('attachments', attachments[i]);
+    }
+    
+    // Show loading
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+    submitBtn.disabled = true;
+    
+    // Submit to server
+    fetch('/Home/SubmitSupportRequest', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Support request sent! We\'ll get back to you within 24 hours.');
+            this.reset();
+        } else {
+            alert(data.message || 'Failed to send support request');
+        }
+    })
+    .catch(error => {
+        alert('Error sending support request');
+        console.error(error);
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Live chat simulation
+function openLiveChat() {
+    alert('Live chat would open here in a real application. For now, please use email or phone support.');
+}
+
+// Initialize FAQ accordion
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-expand first FAQ item
+    const firstFaq = document.querySelector('#faqAccordion .accordion-collapse');
+    if (firstFaq) {
+        new bootstrap.Collapse(firstFaq, { toggle: true });
+    }
+});
+</script>

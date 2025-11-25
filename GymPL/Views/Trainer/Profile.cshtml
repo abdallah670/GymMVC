@@ -1,0 +1,295 @@
+﻿@using GymPL.ViewModels
+@model TrainerProfileVM
+@{
+    ViewData["Title"] = "Trainer Profile";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Column - Profile Info -->
+        <div class="col-md-4">
+            <div class="card profile-card">
+                <div class="card-body text-center">
+                    <!-- Profile Picture -->
+                    <div class="mb-4">
+                        <div class="profile-picture-wrapper position-relative d-inline-block">
+                            <div class="profile-picture-container" id="profilePictureContainer">
+                                @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                                {
+                                    <img src="@Model.ProfilePicture"
+                                         alt="@Model.FullName"
+                                         class="profile-picture rounded-circle"
+                                         id="currentProfilePicture">
+                                }
+                                else
+                                {
+                                    <div class="profile-picture-placeholder rounded-circle">
+                                        <i class="fas fa-user-tie fa-4x"></i>
+                                    </div>
+                                }
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm profile-camera-btn"
+                                    onclick="document.getElementById('ProfileImageFile').click()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">Click camera icon to change picture</small>
+                        </div>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <h4 class="mb-2">@Model.FullName</h4>
+                    <p class="text-muted mb-3">@Model.Email</p>
+
+                    <div class="badge bg-primary mb-3">
+                        <i class="fas fa-dumbbell me-1"></i> Trainer
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="row stats-row text-center">
+                        <div class="col-6">
+                            <h5 class="mb-1">@(Model.ExperienceYears ?? 0)</h5>
+                            <small class="text-muted">Years Exp</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">0</h5>
+                            <small class="text-muted">Clients</small>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- Contact Info -->
+                    <div class="contact-info">
+                        <p class="mb-2">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            @(string.IsNullOrEmpty(Model.Phone) ? "Not set" : Model.Phone)
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-user-clock me-2 text-primary"></i>
+                            Member since @Model.CreatedAt.ToString("MMM yyyy")
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">Quick Stats</h6>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Active Clients
+                            <span class="badge bg-primary rounded-pill">0</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Diet Plans
+                            <span class="badge bg-success rounded-pill">0</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Workout Plans
+                            <span class="badge bg-info rounded-pill">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Edit Form -->
+        <div class="col-md-8">
+            <!-- ASP.NET FORM -->
+            <form asp-action="UpdateProfile" asp-controller="Trainer"
+                  method="post" enctype="multipart/form-data" id="profileForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Hidden fields -->
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="ProfilePicture" />
+                <input type="hidden" asp-for="CreatedAt" />
+
+                <!-- Hidden file input for profile picture -->
+                <input type="file" asp-for="ProfileImageFile"
+                       id="ProfileImageFile"
+                       accept="image/*"
+                       style="display: none;"
+                       onchange="previewProfilePicture(this)">
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Edit Profile</h5>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Basic Information -->
+                        <h6 class="mb-3"><i class="fas fa-user me-2"></i>Basic Information</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FullName" class="form-label">Full Name *</label>
+                                <input asp-for="FullName" class="form-control" required />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control"
+                                       value="@Model.Email" readonly>
+                                <small class="text-muted">Contact admin to change email</small>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <h6 class="mb-3 mt-4"><i class="fas fa-address-card me-2"></i>Contact Information</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Phone" class="form-label">Phone Number</label>
+                                <input asp-for="Phone" class="form-control"
+                                       placeholder="+1 (555) 123-4567" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Professional Information -->
+                        <h6 class="mb-3 mt-4"><i class="fas fa-briefcase me-2"></i>Professional Information</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ExperienceYears" class="form-label">Years of Experience</label>
+                                <input asp-for="ExperienceYears" class="form-control"
+                                       type="number" min="0" max="50" />
+                                <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Bio" class="form-label">Bio / About Me</label>
+                            <textarea asp-for="Bio" class="form-control" rows="4"
+                                      placeholder="Tell us about your training philosophy, specialties, and background..."></textarea>
+                            <span asp-validation-for="Bio" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Simple preview function (optional)
+        function previewProfilePicture(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update preview
+                    const container = document.getElementById('profilePictureContainer');
+                    container.innerHTML = '';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'profile-picture rounded-circle';
+                    img.alt = 'New Profile Picture';
+
+                    container.appendChild(img);
+
+                    // Show message
+                    const message = document.querySelector('.profile-picture-wrapper + .mt-2 small');
+                    if (message) {
+                        message.innerHTML = '<span class="text-success">✓ New picture selected. Click Save Changes to update.</span>';
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+      
+
+        // Optional: Show loading on submit
+        document.getElementById('profileForm').addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+                submitBtn.disabled = true;
+            }
+        });
+    </script>
+}
+
+<style>
+    .profile-card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .profile-picture-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-picture-container {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .profile-picture {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-picture-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+
+    .profile-camera-btn {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        z-index: 10;
+    }
+
+        .profile-camera-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+            transition: all 0.2s;
+        }
+
+    .stats-row {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px 0;
+        margin: 15px 0;
+    }
+
+    .contact-info i {
+        width: 20px;
+    }
+
+    .field-validation-error {
+        font-size: 0.875rem;
+    }
+</style>

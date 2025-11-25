@@ -1,0 +1,44 @@
+@model GymBLL.ModelVM.User.Member.MemberVM
+
+@{
+    ViewData["Title"] = "Member Details";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Member Details</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">@Model.FullName</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Full Name</dt>
+                <dd class="col-sm-9">@Model.FullName</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Phone</dt>
+                <dd class="col-sm-9">@Model.Phone</dd>
+
+                <dt class="col-sm-3">Join Date</dt>
+                <dd class="col-sm-9">@Model.JoinDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-3">Fitness Goals</dt>
+                <dd class="col-sm-9">@Model.FitnessGoal.GoalName</dd>
+                
+
+                <dt class="col-sm-3">Current Weight</dt>
+                <dd class="col-sm-9">@Model.CurrentWeight kg</dd>
+
+                <dt class="col-sm-3">Height</dt>
+                <dd class="col-sm-9">@Model.CurrentHeight cm</dd>
+            </dl>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
