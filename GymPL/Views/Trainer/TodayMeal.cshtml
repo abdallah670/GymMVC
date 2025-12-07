@@ -1,0 +1,182 @@
+@{
+    ViewData["Title"] = "Today's Meals";
+    var assignment = ViewBag.Assignment as GymBLL.ModelVM.Nutrition.DietPlanAssignmentVM;
+    var dietPlan = ViewBag.DietPlan as GymBLL.ModelVM.Nutrition.DietPlanVM;
+    var currentDay = (int)ViewBag.CurrentDay;
+    var maxDays = (int)ViewBag.MaxDays;
+    var meals = ViewBag.Meals as List<GymBLL.ModelVM.Nutrition.DietPlanItemVM>;
+    
+    var icons = new Dictionary<string, string> 
+    {
+        { "Breakfast", "fa-coffee" },
+        { "Lunch", "fa-hamburger" },
+        { "Dinner", "fa-drumstick-bite" },
+        { "Snack", "fa-apple-alt" }
+    };
+    var colors = new Dictionary<string, string>
+    {
+        { "Breakfast", "#FFB347" },
+        { "Lunch", "#77DD77" },
+        { "Dinner", "#6CA0DC" },
+        { "Snack", "#FF6B6B" }
+    };
+}
+
+<div class="container" style="max-width: 900px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@Url.Action("MyMembers")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Members
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, var(--info), var(--secondary-color)); padding: 2rem; border-radius: var(--radius); margin-bottom: 2rem; color: var(--accent-ink);">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <h2 style="margin-bottom: 0.5rem;">
+                    <i class="fas fa-utensils"></i> @dietPlan?.Name
+                </h2>
+                <p style="opacity: 0.9; margin-bottom: 0.25rem;">
+                    <i class="fas fa-fire"></i> @dietPlan?.TotalCalories cal/day | 
+                    <i class="fas fa-leaf"></i> @dietPlan?.DietType
+                </p>
+                <p style="opacity: 0.8; font-size: 0.9rem;">
+                    <i class="fas fa-calendar-alt"></i> 
+                    @assignment?.StartDate.ToString("MMM dd, yyyy") - @assignment?.EndDate.ToString("MMM dd, yyyy")
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <div style="background: rgba(255,255,255,0.2); padding: 0.75rem 1.5rem; border-radius: var(--radius);">
+                    <div style="font-size: 2rem; font-weight: 700;">Day @currentDay</div>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">of @maxDays days</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Navigation -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: var(--tile); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--frame);">
+        @if (currentDay > 1)
+        {
+            <a href="@Url.Action("TodayMeal", new { assignmentId = assignment?.Id, day = currentDay - 1 })" class="btn btn-secondary">
+                <i class="fas fa-chevron-left"></i> Previous Day
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <label style="color: var(--muted);">Jump to day:</label>
+            <select id="daySelector" onchange="changeDayMeal(this.value)" style="padding: 0.5rem; border-radius: var(--radius); border: 1px solid var(--frame); background: var(--tile); color: var(--ink);">
+                @for (int i = 1; i <= maxDays; i++)
+                {
+                    <option value="@i" selected="@(i == currentDay)">Day @i</option>
+                }
+            </select>
+        </div>
+
+        @if (currentDay < maxDays)
+        {
+            <a href="@Url.Action("TodayMeal", new { assignmentId = assignment?.Id, day = currentDay + 1 })" class="btn btn-secondary">
+                Next Day <i class="fas fa-chevron-right"></i>
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+    </div>
+
+    <!-- Meals List -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame);">
+        <h3 style="color: var(--ink); margin-bottom: 1.5rem;">
+            <i class="fas fa-utensils"></i> Meals for Day @currentDay
+        </h3>
+
+        @if (meals == null || !meals.Any())
+        {
+            <div style="text-align: center; padding: 3rem; color: var(--muted);">
+                <i class="fas fa-pizza-slice" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+                <h4 style="color: var(--ink);">No Meals Planned</h4>
+                <p>No meals scheduled for this day.</p>
+            </div>
+        }
+        else
+        {
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                @foreach (var mealType in meals.Select(m => m.MealType).Distinct())
+                {
+                    var typeMeals = meals.Where(m => m.MealType == mealType).ToList();
+                    var iconClass = icons.ContainsKey(mealType) ? icons[mealType] : "fa-utensil-spoon";
+                    var colorHex = colors.ContainsKey(mealType) ? colors[mealType] : "#888";
+
+                    <div style="background: var(--frame); padding: 1.25rem; border-radius: var(--radius); border-left: 4px solid @colorHex;">
+                        <h4 style="color: var(--ink); margin-bottom: 1rem;">
+                            <i class="fas @iconClass" style="color: @colorHex;"></i> @mealType
+                        </h4>
+
+                        @foreach (var meal in typeMeals)
+                        {
+                            <div style="background: var(--tile); padding: 1rem; border-radius: var(--radius); margin-bottom: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                    <h5 style="color: var(--ink); margin: 0; font-size: 1rem;">@meal.MealName</h5>
+                                    <span style="background: @colorHex; color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                                        @meal.Calories cal
+                                    </span>
+                                </div>
+
+                                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--muted);">
+                                    @if (!string.IsNullOrEmpty(meal.ProteinMacros))
+                                    {
+                                        <span><i class="fas fa-drumstick-bite"></i> Protein: @meal.ProteinMacros</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(meal.CarbMacros))
+                                    {
+                                        <span><i class="fas fa-bread-slice"></i> Carbs: @meal.CarbMacros</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(meal.FatMacros))
+                                    {
+                                        <span><i class="fas fa-cheese"></i> Fats: @meal.FatMacros</span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(meal.Ingredients))
+                                {
+                                    <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--frame);">
+                                        <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.25rem;">
+                                            <i class="fas fa-list"></i> Ingredients:
+                                        </div>
+                                        <div style="color: var(--ink); font-size: 0.9rem;">@meal.Ingredients</div>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(meal.Notes))
+                                {
+                                    <div style="margin-top: 0.5rem; color: var(--muted); font-size: 0.85rem; font-style: italic;">
+                                        <i class="fas fa-info-circle"></i> @meal.Notes
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Daily Totals -->
+            var totalCalories = meals.Sum(m => m.Calories);
+            <div style="margin-top: 1.5rem; padding: 1rem; background: linear-gradient(135deg, var(--main-color), var(--secondary-color)); border-radius: var(--radius); color: var(--accent-ink); text-align: center;">
+                <h4 style="margin: 0;">Daily Total: @totalCalories calories</h4>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeDayMeal(day) {
+            window.location.href = '@Url.Action("TodayMeal")?assignmentId=@assignment?.Id&day=' + day;
+        }
+    </script>
+}

@@ -1,0 +1,80 @@
+@model GymBLL.ModelVM.Nutrition.DietPlanAssignmentVM
+
+@{
+    ViewData["Title"] = "Edit Diet Plan";
+    var member = ViewBag.Member as GymBLL.ModelVM.User.Member.MemberVM;
+    var memberId = ViewBag.MemberId as string;
+    var dietPlans = ViewBag.DietPlans as List<GymBLL.ModelVM.Nutrition.DietPlanVM>;
+}
+
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@Url.Action("MemberDetails", new { id = memberId })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Member
+        </a>
+    </div>
+
+    <div style="background: var(--tile); border-radius: var(--radius); border: 1px solid var(--frame); padding: 2rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: var(--ink); margin-bottom: 0.5rem;">
+                <i class="fas fa-edit" style="color: var(--main-color);"></i>
+                Edit Diet Plan
+            </h2>
+            <p style="color: var(--muted);">Update diet plan assignment for <strong>@member?.FullName</strong></p>
+        </div>
+
+        <form asp-action="EditDietPlan" asp-route-memberId="@memberId" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label asp-for="DietPlanId" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Select Diet Plan</label>
+                <select asp-for="DietPlanId" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);">
+                    <option value="">-- Select a Diet Plan --</option>
+                    @if (dietPlans != null)
+                    {
+                        @foreach (var plan in dietPlans)
+                        {
+                            <option value="@plan.Id" selected="@(plan.Id == Model.DietPlanId)">@plan.Name - @plan.DietType (@plan.TotalCalories cal)</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="DietPlanId" class="text-danger"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label asp-for="StartDate" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Start Date</label>
+                    <input asp-for="StartDate" type="date" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="EndDate" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">End Date</label>
+                    <input asp-for="EndDate" type="date" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input asp-for="IsActive" type="checkbox" style="width: 18px; height: 18px;" />
+                    <span style="color: var(--ink);">Active (Member can use this plan)</span>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <a href="@Url.Action("MemberDetails", new { id = memberId })" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
