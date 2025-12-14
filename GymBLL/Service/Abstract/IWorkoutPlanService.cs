@@ -1,6 +1,7 @@
 using GymBLL.ModelVM.Workout;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
 
 namespace GymBLL.Service.Abstract
 {
@@ -14,5 +15,7 @@ namespace GymBLL.Service.Abstract
         Task<Response<bool>> DeleteWorkoutPlanAsync(int workoutPlanId);
         Task<Response<bool>> ToggleStatusAsync(int workoutPlanId);
         Task<Response<string>> GetWorkoutPlanNameAsync(int Id);
+        // Pagination
+        Task<Response<PagedResult<WorkoutPlanVM>>> GetPagedWorkoutPlansAsync(int pageNumber, int pageSize);
     }
 }

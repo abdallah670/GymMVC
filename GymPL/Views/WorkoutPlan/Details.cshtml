@@ -2,40 +2,232 @@
 
 @{
     ViewData["Title"] = "Workout Plan Details";
+    var returnPage = Context.Request.Query["page"].FirstOrDefault() ?? "1";
+    var returnUrl = Context.Request.Query["returnUrl"].FirstOrDefault();
+    // Determine the back URL
+    string backUrl;
+
+    if (!string.IsNullOrEmpty(returnUrl))
+    {
+        // Use the provided returnUrl
+        backUrl = returnUrl;
+    }
+    else
+    {
+        // Default: Go back to Index with page number
+        backUrl = Url.Action("Index", new { page = returnPage });
+    }
 }
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Workout Plan Details</h1>
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@backUrl"  class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back 
+        </a>
+    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">@Model.Name</h6>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Plan Name</dt>
-                <dd class="col-sm-9">@Model.Name</dd>
-
-                <dt class="col-sm-3">Description</dt>
-                <dd class="col-sm-9">@Model.Description</dd>
-
-                <dt class="col-sm-3">Duration</dt>
-                <dd class="col-sm-9">@Model.DurationWeeks</dd>
-
-                <dt class="col-sm-3">Difficulty</dt>
-                <dd class="col-sm-9">@Model.Difficulty</dd>
-
-                <dt class="col-sm-3">Status</dt>
-                <dd class="col-sm-9">
-                    <span class="badge badge-@(Model.IsActive ? "success" : "secondary")">
-                        @(Model.IsActive ? "Active" : "Inactive")
-                    </span>
-                </dd>
-            </dl>
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, var(--main-color), var(--secondary-color)); padding: 2rem; border-radius: var(--radius); margin-bottom: 2rem; color: var(--accent-ink);">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
             <div>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <h2 style="margin-bottom: 0.5rem;">
+                    <i class="fas fa-dumbbell"></i> @Model.Name
+                </h2>
+                <p style="opacity: 0.9; margin-bottom: 0.25rem;">
+                    <i class="fas fa-signal"></i> @Model.Difficulty |
+                    <i class="fas fa-bullseye"></i> @Model.Goal |
+                    <i class="fas fa-calendar-week"></i> @Model.DurationWeeks days per Week
+                </p>
+            </div>
+            <div>
+                @if (Model.IsActive)
+                {
+                    <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: var(--radius); font-weight: 500;">
+                        <i class="fas fa-check-circle"></i> Active
+                    </span>
+                }
+                else
+                {
+                    <span style="background: rgba(255,0,0,0.3); padding: 0.5rem 1rem; border-radius: var(--radius); font-weight: 500;">
+                        <i class="fas fa-times-circle"></i> Inactive
+                    </span>
+                }
             </div>
         </div>
+    </div>
+
+    <!-- Description -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+        <h4 style="color: var(--ink); margin-bottom: 1rem;">
+            <i class="fas fa-info-circle"></i> Description
+        </h4>
+        <p style="color: var(--muted); line-height: 1.6;">
+            @(string.IsNullOrEmpty(Model.Description) ? "No description provided." : Model.Description)
+        </p>
+    </div>
+
+    <!-- Plan Info -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+        <h4 style="color: var(--ink); margin-bottom: 1rem;">
+            <i class="fas fa-clipboard-list"></i> Plan Details
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: var(--frame); border-radius: var(--radius);">
+                <div style="font-size: 1.5rem; color: var(--main-color); font-weight: 700;">@Model.DurationWeeks</div>
+                <div style="color: var(--muted); font-size: 0.85rem;">Days/Week</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--frame); border-radius: var(--radius);">
+                <div style="font-size: 1.5rem; color: var(--info); font-weight: 700;">@Model.Difficulty</div>
+                <div style="color: var(--muted); font-size: 0.85rem;">Difficulty</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--frame); border-radius: var(--radius);">
+                <div style="font-size: 1.5rem; color: var(--success); font-weight: 700;">@Model.Goal</div>
+                <div style="color: var(--muted); font-size: 0.85rem;">Goal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercises List -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="color: var(--ink); margin: 0;">
+                <i class="fas fa-running"></i> Exercises
+            </h4>
+            <a asp-controller="WorkoutPlanItem"
+               asp-action="Create"
+               asp-route-workoutPlanId="@Model.Id"
+               asp-route-returnUrl="@Url.Action("Details", "WorkoutPlan", new { id = Model.Id,  page = returnPage })"
+               class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Add Exercise
+            </a>
+        </div>
+
+        @if (Model.workoutPlanItemVMs != null && Model.workoutPlanItemVMs.Any())
+        {
+            var groupedExercises = Model.workoutPlanItemVMs.OrderBy(e => e.DayNumber).GroupBy(e => e.DayNumber);
+            int dayCount = 0;
+
+            foreach (var group in groupedExercises)
+            {
+                dayCount++;
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h5 style="color: var(--main-color); margin: 0; border-bottom: 2px solid var(--frame); padding-bottom: 0.5rem;">
+                            <i class="fas fa-calendar-day"></i> Day @group.Key
+                        </h5>
+                        <span class="badge bg-secondary">@group.Count() exercises</span>
+                    </div>
+
+                    <div style="display: grid; gap: 1rem;">
+                        @foreach (var exercise in group)
+                        {
+                            <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); border-left: 4px solid var(--secondary-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <h6 style="margin: 0 0 0.25rem 0; font-size: 1rem;">@exercise.ExerciseName</h6>
+                                        <div style="font-size: 0.85rem; color: var(--muted); display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                                            @if (!string.IsNullOrEmpty(exercise.Sets))
+                                            {
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-layer-group"></i> @exercise.Sets sets
+                                                </span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(exercise.Reps))
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-redo"></i> @exercise.Reps reps
+                                                </span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(exercise.RestDuration))
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-stopwatch"></i> @exercise.RestDuration sec
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                        @if (!string.IsNullOrEmpty(exercise.VideoUrl))
+                                        {
+                                            <a href="@exercise.VideoUrl" target="_blank" class="btn btn-sm btn-outline-info" title="Watch Video">
+                                                <i class="fas fa-play"></i>
+                                            </a>
+                                        }
+                                        <!-- Edit Button -->
+                                        <a asp-controller="WorkoutPlanItem"
+                                           asp-action="Edit"
+                                           asp-route-id="@exercise.Id"
+                                           asp-route-returnUrl="@Url.Action("Details", "WorkoutPlan", new { id = Model.Id, page = returnPage })"
+                                           class="btn btn-sm btn-outline-primary" title="Edit Exercise">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <!-- Delete Button -->
+                                        <form asp-controller="WorkoutPlanItem"
+                                              asp-action="Delete"
+                                              asp-route-id="@exercise.Id"
+                                              method="post"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Delete this exercise?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="returnUrl" value="@Url.Action("Details", "WorkoutPlan", new { id = Model.Id, page = returnPage })" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exercise">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(exercise.Notes))
+                                {
+                                    <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--frame);">
+                                        <small class="text-muted">
+                                            <i class="fas fa-sticky-note"></i> @exercise.Notes
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-running" style="font-size: 3rem; color: var(--muted); margin-bottom: 1rem;"></i>
+                <h5 style="color: var(--ink);">No Exercises Added Yet</h5>
+                <p style="color: var(--muted); margin-bottom: 1rem;">Add your first exercise to get started.</p>
+                <a asp-controller="WorkoutPlanItem"
+                   asp-action="Create"
+                   asp-route-workoutPlanId="@Model.Id"
+                   asp-route-returnUrl="@Url.Action("Details", "WorkoutPlan", new { id = Model.Id, page = returnPage })"
+                   asp-route-returnPage="@returnPage"
+                   class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add First Exercise
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <a asp-action="Edit" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" asp-route-id="@Model.Id" asp-route-returnPage="@returnPage" class="btn btn-primary" style="flex: 1;">
+            <i class="fas fa-edit"></i> Edit Plan
+        </a>
+        <a asp-controller="WorkoutPlanItem"
+           asp-action="Create"
+           asp-route-workoutPlanId="@Model.Id"
+           asp-route-returnUrl="@Url.Action("Details", "WorkoutPlan", new { id = Model.Id, page = returnPage })"
+           asp-route-returnPage="@returnPage"
+           class="btn btn-success" style="flex: 1;">
+            <i class="fas fa-plus"></i> Add Exercise
+        </a>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="flex: 1;"
+              onsubmit="return confirm('Are you sure you want to delete this workout plan?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnPage" value="@returnPage" />
+            <button type="submit" class="btn btn-danger" style="width: 100%;">
+                <i class="fas fa-trash"></i> Delete Plan
+            </button>
+        </form>
     </div>
 </div>

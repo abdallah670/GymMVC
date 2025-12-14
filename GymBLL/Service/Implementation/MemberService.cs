@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
 
 namespace GymBLL.Service.Implementation
 {
@@ -117,7 +118,13 @@ namespace GymBLL.Service.Implementation
                 existingMember.FullName = memberVm.FullName;
                 existingMember.Phone = memberVm.Phone;
                 existingMember.ProfilePicture = memberVm.ProfilePicture;
-                
+                existingMember.CurrentWeight = (double)memberVm.CurrentWeight;
+                existingMember.Height = (double)memberVm.Height;
+                existingMember.Email = memberVm.Email;
+                existingMember.Gender = memberVm.Gender;
+
+
+
                 UnitOfWork.Members.Update(existingMember);
 
                 var result = await UnitOfWork.SaveAsync();
@@ -178,7 +185,7 @@ namespace GymBLL.Service.Implementation
                     Phone = m.Phone,
                     ProfilePicture = m.ProfilePicture,
                     JoinDate = m.JoinDate,
-                    CurrentHeight = m.Height,
+                    Height = m.Height,
                     CurrentWeight = m.CurrentWeight,
                     Gender = m.Gender,
                     FitnessGoal = new FitnessGoalsVM
@@ -257,7 +264,7 @@ namespace GymBLL.Service.Implementation
                     Phone = m.Phone,
                     ProfilePicture = m.ProfilePicture,
                     JoinDate = m.JoinDate,
-                    CurrentHeight = m.Height,
+                        Height = m.Height,
                     CurrentWeight = m.CurrentWeight,
                     Gender = m.Gender,
                     FitnessGoal = new FitnessGoalsVM
@@ -290,7 +297,7 @@ namespace GymBLL.Service.Implementation
                     Phone = m.Phone,
                     ProfilePicture = m.ProfilePicture,
                     JoinDate = m.JoinDate,
-                    CurrentHeight = m.Height,
+                    Height = m.Height,
                     CurrentWeight = m.CurrentWeight,
                     Gender = m.Gender,
                     FitnessGoal = new FitnessGoalsVM
@@ -305,6 +312,41 @@ namespace GymBLL.Service.Implementation
             catch (Exception ex)
             {
                 return new Response<List<MemberVM>>(null, $"Failed to get not active members: {ex.Message}", true);
+            }
+        }
+
+        public async Task<Response<PagedResult<MemberVM>>> GetPagedMembersAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var members = await UnitOfWork.Members.GetPagedAsync(pageNumber, pageSize);
+                var totalCount = await UnitOfWork.Members.CountAsync(); // Assuming generic repo has CountAsync
+
+                var memberVms = members.Select(m => new MemberVM
+                {
+                    Id = m.Id,
+                    Email = m.Email,
+                    FullName = m.FullName,
+                    Phone = m.Phone,
+                    ProfilePicture = m.ProfilePicture,
+                    JoinDate = m.JoinDate,
+                    Height = m.Height,
+                    CurrentWeight = m.CurrentWeight,
+                    Gender = m.Gender,
+                    FitnessGoal = new FitnessGoalsVM
+                    {
+                        GoalName = m.FitnessGoal?.GoalsName,
+                        Id = m.FitnessGoal?.Id,
+                        GoalDescription = m.FitnessGoal?.GoalsDescription
+                    }
+                }).ToList();
+
+                var pagedResult = new PagedResult<MemberVM>(memberVms, totalCount, pageNumber, pageSize);
+                return new Response<PagedResult<MemberVM>>(pagedResult, null, false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<PagedResult<MemberVM>>(null, $"Failed to get paged members: {ex.Message}", true);
             }
         }
     }

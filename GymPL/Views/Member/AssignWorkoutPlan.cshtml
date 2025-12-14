@@ -1,0 +1,86 @@
+﻿@model GymBLL.ModelVM.Workout.WorkoutAssignmentVM
+
+@{
+    ViewData["Title"] = "Assign Workout Plan";
+    var member = ViewBag.Member as GymBLL.ModelVM.User.Member.MemberVM;
+    var workoutPlans = ViewBag.WorkoutPlans as List<GymBLL.ModelVM.Workout.WorkoutPlanVM>;
+}
+
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@Url.Action("MemberDetails", new { id = ViewBag.Member.Id })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Member
+        </a>
+    </div>
+
+    <div style="background: white; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); padding: 2rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: #5a5c69; margin-bottom: 0.5rem;">
+                <i class="fas fa-dumbbell text-primary"></i>
+                Assign Workout Plan
+            </h2>
+            <p style="color: #858796;">Create a workout plan assignment for <strong>@member?.FullName</strong></p>
+        </div>
+
+        <form asp-action="AssignWorkoutPlan" asp-route-memberId="@member?.Id" method="post">
+
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label asp-for="WorkoutPlanId" style="display: block; margin-bottom: 0.5rem; color: #5a5c69; font-weight: 600;">Select Workout Plan</label>
+                <select asp-for="WorkoutPlanId" class="form-control" required>
+                    <option value="">-- Select a Workout Plan --</option>
+                    @if (workoutPlans != null)
+                    {
+                        @foreach (var plan in workoutPlans)
+                        {
+                            <option value="@plan.Id">@plan.Name - @plan.DurationWeeks weeks</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="WorkoutPlanId" class="text-danger"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label asp-for="StartDate" style="display: block; margin-bottom: 0.5rem; color: #5a5c69; font-weight: 600;">Start Date</label>
+                    <input asp-for="StartDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" type="date" class="form-control" required />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="EndDate" style="display: block; margin-bottom: 0.5rem; color: #5a5c69; font-weight: 600;">End Date</label>
+                    <input asp-for="EndDate" value="@DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd")" type="date" class="form-control" required />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label asp-for="Notes" style="display: block; margin-bottom: 0.5rem; color: #5a5c69; font-weight: 600;">Notes (Optional)</label>
+                <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Add any specific instructions, focus areas, or modifications..."></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input asp-for="IsActive" type="checkbox" checked style="width: 18px; height: 18px;" />
+                    <span style="color: #5a5c69;">Active (Member can start following this plan immediately)</span>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <a href="@Url.Action("MemberDetails", new { id = ViewBag.Member.Id })" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Assign Workout Plan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -57,7 +57,6 @@ namespace GymDAL.Configuration.Workout
             builder.HasMany(wp => wp.WorkoutAssignments)
                 .WithOne(wa => wa.WorkoutPlan)
                 .HasForeignKey(wa => wa.WorkoutPlanId)
-
                 .OnDelete(DeleteBehavior.Restrict);
             //builder.HasMany(wp => wp.Memberships)
             //  .WithOne(m => m.WorkoutPlan)

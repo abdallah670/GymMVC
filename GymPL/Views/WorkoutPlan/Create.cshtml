@@ -2,64 +2,457 @@
 
 @{
     ViewData["Title"] = "Create Workout Plan";
+    var returnPage = Context.Request.Query["page"].FirstOrDefault() ?? "1";
 }
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Create Workout Plan</h1>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Plan Details</h6>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
-                <div class="form-group">
-                    <label asp-for="Name" class="control-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label asp-for="DurationWeeks" class="control-label"></label>
-                        <input asp-for="DurationWeeks" class="form-control" />
-                        <span asp-validation-for="DurationWeeks" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label asp-for="Difficulty" class="control-label"></label>
-                        <select asp-for="Difficulty" class="form-control">
-                            <option value="">Select Level</option>
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                        <span asp-validation-for="Difficulty" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="form-group form-check">
-                    <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-                </div>
-            </form>
-        </div>
+<div class="container" style="max-width: 700px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@Url.Action("Index", new { page = returnPage })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
     </div>
-</div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <div style="background: var(--tile); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--frame);">
+        <h2 style="color: var(--ink); margin-bottom: 1.5rem;">
+            <i class="fas fa-dumbbell"></i> Create New Workout Plan
+        </h2>
+
+      
+
+        <form asp-action="Create" asp-route-page="@returnPage" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnPage" value="@returnPage" />
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label asp-for="Name" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Plan Name *</label>
+                <input asp-for="Name" class="form-control" placeholder="e.g., Beginner Full Body" 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label asp-for="Description" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the workout plan..."
+                          style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label asp-for="Difficulty" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Difficulty *</label>
+                    <select asp-for="Difficulty" class="form-control" 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required>
+                        <option value="">Select Difficulty</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                    <span asp-validation-for="Difficulty" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Goal" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Goal *</label>
+                    <select asp-for="Goal" class="form-control" 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required>
+                        <option value="">Select Goal</option>
+                        <option value="Weight Loss">Weight Loss</option>
+                        <option value="Muscle Gain">Muscle Gain</option>
+                        <option value="Strength">Strength</option>
+                        <option value="Endurance">Endurance</option>
+                        <option value="Flexibility">Flexibility</option>
+                        <option value="General Fitness">General Fitness</option>
+                    </select>
+                    <span asp-validation-for="Goal" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label asp-for="DurationWeeks" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Day per (Week) *</label>
+                <input asp-for="DurationWeeks" type="number" class="form-control" min="1" max="7" 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                <span asp-validation-for="DurationWeeks" class="text-danger"></span>
+            </div>
+            <!-- Add Exercises Section -->
+            <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+                <h4 style="color: var(--ink); margin-bottom: 1rem;">
+                    <i class="fas fa-dumbbell"></i> Add Exercises (Optional)
+                </h4>
+
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">
+                    You can add exercises now or add them later from the plan details page.
+                </p>
+
+                <!-- Exercises Container -->
+                <div id="exercisesContainer">
+                    <!-- This will hold all exercise forms -->
+                </div>
+
+                <!-- Add Exercise Button -->
+                <div class="text-center mb-3">
+                    <button type="button" id="addExerciseBtn" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i> Add Exercise
+                    </button>
+                </div>
+
+                <!-- Hidden template for exercise form -->
+                <div id="exerciseTemplate" style="display: none;">
+                    <div class="exercise-card" style="background: var(--bg); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h5 style="color: var(--ink); margin: 0;">
+                                <i class="fas fa-running"></i> Exercise <span class="exercise-number">1</span>
+                            </h5>
+                            <button type="button" class="btn btn-sm btn-danger remove-exercise">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Exercise Name *</label>
+                                    <input type="text" class="form-control exercise-name"
+                                           name="workoutPlanItemVMs[0].ExerciseName" required />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Day Number *</label>
+                                    <input type="number" class="form-control"
+                                           name="workoutPlanItemVMs[0].DayNumber"
+                                           min="1" max="7" value="1" required />
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Sets</label>
+                                    <input type="text" class="form-control"
+                                           name="workoutPlanItemVMs[0].Sets" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Reps</label>
+                                    <input type="text" class="form-control"
+                                           name="workoutPlanItemVMs[0].Reps" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Rest (seconds)</label>
+                                    <input type="text" class="form-control"
+                                           name="workoutPlanItemVMs[0].RestDuration" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Equipment</label>
+                                    <input type="text" class="form-control"
+                                           name="workoutPlanItemVMs[0].Equipment" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Video URL</label>
+                                    <input type="url" class="form-control"
+                                           name="workoutPlanItemVMs[0].VideoUrl" 
+                                    placeholder="https://youtube.com/watch?v=example"
+                                    pattern="https?://.+"
+                                    title="Please enter a valid URL starting with http:// or https://" />
+                                    <div class="invalid-feedback">
+                                        Please enter a valid URL (e.g., https://youtube.com/watch?v=example)
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control"
+                                      name="workoutPlanItemVMs[0].Notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; gap: 1rem;">
+                <a href="@Url.Action("Index", new { page = returnPage })" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success" style="flex: 1;">
+                    <i class="fas fa-save"></i> Create Plan
+                </button>
+            </div>
+        </form>
+    </div>
+    </div>
+
+
+<script>
+    let exerciseIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there are any exercise cards already in the container
+        const container = document.getElementById('exercisesContainer');
+        const initialExercises = container.querySelectorAll('.exercise-card');
+
+        if (initialExercises.length > 0) {
+            // Remove all empty exercise cards on page load
+            initialExercises.forEach(card => {
+                const exerciseName = card.querySelector('input[name*="ExerciseName"]');
+                if (!exerciseName || !exerciseName.value.trim()) {
+                    card.remove();
+                }
+            });
+        }
+
+        // Reset exercise index based on what remains
+        exerciseIndex = container.querySelectorAll('.exercise-card').length;
+    });
+
+    // Add Exercise Button Click
+    document.getElementById('addExerciseBtn').addEventListener('click', function() {
+        addExercise();
+    });
+
+    function addExercise() {
+        const container = document.getElementById('exercisesContainer');
+        const template = document.getElementById('exerciseTemplate').innerHTML;
+
+        // Replace all [0] with [exerciseIndex]
+        let newExerciseHtml = template.replace(/workoutPlanItemVMs\[0\]/g, `workoutPlanItemVMs[${exerciseIndex}]`);
+
+        // Create a temporary div to hold the HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newExerciseHtml;
+
+        // Get the exercise card element
+        const exerciseCard = tempDiv.firstElementChild;
+
+        // Update exercise number
+        const exerciseNumberSpan = exerciseCard.querySelector('.exercise-number');
+        if (exerciseNumberSpan) {
+            exerciseNumberSpan.textContent = exerciseIndex + 1;
+        }
+
+        // Add remove event listener
+        const removeBtn = exerciseCard.querySelector('.remove-exercise');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                exerciseCard.remove();
+                updateExerciseNumbers();
+            });
+        }
+
+        // Add to container
+        container.appendChild(exerciseCard);
+
+        exerciseIndex++;
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Clear previous errors
+        clearAllErrors();
+
+        let hasErrors = false;
+        const errorMessages = [];
+
+        // 1. Validate main plan fields
+        const planName = document.querySelector('input[name="Name"]');
+        if (!planName.value.trim()) {
+            markInvalid(planName, 'Plan name is required');
+            hasErrors = true;
+            errorMessages.push('Plan name is required');
+        }
+
+        const difficulty = document.querySelector('select[name="Difficulty"]');
+        if (!difficulty.value) {
+            markInvalid(difficulty, 'Difficulty is required');
+            hasErrors = true;
+            errorMessages.push('Difficulty is required');
+        }
+
+        const goal = document.querySelector('select[name="Goal"]');
+        if (!goal.value) {
+            markInvalid(goal, 'Goal is required');
+            hasErrors = true;
+            errorMessages.push('Goal is required');
+        }
+
+        const duration = document.querySelector('input[name="DurationWeeks"]');
+        if (!duration.value || duration.value < 1 || duration.value > 7) {
+            markInvalid(duration, 'Day per week must be between 1 and 7');
+            hasErrors = true;
+            errorMessages.push('Day per week must be between 1 and 7');
+        }
+
+        // 2. Check for and remove completely empty exercise cards first
+        const allExerciseCards = document.querySelectorAll('.exercise-card');
+        allExerciseCards.forEach((card) => {
+            const exerciseNameInput = card.querySelector('input[name*="ExerciseName"]');
+            if (exerciseNameInput && !exerciseNameInput.value.trim()) {
+                // Check if all fields are empty
+                const dayNumber = card.querySelector('input[name*="DayNumber"]');
+                const sets = card.querySelector('input[name*="Sets"]');
+                const reps = card.querySelector('input[name*="Reps"]');
+                const rest = card.querySelector('input[name*="RestDuration"]');
+                const equipment = card.querySelector('input[name*="Equipment"]');
+                const videoUrl = card.querySelector('input[name*="VideoUrl"]');
+                const notes = card.querySelector('textarea[name*="Notes"]');
+
+                // If it's a completely empty card, remove it
+                if (dayNumber && dayNumber.value === "1" &&
+                    (!sets || !sets.value.trim()) &&
+                    (!reps || !reps.value.trim()) &&
+                    (!rest || !rest.value.trim()) &&
+                    (!equipment || !equipment.value.trim()) &&
+                    (!videoUrl || !videoUrl.value.trim()) &&
+                    (!notes || !notes.value.trim())) {
+                    card.remove();
+                }
+            }
+        });
+
+        // 3. Now validate remaining exercise cards
+        const exerciseCards = document.querySelectorAll('.exercise-card'); // Only declare once!
+        exerciseCards.forEach((card) => {
+            // Get the actual index from the input name
+            const exerciseNameInput = card.querySelector('input[name*="ExerciseName"]');
+            if (exerciseNameInput && !exerciseNameInput.value.trim()) {
+                markInvalid(exerciseNameInput, 'Exercise name is required');
+                hasErrors = true;
+
+                // Get exercise number for error message
+                const exerciseNumber = card.querySelector('.exercise-number');
+                const exNum = exerciseNumber ? exerciseNumber.textContent : '';
+                errorMessages.push(`Exercise ${exNum}: Name is required`);
+            }
+
+            // Day Number validation
+            const dayNumber = card.querySelector('input[name*="DayNumber"]');
+            if (dayNumber) {
+                const dayValue = parseInt(dayNumber.value);
+                if (isNaN(dayValue) || dayValue < 1 || dayValue > 365) {
+                    markInvalid(dayNumber, 'Day number must be between 1 and 365');
+                    hasErrors = true;
+                }
+            }
+        });
+
+        // 4. If errors exist, prevent submission
+        if (hasErrors) {
+            e.preventDefault();
+
+            // Show all error messages
+            showErrorMessages(errorMessages);
+
+            // Focus on first invalid field
+            const firstInvalid = document.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+            }
+
+            return false;
+        }
+
+        return true;
+    });
+
+    // URL validation function
+    function isValidUrl(string) {
+        try {
+            const url = new URL(string);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch (_) {
+            return false;
+        }
+    }
+
+    // Mark field as invalid
+    function markInvalid(element, message) {
+        element.classList.add('is-invalid');
+        element.classList.remove('is-valid');
+
+        // Add or update error message
+        let feedback = element.nextElementSibling;
+        if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            element.parentNode.appendChild(feedback);
+        }
+        feedback.textContent = message;
+    }
+
+    // Clear all errors
+    function clearAllErrors() {
+        document.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+
+        document.querySelectorAll('.invalid-feedback').forEach(el => {
+            el.textContent = '';
+        });
+    }
+
+    // Show error messages
+    function showErrorMessages(messages) {
+        let errorContainer = document.getElementById('errorContainer');
+        if (!errorContainer) {
+            errorContainer = document.createElement('div');
+            errorContainer.id = 'errorContainer';
+            errorContainer.className = 'alert alert-danger';
+            errorContainer.style.marginTop = '1rem';
+            errorContainer.style.borderRadius = 'var(--radius)';
+            document.querySelector('form').parentNode.insertBefore(errorContainer, document.querySelector('form'));
+        }
+
+        if (messages.length > 0) {
+            let html = '<h5><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h5><ul>';
+            messages.forEach(msg => {
+                html += `<li>${msg}</li>`;
+            });
+            html += '</ul>';
+            errorContainer.innerHTML = html;
+            errorContainer.style.display = 'block';
+        } else {
+            errorContainer.style.display = 'none';
+        }
+    }
+
+    function updateExerciseNumbers() {
+        const exerciseCards = document.querySelectorAll('.exercise-card');
+        exerciseCards.forEach((card, index) => {
+            const numberSpan = card.querySelector('.exercise-number');
+            if (numberSpan) {
+                numberSpan.textContent = index + 1;
+            }
+        });
+    }
+
+    // Remove error message when user starts typing
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+        element.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+
+            // Hide error message
+            const errorDiv = document.getElementById('formError');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+
+            // Also hide the error container
+            const errorContainer = document.getElementById('errorContainer');
+            if (errorContainer) {
+                errorContainer.style.display = 'none';
+            }
+        });
+    });
+</script>

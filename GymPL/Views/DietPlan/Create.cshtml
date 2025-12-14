@@ -2,89 +2,381 @@
 
 @{
     ViewData["Title"] = "Create Diet Plan";
+    var returnPage = Context.Request.Query["page"].FirstOrDefault() ?? "1";
+}
 }
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Create Diet Plan</h1>
+<div class="container" style="max-width: 700px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@Url.Action("Index", new { page = returnPage })" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Plan Details</h6>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
+    <div style="background: var(--tile); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--frame);">
+        <h2 style="color: var(--ink); margin-bottom: 1.5rem;">
+            <i class="fas fa-utensils"></i> Create New Diet Plan
+        </h2>
+
+       
+        <form asp-action="Create" asp-route-page="returnPage" method="post" id="createForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnPage" value="@returnPage" />
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label asp-for="Name" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Plan Name *</label>
+                <input asp-for="Name" class="form-control" placeholder="e.g., High Protein Diet"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label asp-for="Description" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the diet plan..."
+                          style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div class="form-group">
-                    <label asp-for="Name" class="control-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label asp-for="DietType" class="control-label"></label>
-                        <select asp-for="DietType" class="form-control">
-                            <option value="">Select Type</option>
-                            <option value="Weight Loss">Weight Loss</option>
-                            <option value="Muscle Gain">Muscle Gain</option>
-                            <option value="Maintenance">Maintenance</option>
-                            <option value="Keto">Keto</option>
-                            <option value="Vegan">Vegan</option>
-                        </select>
-                        <span asp-validation-for="DietType" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="TotalCalories" class="control-label"></label>
-                        <input asp-for="TotalCalories" class="form-control" />
-                        <span asp-validation-for="TotalCalories" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="DurationDays" class="control-label"></label>
-                        <input asp-for="DurationDays" class="form-control" />
-                        <span asp-validation-for="DurationDays" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label asp-for="ProteinMacros" class="control-label"></label>
-                        <input asp-for="ProteinMacros" class="form-control" placeholder="e.g. 30%" />
-                        <span asp-validation-for="ProteinMacros" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="CarbMacros" class="control-label"></label>
-                        <input asp-for="CarbMacros" class="form-control" placeholder="e.g. 50%" />
-                        <span asp-validation-for="CarbMacros" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label asp-for="FatMacros" class="control-label"></label>
-                        <input asp-for="FatMacros" class="form-control" placeholder="e.g. 20%" />
-                        <span asp-validation-for="FatMacros" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="form-group form-check">
-                    <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                    </label>
+                    <label asp-for="TotalCalories" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Daily Calories *</label>
+                    <input asp-for="TotalCalories" type="number" class="form-control" min="500" max="10000"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                    <span asp-validation-for="TotalCalories" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    <label asp-for="DietType" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Diet Type *</label>
+                    <select asp-for="DietType" class="form-control"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required>
+                        <option value="">Select Type</option>
+                        <option value="Balanced">Balanced</option>
+                        <option value="High Protein">High Protein</option>
+                        <option value="Low Carb">Low Carb</option>
+                        <option value="Keto">Keto</option>
+                        <option value="Vegan">Vegan</option>
+                        <option value="Vegetarian">Vegetarian</option>
+                        <option value="Mediterranean">Mediterranean</option>
+                    </select>
+                    <span asp-validation-for="DietType" class="text-danger"></span>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label asp-for="DurationDays" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Duration (Days) *</label>
+                <input asp-for="DurationDays" value="30" disabled type="number" class="form-control" min="1" max="30"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                <span asp-validation-for="DurationDays" class="text-danger"></span>
+            </div>
+
+            <!-- Add Meals Section -->
+            <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+                <h4 style="color: var(--ink); margin-bottom: 1rem;">
+                    <i class="fas fa-utensils"></i> Add Meals (Optional)
+                </h4>
+
+                <p style="color: var(--muted); margin-bottom: 1.5rem;">
+                    You can add meals now or add them later from the plan details page.
+                </p>
+
+                <!-- Meals Container -->
+                <div id="mealsContainer">
+                    <!-- This will hold all meal forms -->
+                </div>
+
+                <!-- Add Meal Button -->
+                <div class="text-center mb-3">
+                    <button type="button" id="addMealBtn" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i> Add Meal
+                    </button>
+                </div>
+
+                <!-- Hidden template for meal form -->
+                <div id="mealTemplate" style="display: none;">
+                    <div class="meal-card" style="background: var(--bg); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h5 style="color: var(--ink); margin: 0;">
+                                <i class="fas fa-drumstick-bite"></i> Meal <span class="meal-number">1</span>
+                            </h5>
+                            <button type="button" class="btn btn-sm btn-danger remove-meal">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Meal Name *</label>
+                                    <input type="text" class="form-control meal-name"
+                                           name="DietPlanItemsVM[0].MealName" placeholder="e.g., Grilled Chicken Salad" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Meal Type *</label>
+                                    <select class="form-control" name="DietPlanItemsVM[0].MealType">
+                                        <option value="Breakfast">Breakfast</option>
+                                        <option value="Lunch">Lunch</option>
+                                        <option value="Dinner">Dinner</option>
+                                        <option value="Snack">Snack</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Day Number *</label>
+                                    <input type="number" class="form-control"
+                                           name="DietPlanItemsVM[0].DayNumber"
+                                           min="1" max="7" value="1" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Calories</label>
+                                    <input type="number" class="form-control"
+                                           name="DietPlanItemsVM[0].Calories" min="0" max="5000" value="0" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Protein (g)</label>
+                                    <input type="text" class="form-control"
+                                           name="DietPlanItemsVM[0].ProteinMacros" placeholder="e.g., 30g" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Carbs (g)</label>
+                                    <input type="text" class="form-control"
+                                           name="DietPlanItemsVM[0].CarbMacros" placeholder="e.g., 45g" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Fat (g)</label>
+                                    <input type="text" class="form-control"
+                                           name="DietPlanItemsVM[0].FatMacros" placeholder="e.g., 15g" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Ingredients</label>
+                                    <textarea class="form-control" name="DietPlanItemsVM[0].Ingredients"
+                                              rows="2" placeholder="List ingredients..."></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Notes</label>
+                                    <textarea class="form-control" name="DietPlanItemsVM[0].Notes"
+                                              rows="2" placeholder="Preparation tips, substitutions..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; gap: 1rem;">
+                <a href ="@Url.Action("Index", new { page = returnPage })" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit"  class="btn btn-success" style="flex: 1;">
+                    <i class="fas fa-save"></i> Create Plan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+<script>
+    let mealIndex = 0;
+
+    // DEBUG: Check what's in the container on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Page loaded - checking meals container");
+
+        const mealsContainer = document.getElementById('mealsContainer');
+        console.log("Meals container children:", mealsContainer.children.length);
+
+        // Check if there are any hidden or empty meal forms
+        const allMealElements = document.querySelectorAll('[id*="meal"], [class*="meal"], [name*="Meal"]');
+        console.log("All meal-related elements:", allMealElements.length);
+
+        // Force remove any meal cards that might be hidden
+        const allMealCards = document.querySelectorAll('.meal-card');
+        console.log("Found meal cards:", allMealCards.length);
+
+        allMealCards.forEach((card, index) => {
+            console.log(`Meal card ${index}:`, card);
+            const mealNameInput = card.querySelector('input[name*="MealName"]');
+            console.log(`  Meal name value: "${mealNameInput ? mealNameInput.value : 'no input found'}"`);
+
+            // If meal name is empty, remove the card
+            if (!mealNameInput || mealNameInput.value.trim() === '') {
+                console.log(`  Removing empty meal card ${index}`);
+                card.remove();
+            }
+        });
+
+        // Also check for any hidden inputs with meal names
+        const hiddenMealInputs = document.querySelectorAll('input[type="hidden"][name*="Meal"]');
+        console.log("Hidden meal inputs:", hiddenMealInputs.length);
+        hiddenMealInputs.forEach(input => input.remove());
+
+        // Reset meal index
+        mealIndex = 0;
+    });
+
+    // Add Meal Button Click
+    document.getElementById('addMealBtn').addEventListener('click', function() {
+        console.log("Add meal button clicked");
+        addMeal();
+    });
+
+    function addMeal() {
+        const container = document.getElementById('mealsContainer');
+        const template = document.getElementById('mealTemplate').innerHTML;
+
+        // Replace all [0] with [mealIndex]
+        let newMealHtml = template.replace(/DietPlanItemsVM\[0\]/g, `DietPlanItemsVM[${mealIndex}]`);
+
+        // Create a temporary div to hold the HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newMealHtml;
+
+        // Get the meal card element
+        const mealCard = tempDiv.firstElementChild;
+
+        // Update meal number
+        const mealNumberSpan = mealCard.querySelector('.meal-number');
+        if (mealNumberSpan) {
+            mealNumberSpan.textContent = mealIndex + 1;
+        }
+
+        // Add remove event listener
+        const removeBtn = mealCard.querySelector('.remove-meal');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                console.log("Remove meal clicked");
+                mealCard.remove();
+                updateMealNumbers();
+            });
+        }
+
+        // Add to container
+        container.appendChild(mealCard);
+        console.log("Added meal card, total now:", container.querySelectorAll('.meal-card').length);
+
+        mealIndex++;
+    }
+
+    function updateMealNumbers() {
+        const mealCards = document.querySelectorAll('.meal-card');
+        mealCards.forEach((card, index) => {
+            const numberSpan = card.querySelector('.meal-number');
+            if (numberSpan) {
+                numberSpan.textContent = index + 1;
+            }
+        });
+    }
+
+    // Form validation - SIMPLIFIED AND FIXED
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+        console.log("Form submission started");
+
+        let hasErrors = false;
+        const errorMessages = [];
+
+        // 1. First, remove ALL completely empty meal cards
+        const mealCards = document.querySelectorAll('.meal-card');
+        console.log("Total meal cards found before cleanup:", mealCards.length);
+
+        mealCards.forEach((card, index) => {
+            const mealNameInput = card.querySelector('input[name*="MealName"]');
+            const mealTypeSelect = card.querySelector('select[name*="MealType"]');
+            const dayNumberInput = card.querySelector('input[name*="DayNumber"]');
+
+            // Check if this is a completely empty/untouched meal card
+            const isCompletelyEmpty =
+                (!mealNameInput || mealNameInput.value.trim() === '') &&
+                (!mealTypeSelect || mealTypeSelect.value === 'Breakfast') &&
+                (!dayNumberInput || dayNumberInput.value === '1');
+
+            console.log(`Meal card ${index}: name="${mealNameInput ? mealNameInput.value : 'N/A'}", completelyEmpty=${isCompletelyEmpty}`);
+
+            if (isCompletelyEmpty) {
+                console.log(`Removing completely empty meal card ${index}`);
+                card.remove();
+            }
+        });
+
+        // 2. Now validate main form fields
+        const planName = document.querySelector('input[name="Name"]');
+        if (!planName.value.trim()) {
+            planName.classList.add('is-invalid');
+            hasErrors = true;
+            errorMessages.push('Plan name is required');
+        } else {
+            planName.classList.remove('is-invalid');
+        }
+
+        const dietType = document.querySelector('select[name="DietType"]');
+        if (!dietType.value) {
+            dietType.classList.add('is-invalid');
+            hasErrors = true;
+            errorMessages.push('Diet type is required');
+        } else {
+            dietType.classList.remove('is-invalid');
+        }
+
+        // 3. Check remaining meal cards (if any)
+        const remainingMealCards = document.querySelectorAll('.meal-card');
+        console.log("Remaining meal cards after cleanup:", remainingMealCards.length);
+
+        if (remainingMealCards.length > 0) {
+            remainingMealCards.forEach((card, index) => {
+                const mealNameInput = card.querySelector('input[name*="MealName"]');
+                if (mealNameInput && mealNameInput.value.trim() === '') {
+                    mealNameInput.classList.add('is-invalid');
+                    hasErrors = true;
+                    errorMessages.push(`Meal ${index + 1}: Meal name is required`);
+                } else if (mealNameInput) {
+                    mealNameInput.classList.remove('is-invalid');
+                }
+            });
+        }
+
+        // 4. Prevent submission if errors
+        if (hasErrors) {
+            e.preventDefault();
+            console.log("Form has errors:", errorMessages);
+
+            // Focus on first invalid field
+            const firstInvalid = document.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+            }
+
+            // Show error alert
+            alert('Please fix the following errors:\n' + errorMessages.join('\n'));
+            return false;
+        }
+
+        console.log("Form validation passed, submitting...");
+        return true;
+    });
+
+    // Remove error message when user starts typing
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+        element.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+</script>

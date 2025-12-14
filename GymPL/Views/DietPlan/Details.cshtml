@@ -2,50 +2,310 @@
 
 @{
     ViewData["Title"] = "Diet Plan Details";
+    var returnPage = Context.Request.Query["page"].FirstOrDefault() ?? "1";
+    var returnUrl = Context.Request.Query["returnUrl"].FirstOrDefault();
+    // Determine the back URL
+    string backUrl;
+
+
+    if (!string.IsNullOrEmpty(returnUrl))
+    {
+        // Use the provided returnUrl
+        backUrl = returnUrl;
+    }
+    else
+    {
+        // Default: Go back to Index with page number
+        backUrl = Url.Action("Index", new { page = returnPage });
+    }
 }
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+            <a href="@backUrl" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back 
+        </a>
+    </div>
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Diet Plan Details</h1>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">@Model.Name</h6>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Plan Name</dt>
-                <dd class="col-sm-9">@Model.Name</dd>
-
-                <dt class="col-sm-3">Description</dt>
-                <dd class="col-sm-9">@Model.Description</dd>
-
-                <dt class="col-sm-3">Type</dt>
-                <dd class="col-sm-9">@Model.</dd>
-
-                <dt class="col-sm-3">Total Calories</dt>
-                <dd class="col-sm-9">@Model.TotalCalories kcal</dd>
-
-                <dt class="col-sm-3">Duration</dt>
-                <dd class="col-sm-9">@Model.DurationDays weeks</dd>
-
-                <dt class="col-sm-3">Macros</dt>
-                <dd class="col-sm-9">
-                    <span class="badge badge-primary">Protein: @Model.ProteinMacros</span>
-                    <span class="badge badge-success">Carbs: @Model.CarbMacros</span>
-                    <span class="badge badge-warning">Fats: @Model.FatMacros</span>
-                </dd>
-
-                <dt class="col-sm-3">Status</dt>
-                <dd class="col-sm-9">
-                    <span class="badge badge-@(Model.IsActive ? "success" : "secondary")">
-                        @(Model.IsActive ? "Active" : "Inactive")
-                    </span>
-                </dd>
-            </dl>
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, var(--info), var(--secondary-color)); padding: 2rem; border-radius: var(--radius); margin-bottom: 2rem; color: var(--accent-ink);">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
             <div>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <h2 style="margin-bottom: 0.5rem;">
+                    <i class="fas fa-utensils"></i> @Model.Name
+                </h2>
+                <p style="opacity: 0.9; margin-bottom: 0.25rem;">
+                    <i class="fas fa-fire"></i> @Model.TotalCalories cal/day | 
+                    <i class="fas fa-leaf"></i> @Model.DietType |
+                    <i class="fas fa-calendar-week"></i> @Model.DurationDays days
+                </p>
+            </div>
+            <div>
+                @if (Model.IsActive)
+                {
+                    <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: var(--radius); font-weight: 500;">
+                        <i class="fas fa-check-circle"></i> Active
+                    </span>
+                }
+                else
+                {
+                    <span style="background: rgba(255,0,0,0.3); padding: 0.5rem 1rem; border-radius: var(--radius); font-weight: 500;">
+                        <i class="fas fa-times-circle"></i> Inactive
+                    </span>
+                }
             </div>
         </div>
     </div>
+
+    <!-- Description -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+        <h4 style="color: var(--ink); margin-bottom: 1rem;">
+            <i class="fas fa-info-circle"></i> Description
+        </h4>
+        <p style="color: var(--muted); line-height: 1.6;">
+            @(string.IsNullOrEmpty(Model.Description) ? "No description provided." : Model.Description)
+        </p>
+    </div>
+
+    <!-- Plan Info -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+        <h4 style="color: var(--ink); margin-bottom: 1rem;">
+            <i class="fas fa-clipboard-list"></i> Plan Details
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: var(--frame); border-radius: var(--radius);">
+                <div style="font-size: 1.5rem; color: var(--main-color); font-weight: 700;">@Model.TotalCalories</div>
+                <div style="color: var(--muted); font-size: 0.85rem;">Daily Calories</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--frame); border-radius: var(--radius);">
+                <div style="font-size: 1.5rem; color: var(--info); font-weight: 700;">@Model.DietType</div>
+                <div style="color: var(--muted); font-size: 0.85rem;">Diet Type</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--frame); border-radius: var(--radius);">
+                <div style="font-size: 1.5rem; color: var(--success); font-weight: 700;">@Model.DurationDays</div>
+                <div style="color: var(--muted); font-size: 0.85rem;">Days</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meals List -->
+    <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="color: var(--ink); margin: 0;">
+                <i class="fas fa-carrot"></i> Meals
+            </h4>
+            <a asp-controller="DietPlanItem"
+               asp-action="Create"
+               asp-route-dietPlanId="@Model.Id"
+               asp-route-returnUrl="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })"
+               class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Add Meal
+            </a>
+        </div>
+
+        @if (Model.DietPlanItemsVM != null && Model.DietPlanItemsVM.Any())
+        {
+            var groupedMeals = Model.DietPlanItemsVM.OrderBy(m => m.DayNumber).GroupBy(m => m.DayNumber).ToList();
+            var firstDay = groupedMeals.FirstOrDefault();
+            var remainingDays = groupedMeals.Skip(1).ToList();
+
+            if (firstDay != null)
+            {
+                <div style="margin-bottom: 1.5rem;">
+                    <h5 style="color: var(--info); margin-bottom: 0.5rem; border-bottom: 2px solid var(--frame); padding-bottom: 0.5rem;">
+                        Day @firstDay.Key
+                    </h5>
+                    <div style="display: grid; gap: 1rem;">
+                        @foreach (var meal in firstDay.OrderBy(m => m.MealType == "Breakfast" ? 1 : m.MealType == "Lunch" ? 2 : m.MealType == "Dinner" ? 3 : 4))
+                        {
+                            <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); border-left: 4px solid var(--secondary-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 0.25rem;">
+                                            @meal.MealType
+                                        </div>
+                                        <h6 style="margin: 0 0 0.25rem 0; font-size: 1rem;">@meal.MealName</h6>
+                                        <div style="font-size: 0.85rem; color: var(--muted); display: flex; gap: 1rem; flex-wrap: wrap;">
+                                            <span><i class="fas fa-fire"></i> @meal.Calories cal</span>
+                                            @if (!string.IsNullOrEmpty(meal.ProteinMacros)) { <span><i class="fas fa-drumstick-bite"></i> @meal.ProteinMacros P</span> }
+                                            @if (!string.IsNullOrEmpty(meal.CarbMacros)) { <span><i class="fas fa-bread-slice"></i> @meal.CarbMacros C</span> }
+                                            @if (!string.IsNullOrEmpty(meal.FatMacros)) { <span><i class="fas fa-cheese"></i> @meal.FatMacros F</span> }
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                        <!-- Edit Button -->
+                                        <a asp-controller="DietPlanItem"
+                                           asp-action="Edit"
+                                           asp-route-id="@meal.Id"
+                                           asp-route-returnUrl="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })"
+                                           class="btn btn-sm btn-outline-primary" title="Edit Meal">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <!-- Delete Button -->
+                                        <form asp-controller="DietPlanItem"
+                                              asp-action="Delete"
+                                              asp-route-id="@meal.Id"
+                                              method="post"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Delete this meal?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="returnUrl" value="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Meal">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(meal.Ingredients))
+                                {
+                                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted);">
+                                        <strong>Ingredients:</strong> @meal.Ingredients
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(meal.Notes))
+                                {
+                                    <div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--muted); font-style: italic;">
+                                        Note: @meal.Notes
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            if (remainingDays.Any())
+            {
+                 <button type="button" 
+                         class="btn btn-outline-primary" 
+                         style="width: 100%; margin-bottom: 1.5rem;" 
+                         onclick="toggleRemainingDays()">
+                    <i class="fas fa-chevron-down" id="toggle-icon"></i>
+                    <span id="toggle-text">Show Remaining (@remainingDays.Count) Days</span>
+                </button>
+
+                <div id="remaining-days-container" style="display: none;">
+                    @foreach (var dayGroup in remainingDays)
+                    {
+                        <div style="margin-bottom: 1.5rem;">
+                            <h5 style="color: var(--info); margin-bottom: 0.5rem; border-bottom: 2px solid var(--frame); padding-bottom: 0.5rem;">
+                                Day @dayGroup.Key
+                            </h5>
+                            <div style="display: grid; gap: 1rem;">
+                                @foreach (var meal in dayGroup.OrderBy(m => m.MealType == "Breakfast" ? 1 : m.MealType == "Lunch" ? 2 : m.MealType == "Dinner" ? 3 : 4))
+                                {
+                                    <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); border-left: 4px solid var(--secondary-color);">
+                                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                                            <div style="flex: 1;">
+                                                <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 0.25rem;">
+                                                    @meal.MealType
+                                                </div>
+                                                <h6 style="margin: 0 0 0.25rem 0; font-size: 1rem;">@meal.MealName</h6>
+                                                <div style="font-size: 0.85rem; color: var(--muted); display: flex; gap: 1rem; flex-wrap: wrap;">
+                                                    <span><i class="fas fa-fire"></i> @meal.Calories cal</span>
+                                                    @if (!string.IsNullOrEmpty(meal.ProteinMacros)) { <span><i class="fas fa-drumstick-bite"></i> @meal.ProteinMacros P</span> }
+                                                    @if (!string.IsNullOrEmpty(meal.CarbMacros)) { <span><i class="fas fa-bread-slice"></i> @meal.CarbMacros C</span> }
+                                                    @if (!string.IsNullOrEmpty(meal.FatMacros)) { <span><i class="fas fa-cheese"></i> @meal.FatMacros F</span> }
+                                                </div>
+                                            </div>
+                                            <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                                                <!-- Edit Button -->
+                                                <a asp-controller="DietPlanItem"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@meal.Id"
+                                                   asp-route-returnUrl="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })"
+                                                   class="btn btn-sm btn-outline-primary" title="Edit Meal">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <!-- Delete Button -->
+                                                <form asp-controller="DietPlanItem"
+                                                      asp-action="Delete"
+                                                      asp-route-id="@meal.Id"
+                                                      method="post"
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Delete this meal?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Meal">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(meal.Ingredients))
+                                        {
+                                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted);">
+                                                <strong>Ingredients:</strong> @meal.Ingredients
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(meal.Notes))
+                                        {
+                                            <div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--muted); font-style: italic;">
+                                                Note: @meal.Notes
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-carrot" style="font-size: 3rem; color: var(--muted); margin-bottom: 1rem;"></i>
+                <h5 style="color: var(--ink);">No Meals Added Yet</h5>
+                <p style="color: var(--muted); margin-bottom: 1rem;">Add your first meal to get started.</p>
+                <a asp-controller="DietPlanItem"
+                   asp-action="Create"
+                   asp-route-dietPlanId="@Model.Id"
+                   asp-route-returnUrl="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })"
+                   class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add First Meal
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" asp-route-returnPage="@returnPage" class="btn btn-primary" style="flex: 1;">
+            <i class="fas fa-edit"></i> Edit Plan
+        </a>
+        <a asp-controller="DietPlanItem"
+           asp-action="Create"
+           asp-route-dietPlanId="@Model.Id"
+           asp-route-returnUrl="@Url.Action("Details", "DietPlan", new { id = Model.Id, page = returnPage })"
+           asp-route-returnPage="@returnPage"
+           class="btn btn-success" style="flex: 1;">
+            <i class="fas fa-plus"></i> Add Meal
+        </a>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="flex: 1;"
+              onsubmit="return confirm('Are you sure you want to delete this diet plan?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnPage" value="@returnPage" />
+            <button type="submit" class="btn btn-danger" style="width: 100%;">
+                <i class="fas fa-trash"></i> Delete Plan
+            </button>
+        </form>
+    </div>
 </div>
+
+<script>
+    function toggleRemainingDays() {
+        var container = document.getElementById('remaining-days-container');
+        var text = document.getElementById('toggle-text');
+        var icon = document.getElementById('toggle-icon');
+        
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            text.textContent = 'Hide Remaining Days';
+            icon.className = 'fas fa-chevron-up';
+        } else {
+            container.style.display = 'none';
+            text.textContent = 'Show Remaining Days';
+            icon.className = 'fas fa-chevron-down';
+        }
+    }
+</script>

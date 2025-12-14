@@ -14,7 +14,7 @@
         <div class="card-body">
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
                 <div class="form-group">
                     <label asp-for="WorkoutPlanId" class="control-label">Workout Plan</label>
                     <select asp-for="WorkoutPlanId" class="form-control" asp-items="ViewBag.WorkoutPlans">
@@ -49,7 +49,7 @@
                     </div>
                     <div class="form-group col-md-4">
                         <label asp-for="RestDuration" class="control-label"></label>
-                        <input asp-for="RestDuration" class="form-control" min="0" />
+                        <input asp-for="RestDuration" class="form-control"  />
                         <span asp-validation-for="RestDuration" class="text-danger"></span>
                     </div>
                 </div>
@@ -58,6 +58,11 @@
                     <label asp-for="Equipment" class="control-label"></label>
                     <input asp-for="Equipment" class="form-control" />
                     <span asp-validation-for="Equipment" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="VideoUrl" class="control-label"></label>
+                    <input asp-for="VideoUrl" class="form-control" />
+                    <span asp-validation-for="VideoUrl" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
@@ -74,7 +79,18 @@
 
                 <div class="form-group">
                     <input type="submit" value="Add Exercise" class="btn btn-primary" />
-                    <a asp-action="Index" asp-route-workoutPlanId="@Model.WorkoutPlanId" class="btn btn-secondary">Back to List</a>
+                    @if (ViewData["ReturnUrl"] != null)
+                    {
+                        <a href="@ViewData["ReturnUrl"]" class="btn btn-secondary">Back</a>
+                    }
+                    else if (Model?.WorkoutPlanId > 0)
+                    {
+                        <a asp-action="Details" asp-controller="DietPlan" asp-route-id="@Model.WorkoutPlanId" class="btn btn-secondary">Back to Plan</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" asp-controller="DietPlan" class="btn btn-secondary">Back to List</a>
+                    }
                 </div>
             </form>
         </div>

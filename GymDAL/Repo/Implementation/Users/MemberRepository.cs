@@ -5,6 +5,7 @@
 
 
 using GymDAL.Repo.Abstract.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymDAL.Repo.Implementation
 {
@@ -34,7 +35,7 @@ namespace GymDAL.Repo.Implementation
             {
                 throw;
             }
-          
+
 
         }
         public override async Task<IEnumerable<Member>> GetAllAsync()
@@ -67,9 +68,19 @@ namespace GymDAL.Repo.Implementation
 
             }
         }
-
-
-
-
+        public override async Task<IEnumerable<Member>> GetPagedAsync(int page, int pageSize)
+        {
+            try
+            {
+                return await _context.Members.Include(m => m.FitnessGoal)
+               .Skip((page - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

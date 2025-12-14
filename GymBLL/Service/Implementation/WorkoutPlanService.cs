@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
 
 namespace GymBLL.Service.Implementation
 {
@@ -26,22 +27,31 @@ namespace GymBLL.Service.Implementation
         {
             try
             {
+                UnitOfWork.BeginTransaction();
                 var workoutPlan = Mapper.Map<WorkoutPlan>(workoutPlanVm);
+                if (workoutPlanVm.workoutPlanItemVMs != null && workoutPlanVm.workoutPlanItemVMs.Any())
+                {
+                    workoutPlan.WorkoutPlanItems = Mapper.Map<List<WorkoutPlanItem>>(workoutPlanVm.workoutPlanItemVMs
+                        .Where(e => !string.IsNullOrWhiteSpace(e.ExerciseName))
+                        );
+                }
                 await UnitOfWork.WorkoutPlans.AddAsync(workoutPlan);
-
                 var result = await UnitOfWork.SaveAsync();
                 if (result > 0)
                 {
+                   await UnitOfWork.CommitTransactionAsync();
                     workoutPlanVm.Id = workoutPlan.Id;
                     return new Response<WorkoutPlanVM>(workoutPlanVm, null, false);
                 }
                 else
                 {
+                    UnitOfWork.RollbackTransaction();
                     return new Response<WorkoutPlanVM>(null, "Failed to create workout plan.", true);
                 }
             }
             catch (Exception ex)
             {
+                UnitOfWork.RollbackTransaction();
                 return new Response<WorkoutPlanVM>(null, $"Failed to create workout plan: {ex.Message}", true);
             }
         }
@@ -54,6 +64,8 @@ namespace GymBLL.Service.Implementation
                 if (workoutPlan != null)
                 {
                     var workoutPlanVm = Mapper.Map<WorkoutPlanVM>(workoutPlan);
+                    workoutPlanVm.workoutPlanItemVMs = Mapper.Map<List<WorkoutPlanItemVM>>(workoutPlan.WorkoutPlanItems?.ToList() 
+                        ?? new List<WorkoutPlanItem>());
                     return new Response<WorkoutPlanVM>(workoutPlanVm, null, false);
                 }
                 else
@@ -111,6 +123,8 @@ namespace GymBLL.Service.Implementation
                 existingWorkoutPlan.Difficulty = workoutPlanVm.Difficulty;
                 existingWorkoutPlan.Goal = workoutPlanVm.Goal;
                 existingWorkoutPlan.IsActive = workoutPlanVm.IsActive;
+                existingWorkoutPlan.DurationWeeks = workoutPlanVm.DurationWeeks;
+                existingWorkoutPlan.UpdatedAt = DateTime.Now;
 
                 UnitOfWork.WorkoutPlans.Update(existingWorkoutPlan);
 
@@ -207,5 +221,23 @@ namespace GymBLL.Service.Implementation
         }
 
       
+        
+        public async Task<Response<PagedResult<WorkoutPlanVM>>> GetPagedWorkoutPlansAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var plans = await UnitOfWork.WorkoutPlans.GetPagedAsync(pageNumber, pageSize);
+                var totalCount = await UnitOfWork.WorkoutPlans.CountAsync();
+
+                var planVms = plans.Select(wp => Mapper.Map<WorkoutPlanVM>(wp)).ToList();
+
+                var pagedResult = new PagedResult<WorkoutPlanVM>(planVms, totalCount, pageNumber, pageSize);
+                return new Response<PagedResult<WorkoutPlanVM>>(pagedResult, null, false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<PagedResult<WorkoutPlanVM>>(null, $"Failed to get paged workout plans: {ex.Message}", true);
+            }
+        }
     }
 }

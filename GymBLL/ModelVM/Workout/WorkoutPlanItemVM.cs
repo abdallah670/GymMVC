@@ -9,10 +9,10 @@ namespace GymBLL.ModelVM.Workout
         [Required(ErrorMessage = "Workout plan is required")]
         public int WorkoutPlanId { get; set; }
 
-        public string? WorkoutPlanName { get; set; }
+      
 
         [Required(ErrorMessage = "Day number is required")]
-        [Range(1, 365, ErrorMessage = "Day must be between 1 and 365")]
+        [Range(1, 7, ErrorMessage = "Day must be between 1 and 7")]
         public int DayNumber { get; set; }
 
         [Required(ErrorMessage = "Exercise name is required")]
@@ -31,8 +31,9 @@ namespace GymBLL.ModelVM.Workout
         [StringLength(100)]
         public string? Equipment { get; set; }
 
-        [Url]
+        [Url(ErrorMessage = "Please enter a valid URL (e.g., https://youtube.com/watch?v=example)")]
         [StringLength(500)]
+        [Display(Name = "Video URL")]
         public string? VideoUrl { get; set; }
 
         [StringLength(500)]

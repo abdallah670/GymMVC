@@ -2,64 +2,104 @@
 
 @{
     ViewData["Title"] = "Edit Workout Plan";
+    var returnPage = Context.Request.Query["page"].FirstOrDefault() ?? "1";
+    var returnUrl = Context.Request.Query["returnUrl"].FirstOrDefault();
+    // Determine the back URL
+    string backUrl;
+
+    if (!string.IsNullOrEmpty(returnUrl))
+    {
+        // Use the provided returnUrl
+        backUrl = returnUrl;
+    }
+    else
+    {
+        // Default: Go back to Index with page number
+        backUrl = Url.Action("Index", new { page = returnPage });
+    }
 }
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Edit Workout Plan</h1>
+<div class="container" style="max-width: 700px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="@backUrl"  class="btn btn-secondary">
+            <i class="fas fa-arrow-left" ></i> Back 
+        </a>
+    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Plan Details</h6>
-        </div>
-        <div class="card-body">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
-                
+    <div style="background: var(--tile); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--frame);">
+        <h2 style="color: var(--ink); margin-bottom: 1.5rem;">
+            <i class="fas fa-edit"></i> Edit Workout Plan
+        </h2>
+
+        
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="returnPage" value="@returnPage"/>
+            <input type="hidden" name="returnUrl" value="@returnUrl"/>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label asp-for="Name" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Plan Name *</label>
+                <input asp-for="Name" class="form-control" placeholder="e.g., Beginner Full Body"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label asp-for="Description" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the workout plan..."
+                          style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div class="form-group">
-                    <label asp-for="Name" class="control-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+                    <label asp-for="Difficulty" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Difficulty *</label>
+                    <select asp-for="Difficulty" class="form-control"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required>
+                        <option value="">Select Difficulty</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                    <span asp-validation-for="Difficulty" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
+                    <label asp-for="Goal" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Goal *</label>
+                    <select asp-for="Goal" class="form-control"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required>
+                        <option value="">Select Goal</option>
+                        <option value="Weight Loss">Weight Loss</option>
+                        <option value="Muscle Gain">Muscle Gain</option>
+                        <option value="Strength">Strength</option>
+                        <option value="Endurance">Endurance</option>
+                        <option value="Flexibility">Flexibility</option>
+                        <option value="General Fitness">General Fitness</option>
+                    </select>
+                    <span asp-validation-for="Goal" class="text-danger"></span>
                 </div>
+            </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label asp-for="DurationWeeks" class="control-label"></label>
-                        <input asp-for="DurationWeeks" class="form-control" />
-                        <span asp-validation-for="DurationWeeks" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label asp-for="Difficulty" class="control-label"></label>
-                        <select asp-for="Difficulty" class="form-control">
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                        <span asp-validation-for="Difficulty" class="text-danger"></span>
-                    </div>
-                </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label asp-for="DurationWeeks" style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Duration (Weeks) *</label>
+                <input asp-for="DurationWeeks" type="number" class="form-control" min="1" max="52"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" required />
+                <span asp-validation-for="DurationWeeks" class="text-danger"></span>
+            </div>
 
-                <div class="form-group form-check">
-                    <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                    </label>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="color: var(--ink); font-weight: 500; display: block; margin-bottom: 0.5rem;">Status</label>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" asp-for="IsActive" id="IsActive" style="width: 18px; height: 18px;" />
+                    <label for="IsActive" style="color: var(--ink); margin: 0;">Active</label>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-                </div>
-            </form>
-        </div>
+            <button type="submit"  class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;">
+                <i class="fas fa-save"></i> Update Workout Plan
+            </button>
+        </form>
     </div>
 </div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

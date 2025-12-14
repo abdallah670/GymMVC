@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
 
 namespace GymWeb.Controllers
 {
@@ -129,27 +130,51 @@ namespace GymWeb.Controllers
 
             return View(model);
         }
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            
-            // General user claims
+            // Dashboard Logic
+            var membersResponse = await _memberService.GetAllMembersAsync();
+            var workoutPlansResponse = await _workoutPlanService.GetActiveWorkoutPlansAsync();
+            var dietPlansResponse = await _dietPlanService.GetActiveDietPlansAsync();
+
+            var totalMembers = 0;
+            var recentMembers = new List<MemberVM>();
+            if (!membersResponse.ISHaveErrorOrnNot)
+            {
+                totalMembers = membersResponse.Result.Count;
+                // Assuming result is sorted or just taking first 5 for now
+                recentMembers = membersResponse.Result.Take(5).ToList(); 
+            }
+
+            var activeWorkouts = 0;
+            if (!workoutPlansResponse.ISHaveErrorOrnNot)
+            {
+                activeWorkouts = workoutPlansResponse.Result.Count;
+            }
+
+            var activeDiets = 0;
+            if (!dietPlansResponse.ISHaveErrorOrnNot)
+            {
+                activeDiets = dietPlansResponse.Result.Count;
+            }
+
+            var dashboardVM = new TrainerDashboardVM
+            {
+                TotalMembers = totalMembers,
+                ActiveWorkoutPlans = activeWorkouts,
+                ActiveDietPlans = activeDiets,
+                RecentMembers = recentMembers
+            };
+
+            // Keep existing ViewBag claims for header if needed, or remove if ViewModel covers it
             ViewBag.UserId = User.GetUserId();
             ViewBag.FullName = User.GetUserFullName();
-            ViewBag.Email = User.GetUserEmail();
-            ViewBag.Phone = User.GetUserPhone();
             ViewBag.UserType = User.GetUserType();
-           
-            ViewBag.IsActive = User.IsUserActive();
-            
-            // Trainer-specific claims
-            if (User.IsTrainer())
-            {
-                ViewBag.ExperienceYears = User.GetTrainerExperienceYears();
-                ViewBag.Bio = User.GetTrainerBio();
-                ViewBag.HeaderType = "Trainer";
-            }
-            return View();
+            ViewBag.HeaderType = "Trainer";
+
+            return View(dashboardVM);
         }
+
         public async Task<IActionResult> Profile()
         {
             var userId = User.GetUserId();
@@ -241,6 +266,48 @@ namespace GymWeb.Controllers
             // If we got here, something went wrong - redisplay form
             return View("Profile", model);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> MemberDetails(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var memberResponse = await _memberService.GetMemberByIdAsync(id);
+
+            if (memberResponse.ISHaveErrorOrnNot)
+            {
+                TempData["Error"] = "Member not found";
+                return RedirectToAction("Dashboard");
+            }
+
+            var subscriptionsResponse = await _subscripionService.GetByMemeberIdAsync(id);
+            
+            var model = new MemberDietWorkoutPlansVM
+            {
+                Id = memberResponse.Result.Id,
+                FullName = memberResponse.Result.FullName,
+                Email = memberResponse.Result.Email,
+                JoinDate = memberResponse.Result.JoinDate,
+                CurrentWeight = memberResponse.Result.CurrentWeight,
+                Height = memberResponse.Result.Height,
+                FitnessGoal = subscriptionsResponse.Result?.MemberVM?.FitnessGoal,
+                DietPlanAssignmentVM = subscriptionsResponse.Result?.DietPlanAssignmentVM,
+                WorkoutAssignmentVM = subscriptionsResponse.Result?.WorkoutAssignmentVM
+            };
+
+            if (model.DietPlanAssignmentVM != null)
+                model.DietPlanAssignmentVM.DietPlan = subscriptionsResponse.Result.DietPlanAssignmentVM?.DietPlan;
+            
+            if (model.WorkoutAssignmentVM != null)
+                model.WorkoutAssignmentVM.WorkoutPlan = subscriptionsResponse.Result.WorkoutAssignmentVM?.WorkoutPlan;
+
+            ViewBag.HasDiet = subscriptionsResponse.Result?.DietPlanAssignmentVM != null;
+            ViewBag.HasWorkout = subscriptionsResponse.Result?.WorkoutAssignmentVM != null;
+
+            return View(model);
+        }
+
+  
         private async Task UpdateUserClaims(TrainerVM trainer)
         {
           
@@ -257,271 +324,10 @@ namespace GymWeb.Controllers
             return View();
         }
 
-        // View Assigned Members
-        public async Task<IActionResult> MyMembers()
-        {
-           
-            
-            // Get all members (in a real app, you'd filter by trainer assignment)
-            var membersResponse = await _memberService.GetAllMembersAsync();
-            
-            if (membersResponse.ISHaveErrorOrnNot)
-            {
-                TempData["Error"] = "Unable to load members";
-                return View(new List<MemberVM>());
-            }
 
-            // For each member, check if they have workout and diet plans
-            var membersList = membersResponse.Result;
-            
-            return View(membersList);
-        }
 
-        // View Member Details
-        public async Task<IActionResult> MemberDetails(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
 
-            var memberResponse = await _memberService.GetMemberByIdAsync(id);
-            
-            if (memberResponse.ISHaveErrorOrnNot)
-            {
-                TempData["Error"] = "Member not found";
-                return RedirectToAction("MyMembers");
-            }
-            var subscriptionsResponse = await _subscripionService.GetByMemeberIdAsync(id);
-            var Member = new MemberDietWorkoutPlansVM
-            {
-                Id = memberResponse.Result.Id,
-                FullName = memberResponse.Result.FullName,
-                Email = memberResponse.Result.Email,
-                JoinDate = memberResponse.Result.JoinDate,
-                CurrentWeight = memberResponse.Result.CurrentWeight,
-                CurrentHeight = memberResponse.Result.CurrentHeight,
-                FitnessGoal=subscriptionsResponse.Result.MemberVM?.FitnessGoal
-                ,
-                // Initialize empty collections if needed
-                DietPlanAssignmentVM = subscriptionsResponse.Result.DietPlanAssignmentVM,
-                WorkoutAssignmentVM = subscriptionsResponse.Result.WorkoutAssignmentVM,
-                
 
-            };
-            if(Member.DietPlanAssignmentVM!=null)
-            Member.DietPlanAssignmentVM.DietPlan = subscriptionsResponse.Result.DietPlanAssignmentVM?.DietPlan;
-            if(Member.WorkoutAssignmentVM!=null) 
-            Member.WorkoutAssignmentVM.WorkoutPlan = subscriptionsResponse.Result.WorkoutAssignmentVM?.WorkoutPlan;
-
-            ViewBag.hasDiet=subscriptionsResponse.Result.DietPlanAssignmentVM!=null?true:false;
-            ViewBag.hasWorkout= subscriptionsResponse.Result.WorkoutAssignmentVM != null ? true : false;
-
-            return View(Member);
-        }
-
-        // Get Member Plan Status (AJAX)
-        [HttpGet]
-        public async Task<IActionResult> GetMemberPlanStatus(string memberId)
-        {
-            // Check workout plans
-            var Response = await _subscripionService.CheckActivePlanAsync(memberId);
-            if (Response.ISHaveErrorOrnNot)
-            {
-                return Json(new { error = "Unable to check workout plans" });
-            }
-            var hasWorkoutPlan =Response.Result.hasWorkout;
-
-        
-
-            var hasDietPlan =  Response.Result.hasDiet;
-
-            return Json(new 
-            { 
-                hasWorkoutPlan = hasWorkoutPlan,
-                hasDietPlan = hasDietPlan,
-                
-            });
-        }
-
-        // Create Workout Plan for Member
-        [HttpGet]
-        public async Task<IActionResult> CreateWorkoutPlan(string memberId)
-        {
-            if (string.IsNullOrEmpty(memberId))
-                return NotFound();
-
-            var memberResponse = await _memberService.GetMemberByIdAsync(memberId);
-            if (memberResponse.ISHaveErrorOrnNot)
-            {
-                TempData["Error"] = "Member not found";
-                return RedirectToAction("MyMembers");
-            }
-
-            // Get available workout plans
-            var workoutPlansResponse = await _workoutPlanService.GetAllWorkoutPlansAsync();
-            
-            ViewBag.Member = memberResponse.Result;
-            ViewBag.WorkoutPlans = workoutPlansResponse.Result ?? new List<WorkoutPlanVM>();
-          
-            var model = new WorkoutAssignmentVM
-            {
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddMonths(1),
-                IsActive = true
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateWorkoutPlan(WorkoutAssignmentVM model,string memberId)
-        {
-            if (!ModelState.IsValid)
-            {
-                var memberResponse = await _memberService.GetMemberByIdAsync(memberId);
-                var workoutPlansResponse = await _workoutPlanService.GetAllWorkoutPlansAsync();
-                ViewBag.Member = memberResponse.Result;
-                ViewBag.WorkoutPlans = workoutPlansResponse.Result ?? new List<WorkoutPlanVM>();
-                return View(model);
-            }
-          
-            var response = await _workoutAssignmentService.CreateAsync(model);
-            
-            if (response.ISHaveErrorOrnNot)
-            {
-                var memberResponse = await _memberService.GetMemberByIdAsync(memberId);
-                if (memberResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = "Member not found";
-                    return RedirectToAction("MyMembers");
-                }
-
-                // Get available workout plans
-                var workoutPlansResponse = await _workoutPlanService.GetAllWorkoutPlansAsync();
-
-                ViewBag.Member = memberResponse.Result;
-                ViewBag.WorkoutPlans = workoutPlansResponse.Result ?? new List<WorkoutPlanVM>();
-                TempData["Error"] = response.ErrorMessage;
-                return View(model);
-            }
-            
-            var resulteResponse = await _subscripionService.GetByMemeberIdAsync(memberId);
-            resulteResponse.Result.WorkoutAssignmentVM = new WorkoutAssignmentVM();
-            resulteResponse.Result.WorkoutAssignmentVM.Id = response.Result.Id;
-            var Updated = await _subscripionService.UpdateAsync(resulteResponse.Result);
-            if (Updated.ISHaveErrorOrnNot)
-            {
-                var memberResponse = await _memberService.GetMemberByIdAsync(ViewBag.Member.Id);
-                if (memberResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = "Member not found";
-                    return RedirectToAction("MyMembers");
-                }
-
-                // Get available workout plans
-                var workoutPlansResponse = await _workoutPlanService.GetAllWorkoutPlansAsync();
-
-                ViewBag.Member = memberResponse.Result;
-                ViewBag.WorkoutPlans = workoutPlansResponse.Result ?? new List<WorkoutPlanVM>();
-                TempData["Error"] = response.ErrorMessage;
-                return View(model);
-            }
-            TempData["Success"] = "Workout plan assigned successfully!";
-            return RedirectToAction("MemberDetails", new { id = memberId });
-        }
-
-        // Create Diet Plan for Member
-        [HttpGet]
-        public async Task<IActionResult> CreateDietPlan(string memberId)
-        {
-            if (string.IsNullOrEmpty(memberId))
-                return NotFound();
-
-            var memberResponse = await _memberService.GetMemberByIdAsync(memberId);
-            if (memberResponse.ISHaveErrorOrnNot)
-            {
-
-                TempData["Error"] = "Member not found";
-                return RedirectToAction("MyMembers");
-            }
-
-            // Get available diet plans
-            var dietPlansResponse = await _dietPlanService.GetAllDietPlansAsync();
-            
-            ViewBag.Member = memberResponse.Result;
-            ViewBag.DietPlans = dietPlansResponse.Result ?? new List<DietPlanVM>();
-            
-            var model = new DietPlanAssignmentVM
-            {
-               
-                MemberName = memberResponse.Result.FullName,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddMonths(1),
-                IsActive = true
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateDietPlan(DietPlanAssignmentVM model, string memberId)
-        {
-            if (!ModelState.IsValid)
-            {
-                var memberResponse = await _memberService.GetMemberByIdAsync(memberId);
-                var dietPlansResponse = await _dietPlanService.GetAllDietPlansAsync();
-                ViewBag.Member = memberResponse.Result;
-                ViewBag.DietPlans = dietPlansResponse.Result ?? new List<DietPlanVM>();
-                return View(model);
-            }
-           
-            var response = await _dietPlanAssignmentService.CreateAsync(model);
-            
-            if (response.ISHaveErrorOrnNot)
-            {
-                var memberResponse = await _memberService.GetMemberByIdAsync(memberId  );
-                if (memberResponse.ISHaveErrorOrnNot)
-                {
-
-                    TempData["Error"] = "Member not found";
-                    return RedirectToAction("MyMembers");
-                }
-
-                // Get available diet plans
-                var dietPlansResponse = await _dietPlanService.GetAllDietPlansAsync();
-
-                ViewBag.Member = memberResponse.Result;
-                ViewBag.DietPlans = dietPlansResponse.Result ?? new List<DietPlanVM>();
-                TempData["Error"] = response.ErrorMessage;
-                return View(model);
-            }
-            
-            var resulteResponse = await _subscripionService.GetByMemeberIdAsync(memberId);
-            resulteResponse.Result.DietPlanAssignmentVM = new DietPlanAssignmentVM();
-            resulteResponse.Result.DietPlanAssignmentVM.Id = response.Result.Id;
-            
-            var Updated = await _subscripionService.UpdateAsync(resulteResponse.Result);
-            if (Updated.ISHaveErrorOrnNot)
-            {
-                var memberResponse = await _memberService.GetMemberByIdAsync(memberId);
-                if (memberResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = "Member not found";
-                    return RedirectToAction("MyMembers");
-                }
-
-                // Get available workout plans
-                var workoutPlansResponse = await _workoutPlanService.GetAllWorkoutPlansAsync();
-
-                ViewBag.Member = memberResponse.Result;
-                ViewBag.WorkoutPlans = workoutPlansResponse.Result ?? new List<WorkoutPlanVM>();
-                TempData["Error"] = response.ErrorMessage;
-                return View(model);
-            }
-
-            TempData["Success"] = "Diet plan assigned successfully!";
-            return RedirectToAction("MemberDetails", new { id = memberId });
-        }
+      
     }
 }

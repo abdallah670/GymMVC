@@ -9,6 +9,6 @@ namespace GymDAL.Repo.Implementation
         public DietPlanItemRepository(GymDbContext context, IMapper mapper) : base(context, mapper)
         {
         }
-
+         
     }
 }

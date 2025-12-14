@@ -1,6 +1,7 @@
 using GymBLL.ModelVM.Nutrition;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
 
 namespace GymBLL.Service.Abstract
 {
@@ -13,5 +14,7 @@ namespace GymBLL.Service.Abstract
         Task<Response<DietPlanVM>> UpdateDietPlanAsync(DietPlanVM dietPlanVm);
         Task<Response<bool>> DeleteDietPlanAsync(int dietPlanId);
         Task<Response<bool>> ToggleStatusAsync(int dietPlanId);
+        // Pagination
+        Task<Response<PagedResult<DietPlanVM>>> GetPagedDietPlansAsync(int pageNumber, int pageSize);
     }
 }

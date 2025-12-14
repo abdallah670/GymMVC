@@ -9,10 +9,8 @@ namespace GymBLL.ModelVM.Nutrition
         [Required(ErrorMessage = "Diet plan is required")]
         public int DietPlanId { get; set; }
 
-        public string? DietPlanName { get; set; }
-
         [Required(ErrorMessage = "Day number is required")]
-        [Range(1, 365, ErrorMessage = "Day must be between 1 and 365")]
+        [Range(1, 365, ErrorMessage = "Day must be between 1 and 7")]
         public int DayNumber { get; set; }
 
         [Required(ErrorMessage = "Meal type is required")]

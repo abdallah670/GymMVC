@@ -1,10 +1,10 @@
-@model GymBLL.ModelVM.Workout.WorkoutAssignmentVM
+﻿@model GymBLL.ModelVM.Nutrition.DietPlanAssignmentVM
 
 @{
-    ViewData["Title"] = "Edit Workout Plan";
+    ViewData["Title"] = "Edit Diet Plan";
     var member = ViewBag.Member as GymBLL.ModelVM.User.Member.MemberVM;
     var memberId = ViewBag.MemberId as string;
-    var workoutPlans = ViewBag.WorkoutPlans as List<GymBLL.ModelVM.Workout.WorkoutPlanVM>;
+    var dietPlans = ViewBag.DietPlans as List<GymBLL.ModelVM.Nutrition.DietPlanVM>;
 }
 
 <div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
@@ -18,28 +18,28 @@
         <div style="text-align: center; margin-bottom: 2rem;">
             <h2 style="color: var(--ink); margin-bottom: 0.5rem;">
                 <i class="fas fa-edit" style="color: var(--main-color);"></i>
-                Edit Workout Plan
+                Edit Diet Plan
             </h2>
-            <p style="color: var(--muted);">Update workout plan assignment for <strong>@member?.FullName</strong></p>
+            <p style="color: var(--muted);">Update diet plan assignment for <strong>@member?.FullName</strong></p>
         </div>
 
-        <form asp-action="EditWorkoutPlan" asp-route-memberId="@memberId" method="post">
+        <form asp-action="EditDietPlan" asp-route-memberId="@memberId" method="post">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="CreatedAt" />
 
             <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label asp-for="WorkoutPlanId" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Select Workout Plan</label>
-                <select asp-for="WorkoutPlanId" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);">
-                    <option value="">-- Select a Workout Plan --</option>
-                    @if (workoutPlans != null)
+                <label asp-for="DietPlanId" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Select Diet Plan</label>
+                <select asp-for="DietPlanId" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);">
+                    <option value="">-- Select a Diet Plan --</option>
+                    @if (dietPlans != null)
                     {
-                        @foreach (var plan in workoutPlans)
+                        @foreach (var plan in dietPlans)
                         {
-                            <option value="@plan.Id" selected="@(plan.Id == Model.WorkoutPlanId)">@plan.Name - @plan.Description</option>
+                            <option value="@plan.Id" selected="@(plan.Id == Model.DietPlanId)">@plan.Name - @plan.DietType (@plan.TotalCalories cal)</option>
                         }
                     }
                 </select>
-                <span asp-validation-for="WorkoutPlanId" class="text-danger"></span>
+                <span asp-validation-for="DietPlanId" class="text-danger"></span>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
@@ -54,12 +54,6 @@
                     <input asp-for="EndDate" type="date" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
                     <span asp-validation-for="EndDate" class="text-danger"></span>
                 </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label asp-for="Notes" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Notes (Optional)</label>
-                <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Add any specific instructions or notes for this member..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
-                <span asp-validation-for="Notes" class="text-danger"></span>
             </div>
 
             <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -82,5 +76,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

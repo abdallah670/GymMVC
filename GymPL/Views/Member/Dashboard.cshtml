@@ -1,103 +1,170 @@
-﻿
+﻿@model GymPL.ViewModels.MemberDashboardVM
+
 @{
-    ViewData["Title"] = "Member Dashboard";
+    ViewData["Title"] = "My Dashboard";
 }
 
-<div class="dashboard" style="max-width: var(--maxw); margin: 0 auto; padding: 2rem 1rem;">
+<div class="container py-4">
     <!-- Welcome Header -->
-    <div class="dashboard-header" style="background: linear-gradient(135deg, var(--main-color), var(--secondary-color)); padding: 2rem; border-radius: var(--radius); margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h1 style="color: var(--accent-ink); margin-bottom: 0.5rem;">Welcome, John!</h1>
-                <p style="color: color-mix(in srgb, var(--accent-ink) 80%, transparent); margin: 0;">Pro Member since January 2024</p>
-            </div>
-            <div style="text-align: right;">
-                <div class="member-id" style="background: color-mix(in srgb, var(--accent-ink) 10%, transparent); padding: 0.5rem 1rem; border-radius: var(--radius); display: inline-block;">
-                    <span style="color: var(--accent-ink); font-weight: 600;">Member ID: MP2024001</span>
-                </div>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="display-5 fw-bold text-white mb-2">Hello, @Model.MemberName!</h1>
+            <p class="text-muted h5">Here's your comprehensive fitness overview for today.</p>
+        </div>
+        <div class="text-end d-none d-md-block">
+            <h4 class="text-primary fw-bold mb-0">@DateTime.Now.ToString("dddd")</h4>
+            <p class="text-white mb-0">@DateTime.Now.ToString("dd MMMM yyyy")</p>
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-        <div class="stat-card" style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); text-align: center;">
-            <div style="font-size: 2rem; font-weight: 700; color: var(--main-color);">12</div>
-            <div style="color: var(--muted);">Workouts This Month</div>
-        </div>
-        <div class="stat-card" style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); text-align: center;">
-            <div style="font-size: 2rem; font-weight: 700; color: var(--secondary-color);">3</div>
-            <div style="color: var(--muted);">PT Sessions Left</div>
-        </div>
-        <div class="stat-card" style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); text-align: center;">
-            <div style="font-size: 2rem; font-weight: 700; color: var(--tertiary-color);">85%</div>
-            <div style="color: var(--muted);">Monthly Goal</div>
-        </div>
-        <div class="stat-card" style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame); text-align: center;">
-            <div style="font-size: 2rem; font-weight: 700; color: var(--success);">30</div>
-            <div style="color: var(--muted);">Days Streak</div>
-        </div>
-    </div>
-
-    <!-- Main Dashboard Grid -->
-    <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-
-        <!-- Left Column -->
-        <div class="left-column" style="display: flex; flex-direction: column; gap: 2rem;">
-
-            <!-- Workout Schedule -->
-            <div class="dashboard-card" style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame);">
-                <h3 style="margin-bottom: 1rem; color: var(--ink); display: flex; justify-content: between; align-items: center;">
-                    <span>Today's Schedule</span>
-                    <a href="#" style="color: var(--main-color); text-decoration: none; font-size: 0.9rem;">
-                        <i class="fas fa-calendar-plus"></i> Book Class
-                    </a>
-                </h3>
-                <div class="schedule-list" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div class="schedule-item" style="display: flex; justify-content: between; align-items: center; padding: 1rem; background: color-mix(in srgb, var(--tile) 80%, transparent); border-radius: var(--radius);">
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Left Column: Subscription & Quick Stats -->
+        <div class="col-lg-4">
+            
+            <!-- Subscription Card -->
+            <div class="card border-0 shadow-lg bg-dark text-white mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
-                            <div style="font-weight: 600; color: var(--ink);">Strength Training</div>
-                            <div style="color: var(--muted); font-size: 0.9rem;">
-                                <i class="fas fa-clock"></i> 6:00 PM - 7:00 PM
+                            <h5 class="text-muted text-uppercase small mb-1">Current Plan</h5>
+                            <h3 class="fw-bold text-white mb-0">
+                                @(Model.SubscriptionStatus != null ? Model.SubscriptionStatus.MembershipType : "No Active Plan")
+                            </h3>
+                        </div>
+                        @if (Model.SubscriptionStatus != null)
+                        {
+                            <span class="badge @Model.SubscriptionStatus.StatusBadgeClass fs-6">
+                                @Model.SubscriptionStatus.Status
+                            </span>
+                        }
+                    </div>
+
+                    @if (Model.SubscriptionStatus != null)
+                    {
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between text-muted small mb-2">
+                                <span>Progress</span>
+                                <span>@Model.SubscriptionStatus.DaysRemaining days left</span>
+                            </div>
+                            <div class="progress bg-secondary bg-opacity-25" style="height: 6px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: @(Model.SubscriptionStatus.DaysRemaining > 0 ? "75" : "0")%"></div>
                             </div>
                         </div>
-                        <div class="status" style="background: var(--success); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
-                            Booked
+
+                        <div class="d-grid gap-2">
+                            @if (Model.SubscriptionStatus.CanRenew)
+                            {
+                                <a asp-action="RenewSubscription" class="btn btn-primary">Renew Subscription</a>
+                            }
+                            @if (Model.SubscriptionStatus.CanUpgrade)
+                            {
+                                <a asp-action="UpgradeSubscription" class="btn btn-outline-light">Upgrade Plan</a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <p class="text-muted mb-3">You don't have an active subscription.</p>
+                            <a asp-action="Create" class="btn btn-primary w-100">Browse Plans</a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="card border-0 shadow-lg bg-dark text-white">
+                <div class="card-header bg-transparent border-secondary py-3">
+                    <h5 class="mb-0"><i class="fas fa-link me-2"></i>Quick Access</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a asp-action="Details" asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-user-circle me-2 text-primary"></i>My Profile</span>
+                        <i class="fas fa-chevron-right small text-muted"></i>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-history me-2 text-info"></i>Payment History</span>
+                        <i class="fas fa-chevron-right small text-muted"></i>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-bell me-2 text-warning"></i>Notifications</span>
+                        <i class="fas fa-chevron-right small text-muted"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Today's Focus -->
+        <div class="col-lg-8">
+            <h4 class="text-white mb-4">Today's Focus</h4>
+            
+            <div class="row g-4">
+                <!-- Workout Card -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-lg h-100 bg-dark text-white overflow-hidden" style="min-height: 250px;">
+                        <div class="card-body p-4 position-relative z-1">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="icon-shape bg-primary bg-opacity-25 text-primary rounded-3 p-3">
+                                    <i class="fas fa-dumbbell fa-2x"></i>
+                                </div>
+                                <span class="badge bg-dark border border-secondary">Workout</span>
+                            </div>
+                            
+                            @if (Model.HasWorkoutPlan)
+                            {
+                                <h4 class="fw-bold mb-2">@Model.TodayWorkoutName</h4>
+                                <p class="text-muted mb-4 small">Ready to crush your goals? Start your scheduled training now.</p>
+                                    <a asp-controller="Member" asp-action="ViewTodayWorkout" class="btn btn-outline-primary stretched-link">
+                                    Start Workout <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <h4 class="fw-bold mb-2">Rest Day</h4>
+                                <p class="text-muted mb-4 small">No workout scheduled for today. Rest and recover!</p>
+                                <button class="btn btn-outline-secondary disabled">No Workout Assigned</button>
+                            }
+                        </div>
+                        <div class="position-absolute top-0 end-0 h-100 w-100 opacity-10" 
+                             style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'); background-size: cover;">
                         </div>
                     </div>
-                    <div class="schedule-item" style="display: flex; justify-content: between; align-items: center; padding: 1rem; background: color-mix(in srgb, var(--tile) 80%, transparent); border-radius: var(--radius);">
-                        <div>
-                            <div style="font-weight: 600; color: var(--ink);">Personal Training</div>
-                            <div style="color: var(--muted); font-size: 0.9rem;">
-                                <i class="fas fa-clock"></i> 7:30 PM - 8:30 PM
+                </div>
+
+                <!-- Nutrition Card -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-lg h-100 bg-dark text-white overflow-hidden" style="min-height: 250px;">
+                        <div class="card-body p-4 position-relative z-1">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="icon-shape bg-success bg-opacity-25 text-success rounded-3 p-3">
+                                    <i class="fas fa-utensils fa-2x"></i>
+                                </div>
+                                <span class="badge bg-dark border border-secondary">Nutrition</span>
                             </div>
+                            
+                            @if (Model.HasDietPlan)
+                            {
+                                <h4 class="fw-bold mb-2">@Model.TodayDietName</h4>
+                                <p class="text-muted mb-4 small">Fuel your body efficiently. View your meal plan for today.</p>
+                                <a asp-controller="Member" asp-action="TodayMeal" class="btn btn-outline-success stretched-link">
+                                    View Meals <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <h4 class="fw-bold mb-2">Track Calories</h4>
+                                <p class="text-muted mb-4 small">No specific diet plan assigned. Remember to eat healthy!</p>
+                                <button class="btn btn-outline-secondary disabled">No Plan Assigned</button>
+                            }
                         </div>
-                        <div class="status" style="background: var(--warning); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
-                            Confirmed
+                         <div class="position-absolute top-0 end-0 h-100 w-100 opacity-10" 
+                             style="background-image: url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'); background-size: cover;">
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Progress Tracking -->
-            <div class="dashboard-card" style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame);">
-                <h3 style="margin-bottom: 1rem; color: var(--ink);">Progress Tracking</h3>
-                <div class="progress-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="progress-item" style="text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--main-color);">75 kg</div>
-                        <div style="color: var(--muted); font-size: 0.9rem;">Current Weight</div>
-                        <div style="color: var(--success); font-size: 0.8rem;">
-                            <i class="fas fa-arrow-down"></i> 2 kg this month
-                        </div>
-                    </div>
-                    <div class="progress-item" style="text-align: center;">
-                    </a>
-                    <a href="#" class="btn btn-secondary" style="text-align: left; justify-content: start;">
-                        <i class="fas fa-credit-card"></i> Update Payment
-                    </a>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>

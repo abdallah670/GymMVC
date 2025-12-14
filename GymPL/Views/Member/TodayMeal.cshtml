@@ -5,8 +5,8 @@
     var currentDay = (int)ViewBag.CurrentDay;
     var maxDays = (int)ViewBag.MaxDays;
     var meals = ViewBag.Meals as List<GymBLL.ModelVM.Nutrition.DietPlanItemVM>;
-    
-    var icons = new Dictionary<string, string> 
+
+    var icons = new Dictionary<string, string>
     {
         { "Breakfast", "fa-coffee" },
         { "Lunch", "fa-hamburger" },
@@ -37,11 +37,11 @@
                     <i class="fas fa-utensils"></i> @dietPlan?.Name
                 </h2>
                 <p style="opacity: 0.9; margin-bottom: 0.25rem;">
-                    <i class="fas fa-fire"></i> @dietPlan?.TotalCalories cal/day | 
+                    <i class="fas fa-fire"></i> @dietPlan?.TotalCalories cal/day |
                     <i class="fas fa-leaf"></i> @dietPlan?.DietType
                 </p>
                 <p style="opacity: 0.8; font-size: 0.9rem;">
-                    <i class="fas fa-calendar-alt"></i> 
+                    <i class="fas fa-calendar-alt"></i>
                     @assignment?.StartDate.ToString("MMM dd, yyyy") - @assignment?.EndDate.ToString("MMM dd, yyyy")
                 </p>
             </div>

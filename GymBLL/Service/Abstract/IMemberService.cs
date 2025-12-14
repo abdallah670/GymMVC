@@ -2,6 +2,8 @@ using GymBLL.ModelVM.User.AppUser;
 using GymBLL.ModelVM.User.Member;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
+using System.Collections.Generic;
 
 namespace GymBLL.Service.Abstract
 {
@@ -16,6 +18,8 @@ namespace GymBLL.Service.Abstract
         Task<Response<List<MemberVM>>> GetAllMembersAsync();
         Task<Response<List<MemberVM>>> GetActiveMembersAsync();
         Task<Response<List<MemberVM>>> GetNotActiveMembersAsync();
+        // Pagination
+        Task<Response<PagedResult<MemberVM>>> GetPagedMembersAsync(int pageNumber, int pageSize);
         Task<Response<MemberVM>> CompleteProfileAsync(MemberProfileVM model);
         Task<bool> HasCompletedProfileAsync(string memberId);
     }

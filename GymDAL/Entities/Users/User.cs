@@ -12,11 +12,7 @@ namespace GymDAL.Entities.Users
         public string? ProfilePicture { get; set; }
         public bool IsActive { get; set; } = true;
         public virtual ICollection<Notification>? Notifications { get; set; } = new List<Notification>();
-        public bool ToggleStatus()
-        {
-                this.IsActive = !this.IsActive;
-                return true;
-        }
+        
     }
 
 

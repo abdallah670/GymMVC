@@ -1,80 +1,182 @@
-﻿@{
+﻿@model GymPL.ViewModels.TrainerDashboardVM
+
+@{
     ViewData["Title"] = "Trainer Dashboard";
 }
 
 <section id="trainer-dashboard" class="trainer-dashboard">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-white fw-bold">Dashboard Overview</h2>
+             <span class="badge bg-primary fs-6">@DateTime.Now.ToString("dd MMM yyyy")</span>
+        </div>
 
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card clients-card">
-            <div class="stat-content">
-                <div class="stat-info">
-                    <h4 class="stat-title">Clients</h4>
-                    <h2 class="stat-number">0</h2>
+        <!-- Stats Grid -->
+        <div class="row g-4 mb-5">
+            <!-- Members Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted text-uppercase mb-2">Total Members</h6>
+                                <h2 class="mb-0 display-6 fw-bold text-primary">@Model.TotalMembers</h2>
+                            </div>
+                            <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
+            </div>
+
+            <!-- Workout Plans Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted text-uppercase mb-2">Active Workouts</h6>
+                                <h2 class="mb-0 display-6 fw-bold text-info">@Model.ActiveWorkoutPlans</h2>
+                            </div>
+                            <div class="icon-shape bg-info bg-opacity-10 text-info rounded-3 p-3">
+                                <i class="fas fa-dumbbell fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diet Plans Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted text-uppercase mb-2">Active Diet Plans</h6>
+                                <h2 class="mb-0 display-6 fw-bold text-success">@Model.ActiveDietPlans</h2>
+                            </div>
+                            <div class="icon-shape bg-success bg-opacity-10 text-success rounded-3 p-3">
+                                <i class="fas fa-apple-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating/Other Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                             <div>
+                                <h6 class="text-muted text-uppercase mb-2">Quick Access</h6>
+                                <div class="d-flex gap-2 mt-2">
+                                    <a asp-action="Index" asp-controller="Member" class="btn btn-sm btn-outline-primary">View Members</a>
+                                </div>
+                            </div>
+                            <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="stat-card sessions-card">
-            <div class="stat-content">
-                <div class="stat-info">
-                    <h4 class="stat-title">Sessions</h4>
-                    <h2 class="stat-number">0</h2>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-calendar"></i>
+        <!-- Recent Members & Quick Actions -->
+        <div class="row g-4">
+            <!-- Recent Activity -->
+            <div class="col-lg-8">
+                <div class="card bg-dark text-white border-0 shadow-lg">
+                    <div class="card-header border-secondary bg-transparent py-3">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Members</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="border-secondary text-muted">Member</th>
+                                    <th class="border-secondary text-muted">Email</th>
+                                    <th class="border-secondary text-muted">Status</th>
+                                    <th class="border-secondary text-muted text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentMembers != null && Model.RecentMembers.Any())
+                                {
+                                    foreach (var member in Model.RecentMembers)
+                                    {
+                                        <tr>
+                                            <td class="border-secondary">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                        @member.FullName.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">@member.FullName</h6>
+                                                        <small class="text-muted">Joined: @member.JoinDate.ToString("dd MMM")</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="border-secondary text-muted">@member.Email</td>
+                                            <td class="border-secondary">
+                                                <span class="badge bg-success bg-opacity-25 text-success">Active</span>
+                                            </td>
+                                            <td class="border-secondary text-end">
+                                                <a asp-action="MemberDetails" asp-route-id="@member.Id" class="btn btn-sm btn-outline-light">
+                                                    <i class="fas fa-arrow-right"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4 border-secondary">
+                                            No members found.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (Model.TotalMembers > 5)
+                    {
+                        <div class="card-footer bg-transparent border-secondary text-center py-3">
+                            <a asp-action="Index" asp-controller="Member" class="text-decoration-none text-primary">View All Members</a>
+                        </div>
+                    }
                 </div>
             </div>
-        </div>
 
-        <div class="stat-card workouts-card">
-            <div class="stat-content">
-                <div class="stat-info">
-                    <h4 class="stat-title">Workouts</h4>
-                    <h2 class="stat-number">0</h2>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-dumbbell"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card rating-card">
-            <div class="stat-content">
-                <div class="stat-info">
-                    <h4 class="stat-title">Rating</h4>
-                    <h2 class="stat-number">0.0</h2>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-star"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions-section">
-        <div class="section-card">
-            <div class="card-header">
-                <h5>Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="actions-grid">
-                    <a href="@Url.Action("Profile")" class="action-btn profile-btn">
-                        <i class="fas fa-user me-2"></i>My Profile
-                    </a>
-                    <a href="#" class="action-btn schedule-btn">
-                        <i class="fas fa-calendar me-2"></i>My Schedule
-                    </a>
-                    <a href="#" class="action-btn clients-btn">
-                        <i class="fas fa-users me-2"></i>My Clients
-                    </a>
-                    <a href="#" class="action-btn workouts-btn">
-                        <i class="fas fa-dumbbell me-2"></i>Workout Plans
-                    </a>
+            <!-- Quick Actions -->
+            <div class="col-lg-4">
+                <div class="card bg-dark text-white border-0 shadow-lg">
+                    <div class="card-header border-secondary bg-transparent py-3">
+                        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <a asp-action="CreateOwner" class="btn btn-primary d-flex align-items-center justify-content-between p-3">
+                                <span><i class="fas fa-user-plus me-2"></i>Add New Member</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            <a asp-action="Create" asp-controller="WorkoutPlan" class="btn btn-outline-light d-flex align-items-center justify-content-between p-3">
+                                <span><i class="fas fa-dumbbell me-2"></i>Create Workout Plan</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            <a asp-action="Create" asp-controller="DietPlan" class="btn btn-outline-light d-flex align-items-center justify-content-between p-3">
+                                <span><i class="fas fa-utensils me-2"></i>Create Diet Plan</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                             <a asp-action="Profile" class="btn btn-outline-secondary d-flex align-items-center justify-content-between p-3">
+                                <span><i class="fas fa-user-cog me-2"></i>My Profile</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

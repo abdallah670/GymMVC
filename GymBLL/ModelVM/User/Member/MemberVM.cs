@@ -8,7 +8,7 @@ namespace GymBLL.ModelVM.User.Member
         public DateTime JoinDate { get; set; }
         public FitnessGoalsVM? FitnessGoal { get; set; }
         public double? CurrentWeight { get; set; }
-        public double? CurrentHeight { get; set; }
+        public double? Height { get; set; }
         public bool? Gender { get; set; }
     }
 }

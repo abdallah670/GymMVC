@@ -32,6 +32,6 @@ namespace GymBLL.ModelVM.Nutrition
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public List<DietPlanItemVM> DietPlanItemsVM { get; set; }
+        public List<DietPlanItemVM>? DietPlanItemsVM { get; set; }
     }
 }

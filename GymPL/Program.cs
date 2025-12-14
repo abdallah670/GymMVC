@@ -74,16 +74,15 @@ namespace GymPL
                 options.ExpireTimeSpan = TimeSpan.FromDays(7);
                 options.SlidingExpiration = true;
             });
-            
-            // Add the CustomAuth cookie scheme
-            builder.Services.AddAuthentication()
-                .AddCookie("CustomAuth", options =>
-                {
-                    options.LoginPath = new PathString("/Account/Login");
-                    options.AccessDeniedPath = new PathString("/Account/AccessDenied");
-                    options.ExpireTimeSpan = TimeSpan.FromDays(7);
-                    options.SlidingExpiration = true;
-                });
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+          
             // Replace this line:
             // 
             builder.Services.Configure<GymSettings>(builder.Configuration.GetSection("GymSettings"));

@@ -1,0 +1,131 @@
+@model GymBLL.ModelVM.Nutrition.DietPlanItemVM
+
+@{
+    ViewData["Title"] = "Add Meal";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Add Meal</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Meal Details</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                
+                @if (ViewData["PlanName"] != null)
+                {
+                     <div class="form-group">
+                        <label class="control-label">Diet Plan</label>
+                        <input type="text" class="form-control" value="@ViewData["PlanName"]" readonly />
+                        <input type="hidden" asp-for="DietPlanId" />
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <label asp-for="DietPlanId" class="control-label">Diet Plan</label>
+                        <select asp-for="DietPlanId" class="form-control" asp-items="ViewBag.DietPlans">
+                            <option value="">-- Select Plan --</option>
+                        </select>
+                        <span asp-validation-for="DietPlanId" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="MealName" class="control-label"></label>
+                        <input asp-for="MealName" class="form-control" />
+                        <span asp-validation-for="MealName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label asp-for="MealType" class="control-label"></label>
+                        <select asp-for="MealType" class="form-control">
+                            <option value="">-- Select Type --</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snack">Snack</option>
+                        </select>
+                        <span asp-validation-for="MealType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label asp-for="DayNumber" class="control-label"></label>
+                        <input asp-for="DayNumber" class="form-control" min="1" />
+                        <span asp-validation-for="DayNumber" class="text-danger"></span>
+                    </div>
+                     <div class="form-group col-md-4">
+                        <label asp-for="Calories" class="control-label"></label>
+                        <input asp-for="Calories" class="form-control" min="0" />
+                        <span asp-validation-for="Calories" class="text-danger"></span>
+                    </div>
+                </div>
+
+                 <div class="form-title mt-3 mb-2">
+                    <h6 class="font-weight-bold text-secondary">Macros (Optional)</h6>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label asp-for="ProteinMacros" class="control-label"></label>
+                        <input asp-for="ProteinMacros" class="form-control" placeholder="e.g. 30g" />
+                        <span asp-validation-for="ProteinMacros" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="CarbMacros" class="control-label"></label>
+                        <input asp-for="CarbMacros" class="form-control" placeholder="e.g. 50g" />
+                        <span asp-validation-for="CarbMacros" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="FatMacros" class="control-label"></label>
+                        <input asp-for="FatMacros" class="form-control" placeholder="e.g. 15g" />
+                        <span asp-validation-for="FatMacros" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Ingredients" class="control-label"></label>
+                    <textarea asp-for="Ingredients" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Ingredients" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Add Meal" class="btn btn-primary" />
+                    @if (ViewData["ReturnUrl"] != null)
+                    {
+                         <a href="@ViewData["ReturnUrl"]" class="btn btn-secondary">Back</a>
+                    }
+                    else if (Model?.DietPlanId > 0)
+                    {
+                        <a asp-action="Details" asp-controller="DietPlan" asp-route-id="@Model.DietPlanId" class="btn btn-secondary">Back to Plan</a>
+                    }
+                    else
+                    {
+                         <a asp-action="Index" asp-controller="DietPlan" class="btn btn-secondary">Back to List</a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

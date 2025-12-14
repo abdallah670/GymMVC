@@ -9,8 +9,23 @@ namespace GymDAL.Repo.Implementation
         public DietPlanRepository(GymDbContext context, IMapper mapper) : base(context, mapper)
         {
         }
+        
+        public override async Task<DietPlan> GetByIdAsync(int id)
+        {
+            try
+            {
+                    return await _context.DietPlans
+                   .Include(w => w.DietPlanItems
+                       .Where(d => d.DayNumber >= 1 && d.DayNumber <= 7)
+                       .OrderBy(d => d.DayNumber))
+                   .FirstOrDefaultAsync(w => w.Id == id);
+            }
+            catch
+            {
+                throw;
+            }
 
-        
-        
+        }
+
     }
 }

@@ -25,6 +25,6 @@ namespace GymBLL.ModelVM.Workout
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public List<WorkoutPlanItemVM> workoutPlanItemVMs { get; set; }
+        public ICollection<WorkoutPlanItemVM>? workoutPlanItemVMs { get; set; }
     }
 }

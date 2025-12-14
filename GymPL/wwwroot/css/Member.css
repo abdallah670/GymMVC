@@ -1,0 +1,118 @@
+
+.member-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #007bff;
+}
+
+.member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.member-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-group-toggle .active {
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+.border-left-primary {
+    border-left-color: #007bff !important;
+}
+
+.plan-status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 100px;
+    text-align: center;
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.page-link {
+    color: #007bff;
+}
+
+    .page-link:hover {
+        color: #0056b3;
+    }
+
+/* Active/Inactive styles */
+.badge-active {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-inactive {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-loading {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-error {
+    background-color: #dc3545;
+    color: white;
+}
+/* Add these to your existing styles */
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.btn-xs {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-loading {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-error {
+    background-color: #dc3545;
+    color: white;
+}
+
+.d-flex.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+

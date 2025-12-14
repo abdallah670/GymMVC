@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GymBLL.ModelVM;
 
 namespace GymBLL.Service.Implementation
 {
@@ -25,22 +26,31 @@ namespace GymBLL.Service.Implementation
         {
             try
             {
+                UnitOfWork.BeginTransaction();
                 var dietPlan = Mapper.Map<DietPlan>(dietPlanVm);
+                if (dietPlanVm.DietPlanItemsVM != null && dietPlanVm.DietPlanItemsVM.Any())
+                {
+                    dietPlan.DietPlanItems = Mapper.Map<List<DietPlanItem>>(dietPlanVm.DietPlanItemsVM
+                        .Where(m => !string.IsNullOrWhiteSpace(m.MealName)));
+                }
                 await UnitOfWork.DietPlans.AddAsync(dietPlan);
 
                 var result = await UnitOfWork.SaveAsync();
                 if (result > 0)
                 {
+                    await UnitOfWork.CommitTransactionAsync();
                     dietPlanVm.Id = dietPlan.Id;
                     return new Response<DietPlanVM>(dietPlanVm, null, false);
                 }
                 else
                 {
+                    UnitOfWork.RollbackTransaction();
                     return new Response<DietPlanVM>(null, "Failed to create diet plan.", true);
                 }
             }
             catch (Exception ex)
             {
+                UnitOfWork.RollbackTransaction();
                 return new Response<DietPlanVM>(null, $"Failed to create diet plan: {ex.Message}", true);
             }
         }
@@ -53,6 +63,10 @@ namespace GymBLL.Service.Implementation
                 if (dietPlan != null)
                 {
                     var dietPlanVm = Mapper.Map<DietPlanVM>(dietPlan);
+                    if (dietPlan.DietPlanItems.Count > 0)
+                    {
+                        dietPlanVm.DietPlanItemsVM = Mapper.Map<List<DietPlanItemVM>>(dietPlan.DietPlanItems);
+                    }
                     return new Response<DietPlanVM>(dietPlanVm, null, false);
                 }
                 else
@@ -186,6 +200,23 @@ namespace GymBLL.Service.Implementation
             catch (Exception ex)
             {
                 return new Response<bool>(false, $"Failed to toggle diet plan status: {ex.Message}", true);
+            }
+        }
+        public async Task<Response<PagedResult<DietPlanVM>>> GetPagedDietPlansAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var plans = await UnitOfWork.DietPlans.GetPagedAsync(pageNumber, pageSize);
+                var totalCount = await UnitOfWork.DietPlans.CountAsync();
+
+                var planVms = plans.Select(dp => Mapper.Map<DietPlanVM>(dp)).ToList();
+
+                var pagedResult = new PagedResult<DietPlanVM>(planVms, totalCount, pageNumber, pageSize);
+                return new Response<PagedResult<DietPlanVM>>(pagedResult, null, false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<PagedResult<DietPlanVM>>(null, $"Failed to get paged diet plans: {ex.Message}", true);
             }
         }
     }
