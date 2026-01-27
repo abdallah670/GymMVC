@@ -24,7 +24,7 @@ namespace GymBLL.ModelVM.Nutrition
         public string? CarbMacros { get; set; }
 
         [StringLength(100)]
-        public string? FatMacros { get; set; } 
+        public string? FatMacros { get; set; }
         public string DietType { get; set; } = "Balanced"; // "Keto", "Vegetarian", "Vegan", "High-Protein", "Balanced"
 
         public int DurationDays { get; set; } = 30; // Default 30-day plan

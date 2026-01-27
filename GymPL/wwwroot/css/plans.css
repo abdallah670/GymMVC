@@ -1,0 +1,356 @@
+/* Plans (Diet & Workout) Styles */
+
+.plan-details-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.plan-header {
+  padding: 2rem;
+  border-radius: var(--radius);
+  margin-bottom: 2rem;
+  color: var(--accent-ink);
+}
+
+.plan-header-diet {
+  background: linear-gradient(135deg, var(--info), var(--secondary-color));
+}
+
+.plan-header-workout {
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+}
+
+.plan-status-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+
+.plan-status-badge-inactive {
+  background: rgba(255, 0, 0, 0.3);
+}
+
+.plan-section {
+  background: var(--tile);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+  margin-bottom: 1.5rem;
+}
+
+.plan-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.plan-info-item {
+  text-align: center;
+  padding: 1rem;
+  background: var(--frame);
+  border-radius: var(--radius);
+}
+
+.plan-info-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.plan-info-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Items (Meals/Exercises) */
+.plan-item-group {
+  margin-bottom: 1.5rem;
+}
+
+.plan-item-card {
+  background: var(--bg);
+  padding: 1rem;
+  border-radius: var(--radius);
+  border-left: 4px solid var(--secondary-color);
+  margin-bottom: 1rem;
+}
+
+.plan-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.plan-item-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.plan-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.plan-actions-footer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.plan-actions-footer > * {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .plan-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-actions-footer {
+    flex-direction: column;
+  }
+}
+
+/* Daily Plan Views (Today's Meal/Workout) */
+.plan-assignment-wrapper {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.daily-header-gradient {
+  padding: 2rem;
+  border-radius: var(--radius);
+  margin-bottom: 2rem;
+  color: var(--accent-ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.daily-header-gradient.diet {
+  background: linear-gradient(135deg, var(--info), var(--secondary-color));
+}
+
+.daily-header-gradient.workout {
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+}
+
+.day-indicator-box {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  text-align: right;
+}
+
+.day-number {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.day-total-of {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.day-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: var(--tile);
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+}
+
+.day-selector-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.day-selector-group select {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+  background: var(--tile);
+  color: var(--ink);
+}
+
+.daily-content-box {
+  background: var(--tile);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+}
+
+.daily-content-title {
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+.no-data-placeholder {
+  text-align: center;
+  padding: 3rem;
+  color: var(--muted);
+}
+
+.no-data-placeholder i {
+  font-size: 3rem;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+.daily-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.meal-type-group {
+  background: var(--frame);
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.meal-type-title {
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+.meal-card-item {
+  background: var(--tile);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+}
+
+.meal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}
+
+.meal-name {
+  color: var(--ink);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.cal-badge {
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.macro-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.meal-ingredients-box {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--frame);
+}
+
+.meal-ingredients-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.meal-notes-text {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.daily-total-footer {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  border-radius: var(--radius);
+  color: var(--accent-ink);
+  text-align: center;
+}
+
+/* Workout Daily Styles */
+.exercise-card-item {
+  background: var(--frame);
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  border-left: 4px solid var(--main-color);
+}
+
+.exercise-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.75rem;
+}
+
+.exercise-name {
+  color: var(--ink);
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.exercise-stats-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.exercise-stat-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.exercise-stat-value {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.exercise-notes-box {
+  background: var(--tile);
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  margin-top: 0.5rem;
+}
+
+.trainer-notes-alert {
+  background: var(--tile);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+  margin-top: 1.5rem;
+  border-left: 4px solid var(--warning);
+}

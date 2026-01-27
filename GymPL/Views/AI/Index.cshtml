@@ -1,0 +1,176 @@
+@{
+    ViewData["Title"] = "AI Gym Coach";
+}
+
+@section Head {
+    <style>
+        .chat-container {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 1rem;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        .message-bot {
+            align-self: flex-start;
+            background: rgba(33, 37, 41, 0.9);
+            color: #e9ecef;
+            border-bottom-left-radius: 0.2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .message-user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            border-bottom-right-radius: 0.2rem;
+        }
+        .chat-input-area {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 0.5rem;
+        }
+        .typing-indicator {
+            font-size: 0.8rem;
+            color: #adb5bd;
+            margin-left: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .suggestion-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggestion-chip:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0"><i class="fas fa-robot text-primary me-2"></i>AI Coach</h2>
+                <span class="badge bg-secondary">Beta</span>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Intro Message -->
+                    <div class="message-bubble message-bot">
+                        Hello! I'm your virtual fitness assistant. Ask me about your <strong>workout</strong>, <strong>diet</strong>, or <strong>progress</strong>! 🤖
+                    </div>
+                </div>
+                
+                <div class="px-3 pb-2" id="suggestionsArea">
+                    <!-- Suggestions will appear here -->
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="suggestion-chip" onclick="sendSuggestion('What is my workout today?')">Target Workout</div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('Show my diet plan')">My Diet</div>
+                        <div class="suggestion-chip" onclick="sendSuggestion('How is my progress?')">Progress</div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator mb-2" id="typingIndicator">AI is thinking...</div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="userMessage" class="form-control bg-dark text-white border-secondary" placeholder="Type a message..." onkeypress="handleEnter(event)">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userMessage');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function sendSuggestion(text) {
+            userInput.value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add User Message
+            appendMessage(message, 'user');
+            userInput.value = '';
+            
+            // Show Typing
+            typingIndicator.style.opacity = '1';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch('/AI/SendMessage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Keep minimal delay for UX
+                setTimeout(() => {
+                    typingIndicator.style.opacity = '0';
+                    appendMessage(data.reply, 'bot');
+                    
+                    // Handle actions if needed (can expand later)
+                }, 500);
+
+            } catch (error) {
+                typingIndicator.style.opacity = '0';
+                appendMessage("Sorry, I'm having trouble connecting to the server.", 'bot');
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `message-bubble message-${sender}`;
+            // Convert simple markdown-like bold to html
+            div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+}

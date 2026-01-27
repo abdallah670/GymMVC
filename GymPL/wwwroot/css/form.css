@@ -1,0 +1,398 @@
+/* ===== Form Styles (Login, Register, Setup) ===== */
+
+/* Login/Register Container */
+.login-container {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 4rem 1rem;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background: var(--tile);
+  border: 1px solid var(--frame);
+  padding: 3rem 2.5rem;
+  box-shadow: var(--shadow-hover);
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.6s ease-out;
+  border-radius: var(--radius);
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-control-custom {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--frame);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control-custom:focus {
+  outline: none;
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--main-color) 20%, transparent);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.form-control-custom:hover {
+  border-color: color-mix(in srgb, var(--main-color) 40%, transparent);
+}
+
+/* Checkbox Styles */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  width: fit-content;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted);
+  border-radius: 4px;
+  background: var(--tile);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.checkbox-custom:checked {
+  background: #60a5fa;
+  border-color: #60a5fa;
+}
+
+.checkbox-custom:checked::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Button & Links */
+.btn-login {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  color: var(--accent-ink);
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.login-footer p {
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.join-link {
+  color: var(--main-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.join-link:hover {
+  color: var(--secondary-color);
+}
+
+.validation-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+.input-with-icon .form-control-custom {
+  padding-left: 3rem;
+}
+
+.gym-icon {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.gym-icon i {
+  font-size: 3rem;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== Owner Setup Styles ===== */
+#owner-setup {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 4rem 1rem;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#owner-setup .setup-card {
+  background: var(--tile);
+  border-radius: var(--radius);
+  border: 1px solid var(--frame);
+  padding: 3rem;
+  box-shadow: var(--shadow-rest);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.6s ease-out;
+}
+
+#owner-setup .setup-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+}
+
+#owner-setup .setup-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+
+#owner-setup .setup-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  color: var(--accent-ink);
+}
+
+#owner-setup .setup-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+#owner-setup .setup-subtitle {
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+#owner-setup .form-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+#owner-setup .form-group {
+  margin-bottom: 0;
+}
+
+#owner-setup .setup-submit {
+  width: 100%;
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(
+    135deg,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  color: var(--accent-ink);
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#owner-setup .setup-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+#owner-setup .setup-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+#owner-setup .setup-footer p {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Form */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 2rem 1rem;
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+  }
+}

@@ -16,11 +16,12 @@ global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Identity;
 global using System.ComponentModel.DataAnnotations;
 global using GymDAL.Entities.Users;
-global using GymDAL.Entities.Progress_and_Notification;
+global using GymDAL.Entities.Communication;
 global using GymDAL.Entities.Nutrition;
 global using GymDAL.Entities.Workout;
 global using GymDAL.Repo.Abstract;
-global using GymDAL.Entities;
+global using GymDAL.Entities.Financial;
+global using GymDAL.Entities.Core;
 global using AutoMapper;
 
 public interface IGlobal

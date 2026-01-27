@@ -1,4 +1,5 @@
-﻿@if (User.Identity.IsAuthenticated)
+@using System.Security.Claims
+@if (User.Identity.IsAuthenticated)
 {
     <header class="trainer-header">
         <div class="bar">
@@ -9,59 +10,117 @@
             <nav>
                 <ul>
                     <li><a href="/Trainer/Dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="/Member/Index"><i class="fas fa-users"></i> My Members</a></li>
+                    <li><a href="/Member/Index"><i class="fas fa-users"></i>Members</a></li>
+                    <li><a asp-controller="Review" asp-action="Index"><i class="fas fa-star"></i>Reviews</a></li>
                     @* <li><a href="/Trainer/Schedule"><i class="fas fa-calendar-alt"></i> Schedule</a></li> *@
-                    <li><a href="/WorkoutPlan"><i class="fas fa-clipboard-list"></i> Workout Plans</a></li>
-                    <li><a href="/DietPlan"><i class="fas fa-apple-alt"></i> Nutrition Plans</a></li>
-                    <!-- User Dropdown -->
+                    <!-- Plans Dropdown -->
                     <li class="dropdown">
-                        <a href="#" class="user-dropdown" id="userDropdownToggle">
+                        <a href="#" class="dropdown-toggle" id="plansDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                           <i class="fas fa-clipboard-list"></i> Plans
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="plansDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-controller="WorkoutPlan" asp-action="Index">
+                                    <i class="fas fa-dumbbell me-2"></i> Workout Plans
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="DietPlan" asp-action="Index">
+                                    <i class="fas fa-utensils me-2"></i> Diet Plans
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" id="manageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                               <i class="fas fa-cogs"></i> Management
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="manageDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Membership" asp-action="Index">
+                                        <i class="fas fa-id-card me-2"></i> Memberships
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="FitnessGoals" asp-action="Index">
+                                        <i class="fas fa-bullseye me-2"></i> Fitness Goals
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Payment" asp-action="Index">
+                                        <i class="fas fa-money-bill-wave me-2"></i> Payments
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Subscription" asp-action="Index">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i> Subscriptions
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    
+                    
+                    <!-- Notification Bell -->
+                    <partial name="_NotificationsPartial" />
+                    <partial name="_ChatPartial" />
+
+                    <li>
+                        <button class="theme-toggle-btn theme-btn" title="Toggle Light/Dark Mode">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <!-- Show profile picture if available -->
-                            @if (!string.IsNullOrEmpty(User.FindFirst("ProfilePicture").Value))
+                            @if (User.HasClaim(c => c.Type == "ProfilePicture"))
                             {
-                                <img src="@User.FindFirst("ProfilePicture").Value" class="profile-img-sm" alt="@User.Identity.Name" />
+                                <img src="@User.FindFirst("ProfilePicture").Value" class="profile-img-sm rounded-circle" style="width: 30px; height: 30px; object-fit: cover;" alt="@User.Identity.Name" />
                             }
                             else
                             {
-                                <i class="fas fa-user-circle"></i>
+                                <i class="fas fa-user-circle fa-lg"></i>
                             }
-                            <span class="user-name">@User.Identity.Name</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <span class="user-name ms-2">@User.Identity.Name</span>
                         </a>
-                        <!-- Dropdown Menu -->
-                        <div class="dropdown-menu" id="userDropdownMenu">
-                            <div class="dropdown-header">
-                                <div class="user-info">
-                                    @if (!string.IsNullOrEmpty(User.FindFirst("ProfilePicture").Value))
-                                    {
-                                        <img src="@User.FindFirst("ProfilePicture").Value" class="profile-img-sm" alt="@User.Identity.Name" />
-                                    }
-                                    <div>
-                                        <strong>@User.Identity.Name</strong>
-                                        <small>@User.FindFirst("Email").Value</small>
-                                        
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <div class="px-3 py-2">
+                                    <div class="d-flex align-items-center">
+                                        @if (User.HasClaim(c => c.Type == "ProfilePicture"))
+                                        {
+                                            <img src="@User.FindFirst("ProfilePicture").Value" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                                        }
+                                        <div>
+                                            <div class="fw-bold">@User.Identity.Name</div>
+                                            <div class="small text-muted">@User.FindFirst(ClaimTypes.Email)?.Value</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a href="@Url.Action("Profile", "Trainer")" class="dropdown-item">
-                                <i class="fas fa-user me-2"></i>My Profile
-                            </a>
-                            <a href="@Url.Action("Settings", "Account")" class="dropdown-item">
-                                <i class="fas fa-cog me-2"></i>Settings
-                            </a>
-                            <a href="@Url.Action("ChangePassword", "Account")" class="dropdown-item">
-                                <i class="fas fa-key me-2"></i>Change Password
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="@Url.Action("Help", "Home")" class="dropdown-item">
-                                <i class="fas fa-question-circle me-2"></i>Help & Support
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="@Url.Action("Logout", "Account")" class="dropdown-item logout-item">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a>
-                        </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Trainer" asp-action="Profile">
+                                    <i class="fas fa-user me-2 text-primary"></i>My Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
+                                    <i class="fas fa-key me-2 text-warning"></i>Change Password
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </nav>

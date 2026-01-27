@@ -1,32 +1,32 @@
-@model GymBLL.ModelVM.User.Member.MemberDietWorkoutPlansVM
+@model GymBLL.ModelVM.Member.MemberDietWorkoutPlansVM
 @{
     ViewData["Title"] = "Member Details";
     bool hasWorkout = ViewBag.HasWorkout != null && (bool)ViewBag.HasWorkout;
     bool hasDiet = ViewBag.HasDiet != null && (bool)ViewBag.HasDiet;
 }
 
-<div class="container" style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
+<div class="member-details-container">
     <!-- Back Button -->
-    <div style="margin-bottom: 1.5rem;">
+    <div class="assignment-header">
         <a href="@Url.Action("Dashboard")" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 
     <!-- Member Profile Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 8px; margin-bottom: 2rem; color: white;">
-        <div style="display: flex; align-items: center; gap: 1.5rem;">
-            <div style="width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; flex-shrink: 0;">
+    <div class="member-profile-header">
+        <div class="member-header-content">
+            <div class="member-header-avatar">
                 @Model.FullName?.Substring(0, 1).ToUpper()
             </div>
-            <div>
-                <h2 style="margin-bottom: 0.5rem; color: white;">@Model.FullName</h2>
-                <div style="opacity: 0.9; margin-bottom: 0.25rem;">
+            <div class="member-header-info">
+                <h2>@Model.FullName</h2>
+                <div class="info-line">
                     <i class="fas fa-envelope"></i> @Model.Email
                 </div>
                 @if (!string.IsNullOrEmpty(Model.Phone))
                 {
-                    <div style="opacity: 0.9;">
+                    <div class="info-line">
                         <i class="fas fa-phone"></i> @Model.Phone
                     </div>
                 }
@@ -34,48 +34,48 @@
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <div class="trainer-view-grid">
         <!-- Left Column -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
 
             <!-- Member Information -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);">
-                <h3 style="color: #5a5c69; margin-bottom: 1rem; border-bottom: 1px solid #e3e6f0; padding-bottom: 0.5rem;">
+            <div class="trainer-card">
+                <h3 class="trainer-card-title">
                     <i class="fas fa-info-circle text-primary"></i> Member Information
                 </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="trainer-card-grid">
                     <div>
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Join Date</div>
-                        <div style="color: #5a5c69; font-weight: 600;">@Model.JoinDate.ToString("MMMM dd, yyyy")</div>
+                        <div class="info-item-label">Join Date</div>
+                        <div class="info-item-value">@Model.JoinDate.ToString("MMMM dd, yyyy")</div>
                     </div>
                     @if (Model.FitnessGoal != null && !string.IsNullOrEmpty(Model.FitnessGoal.GoalName))
                     {
                         <div>
-                            <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Fitness Goal</div>
-                            <div style="color: #5a5c69; font-weight: 600;">@Model.FitnessGoal.GoalName</div>
+                            <div class="info-item-label">Fitness Goal</div>
+                            <div class="info-item-value">@Model.FitnessGoal.GoalName</div>
                         </div>
                     }
                     <div>
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Current Weight</div>
-                        <div style="color: #5a5c69; font-weight: 600;">@Model.CurrentWeight kg</div>
+                        <div class="info-item-label">Current Weight</div>
+                        <div class="info-item-value">@Model.CurrentWeight kg</div>
                     </div>
                     <div>
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Height</div>
-                        <div style="color: #5a5c69; font-weight: 600;">@Model.Height cm</div>
+                        <div class="info-item-label">Height</div>
+                        <div class="info-item-value">@Model.Height cm</div>
                     </div>
                 </div>
 
                 @if (Model.FitnessGoal != null && !string.IsNullOrEmpty(Model.FitnessGoal.GoalDescription))
                 {
                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e3e6f0;">
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Goal Description</div>
+                        <div class="info-item-label">Goal Description</div>
                         <div style="color: #5a5c69; font-size: 0.95rem; line-height: 1.5;">@Model.FitnessGoal.GoalDescription</div>
                     </div>
                 }
             </div>
 
             <!-- Assigned Workout Plans -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);">
+            <div class="trainer-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 style="color: #5a5c69; margin: 0;">
                         <i class="fas fa-dumbbell text-primary"></i> Workout Plans
@@ -105,13 +105,13 @@
                 }
                 else
                 {
-                    <div style="padding: 1rem; background: #f8f9fc; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div class="trainer-plan-item">
+                        <div class="trainer-plan-header">
                             <div>
-                                <div style="font-weight: 600; color: #5a5c69; font-size: 1.1rem;">
+                                <div class="trainer-plan-name">
                                     @Model.WorkoutAssignmentVM?.WorkoutPlan?.Name
                                 </div>
-                                <div style="color: #858796; font-size: 0.9rem; margin-top: 0.25rem;">
+                                <div class="trainer-plan-dates">
                                     <i class="fas fa-calendar-alt"></i>
                                     @Model.WorkoutAssignmentVM?.StartDate.ToString("MMM dd, yyyy") -
                                     @Model.WorkoutAssignmentVM?.EndDate.ToString("MMM dd, yyyy")
@@ -127,8 +127,8 @@
 
                         @if (!string.IsNullOrEmpty(Model.WorkoutAssignmentVM?.Notes))
                         {
-                            <div style="background: white; padding: 0.75rem; border-radius: 4px; margin-top: 1rem; border-left: 3px solid #4e73df;">
-                                <div style="color: #858796; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                            <div class="trainer-notes-box">
+                                <div class="trainer-notes-label">
                                     <i class="fas fa-sticky-note"></i> Trainer Notes:
                                 </div>
                                 <div style="color: #5a5c69; font-size: 0.9rem;">
@@ -141,7 +141,7 @@
             </div>
 
             <!-- Assigned Diet Plans -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);">
+            <div class="trainer-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 style="color: #5a5c69; margin: 0;">
                         <i class="fas fa-utensils text-success"></i> Diet Plans
@@ -171,20 +171,20 @@
                 }
                 else
                 {
-                    <div style="padding: 1rem; background: #f8f9fc; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div class="trainer-plan-item">
+                        <div class="trainer-plan-header">
                             <div>
-                                <div style="font-weight: 600; color: #5a5c69; font-size: 1.1rem;">
+                                <div class="trainer-plan-name">
                                     @Model.DietPlanAssignmentVM?.DietPlan?.Name
                                 </div>
-                                <div style="color: #858796; font-size: 0.9rem; margin-top: 0.25rem;">
+                                <div class="trainer-plan-dates">
                                     <i class="fas fa-calendar-alt"></i>
                                     @Model.DietPlanAssignmentVM?.StartDate.ToString("MMM dd, yyyy") -
                                     @Model.DietPlanAssignmentVM?.EndDate.ToString("MMM dd, yyyy")
                                 </div>
                                 @if (Model.DietPlanAssignmentVM?.DietPlan?.TotalCalories > 0)
                                 {
-                                    <div style="color: #858796; font-size: 0.9rem; margin-top: 0.25rem;">
+                                    <div class="trainer-plan-dates">
                                         <i class="fas fa-fire"></i> @Model.DietPlanAssignmentVM.DietPlan.TotalCalories calories/day
                                     </div>
                                 }
@@ -204,11 +204,15 @@
         <!-- Right Column - Quick Actions & Stats -->
         <div>
             <!-- Quick Actions -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); margin-bottom: 1.5rem;">
-                <h3 style="color: #5a5c69; margin-bottom: 1rem; border-bottom: 1px solid #e3e6f0; padding-bottom: 0.5rem;">
+            <div class="trainer-card" style="margin-bottom: 1.5rem;">
+                <h3 class="trainer-card-title">
                     <i class="fas fa-bolt text-warning"></i> Quick Actions
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <a href="@Url.Action("Index", "Report", new { memberId = Model.Id })" 
+                       class="btn btn-primary btn-block text-left mb-2">
+                        <i class="fas fa-file-alt mr-2"></i> View Progress Report
+                    </a>
                     @if (!hasWorkout)
                     {
                         <a href="@Url.Action("AssignWorkoutPlan", "Trainer", new { memberId = Model.Id })"
@@ -242,8 +246,8 @@
             </div>
 
             <!-- Member Stats -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);">
-                <h3 style="color: #5a5c69; margin-bottom: 1rem; border-bottom: 1px solid #e3e6f0; padding-bottom: 0.5rem;">
+            <div class="trainer-card">
+                <h3 class="trainer-card-title">
                     <i class="fas fa-chart-bar text-info"></i> Member Stats
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
@@ -264,17 +268,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .btn-outline-primary {
-        transition: all 0.3s ease;
-    }
-    .btn-outline-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.65rem;
-    }
-</style>

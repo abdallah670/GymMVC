@@ -1,4 +1,5 @@
 ﻿using GymDAL.Entities.Users;
+using GymDAL.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace GymDAL.Entities.Workout
 
         // Navigation properties
         public virtual WorkoutPlan WorkoutPlan { get; set; }
-        
+       
         public bool ToggleStatus()
         {
            

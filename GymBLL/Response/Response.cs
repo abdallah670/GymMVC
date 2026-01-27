@@ -1,7 +1,7 @@
-﻿
 
-namespace MenoBLL.Response
+
+namespace GymBLL.Response
 {
-    public record Response<T>(T Result,string?ErrorMessage,bool ISHaveErrorOrnNot);
-   
+    public record Response<T>(T Result, string? ErrorMessage, bool ISHaveErrorOrnNot);
+
 }

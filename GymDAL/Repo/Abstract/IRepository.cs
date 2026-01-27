@@ -1,4 +1,6 @@
-﻿public interface IRepository<T> where T : class
+﻿using Microsoft.EntityFrameworkCore.Query;
+
+public interface IRepository<T> where T : class
 {
     Task<T> GetByIdAsync(int id);
     Task<T> GetByIdAsync(string id);
@@ -14,6 +16,8 @@
     Task<int> CountAsync();
     Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
     Task<IEnumerable<T>> GetPagedAsync(int page, int pageSize);
+    IQueryable<T> Get(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null);
 
     // NEW
     Task<bool> SoftDeleteAsync(int id);

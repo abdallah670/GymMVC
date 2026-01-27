@@ -1,0 +1,200 @@
+@{
+    ViewData["Title"] = "Today's Meals";
+    var assignment = ViewBag.Assignment as GymBLL.ModelVM.Nutrition.DietPlanAssignmentVM;
+    var dietPlan = ViewBag.DietPlan as GymBLL.ModelVM.Nutrition.DietPlanVM;
+    var currentDay = (int)ViewBag.CurrentDay;
+    var maxDays = (int)ViewBag.MaxDays;
+    var meals = ViewBag.Meals as List<GymBLL.ModelVM.Nutrition.DietPlanItemVM>;
+
+    var icons = new Dictionary<string, string>
+    {
+        { "Breakfast", "fa-coffee" },
+        { "Lunch", "fa-hamburger" },
+        { "Dinner", "fa-drumstick-bite" },
+        { "Snack", "fa-apple-alt" }
+    };
+    var colors = new Dictionary<string, string>
+    {
+        { "Breakfast", "#FFB347" },
+        { "Lunch", "#77DD77" },
+        { "Dinner", "#6CA0DC" },
+        { "Snack", "#FF6B6B" }
+    };
+}
+
+
+  
+
+
+<div class="plan-assignment-wrapper">
+    <div class="mb-3">
+        @if (User.IsInRole("Member"))
+        {
+            <a href="@Url.Action("Dashboard", "Member")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Member")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Members
+            </a>
+        }
+    </div>
+
+    <!-- Header -->
+    <div class="daily-header-gradient diet">
+        <div>
+            <h2 class="mb-2">
+                <i class="fas fa-utensils me-1"></i> @dietPlan?.Name
+            </h2>
+            <div class="opacity-90 mb-1">
+                <i class="fas fa-fire me-1"></i> @dietPlan?.TotalCalories cal/day |
+                <i class="fas fa-leaf me-1"></i> @dietPlan?.DietType
+            </div>
+            <div class="opacity-75 small">
+                <i class="fas fa-calendar-alt me-1"></i>
+                @assignment?.StartDate.ToString("MMM dd, yyyy") - @assignment?.EndDate.ToString("MMM dd, yyyy")
+            </div>
+        </div>
+        <div class="day-indicator-box">
+            <div class="day-number">Day @currentDay</div>
+            <div class="day-total-of">of @maxDays days</div>
+        </div>
+        @if (User.IsInRole("Member") && meals != null && meals.Any())
+        {
+            <a asp-controller="MealLog" asp-action="Create" asp-route-assignmentId="@assignment?.Id"
+               class="btn btn-success ms-3" style="align-self: center;">
+                <i class="fas fa-plus-circle me-1"></i> Log Today's Meals
+            </a>
+        }
+        </div>
+
+    <!-- Day Navigation -->
+    <div class="day-nav-bar">
+        @if (currentDay > 1)
+        {
+            <a href="@Url.Action("TodayMeal", "DietPlanAssignment", new { assignmentId = assignment?.Id, day = currentDay - 1 })" class="btn btn-secondary">
+                <i class="fas fa-chevron-left me-1"></i> Previous Day
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+
+        <div class="day-selector-group">
+            <label class="text-muted mb-0">Jump to day:</label>
+            <select id="daySelector" onchange="changeDayMeal(this.value)">
+                @for (int i = 1; i <= maxDays; i++)
+                {
+                    <option value="@i" selected="@(i == currentDay)">Day @i</option>
+                }
+            </select>
+        </div>
+
+        @if (currentDay < maxDays)
+        {
+            <a href="@Url.Action("TodayMeal", "DietPlanAssignment", new { assignmentId = assignment?.Id, day = currentDay + 1 })" class="btn btn-secondary">
+                Next Day <i class="fas fa-chevron-right ms-1"></i>
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+    </div>
+
+    <!-- Meals List -->
+    <div class="daily-content-box">
+        <h3 class="daily-content-title">
+            <i class="fas fa-utensils me-1"></i> Meals for Day @currentDay
+        </h3>
+
+        @if (meals == null || !meals.Any())
+        {
+            <div class="no-data-placeholder">
+                <i class="fas fa-pizza-slice"></i>
+                <h4>No Meals Planned</h4>
+                <p>No meals scheduled for this day.</p>
+            </div>
+        }
+        else
+        {
+            <div class="daily-items-list">
+                @foreach (var mealType in meals.Select(m => m.MealType).Distinct())
+                {
+                    var typeMeals = meals.Where(m => m.MealType == mealType).ToList();
+                    var iconClass = icons.ContainsKey(mealType) ? icons[mealType] : "fa-utensil-spoon";
+                    var colorHex = colors.ContainsKey(mealType) ? colors[mealType] : "#888";
+
+                    <div class="meal-group-container mb-4">
+                        <div class="meal-type-group" style="border-left: 4px solid @colorHex;">
+                            <h4 class="meal-type-title">
+                                <i class="fas @iconClass" style="color: @colorHex;"></i> @mealType
+                            </h4>
+
+                            @foreach (var meal in typeMeals)
+                            {
+                                <div class="meal-card-item">
+                                    <div class="meal-card-header">
+                                        <h5 class="meal-name">@meal.MealName</h5>
+                                        <span class="cal-badge" style="background: @colorHex;">
+                                            @meal.Calories cal
+                                        </span>
+                                    </div>
+
+                                    <div class="macro-stats">
+                                        @if (!string.IsNullOrEmpty(meal.ProteinMacros))
+                                        {
+                                            <span><i class="fas fa-drumstick-bite me-1"></i> Protein: @meal.ProteinMacros</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(meal.CarbMacros))
+                                        {
+                                            <span><i class="fas fa-bread-slice me-1"></i> Carbs: @meal.CarbMacros</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(meal.FatMacros))
+                                        {
+                                            <span><i class="fas fa-cheese me-1"></i> Fats: @meal.FatMacros</span>
+                                        }
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(meal.Ingredients))
+                                    {
+                                        <div class="meal-ingredients-box">
+                                            <div class="meal-ingredients-label">
+                                                <i class="fas fa-list me-1"></i> Ingredients:
+                                            </div>
+                                            <div class="text-dark small">@meal.Ingredients</div>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(meal.Notes))
+                                    {
+                                        <div class="meal-notes-text">
+                                            <i class="fas fa-info-circle me-1"></i> @meal.Notes
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Daily Totals -->
+            var totalCalories = meals.Sum(m => m.Calories);
+            <div class="daily-total-footer">
+                <h4 class="mb-0">Daily Total: @totalCalories calories</h4>
+            </div>
+        }
+    </div>
+</div>
+
+
+    <script>
+        function changeDayMeal(day) {
+            window.location.href = '@Url.Action("TodayMeal", "DietPlanAssignment")?assignmentId=@assignment?.Id&day=' + day;
+        }
+    </script>
+

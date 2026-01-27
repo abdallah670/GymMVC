@@ -1,0 +1,196 @@
+@model GymBLL.ModelVM.Workout.WorkoutLogVM
+
+@{
+    ViewData["Title"] = "Log Workout";
+    var dayNumber = (int)ViewBag.DayNumber;
+    var dayName = ViewBag.DayName as string;
+    var assignment = ViewBag.Assignment as GymBLL.ModelVM.Workout.WorkoutAssignmentVM;
+}
+
+<style>
+    .log-workout-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    .log-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+    .log-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .exercise-log-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    .exercise-log-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .exercise-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+    .exercise-name i {
+        color: var(--bs-primary);
+        margin-right: 0.5rem;
+    }
+    .log-input-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+    .log-input-item label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.5rem;
+    }
+    .log-input-item input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        color: #fff;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+    .log-input-item input:focus {
+        outline: none;
+        border-color: var(--bs-primary);
+        background: rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    .log-input-item input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    .workout-summary-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .summary-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 1rem;
+    }
+    .btn-log-workout {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        color: white;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-log-workout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(56, 239, 125, 0.3);
+    }
+</style>
+
+<div class="log-workout-wrapper">
+    <div class="mb-3">
+        <a asp-controller="WorkoutPlanAssignment" asp-action="ViewTodayWorkout" asp-route-day="@dayNumber" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Workout
+        </a>
+    </div>
+
+    <div class="log-header">
+        <h1><i class="fas fa-clipboard-check me-2"></i>Log Your Workout</h1>
+        <p class="opacity-75 mb-0">
+            <i class="fas fa-calendar-day me-1"></i> @dayName • @Model.WorkoutPlanName
+        </p>
+    </div>
+
+    <form asp-controller="WorkoutLog" asp-action="Create" method="post">
+        <input type="hidden" asp-for="WorkoutPlanId" />
+        <input type="hidden" asp-for="WorkoutPlanName" />
+
+        @for (int i = 0; i < Model.Entries.Count; i++)
+        {
+            <div class="exercise-log-card">
+                <h4 class="exercise-name">
+                    <i class="fas fa-dumbbell"></i>
+                    @Model.Entries[i].ExerciseName
+                </h4>
+                
+                <input type="hidden" name="Entries[@i].WorkoutPlanItemId" value="@Model.Entries[i].WorkoutPlanItemId" />
+                <input type="hidden" name="Entries[@i].ExerciseName" value="@Model.Entries[i].ExerciseName" />
+                
+                <div class="log-input-group">
+                    <div class="log-input-item">
+                        <label>Sets (Target: @Model.Entries[i].TargetSets)</label>
+                        <input type="number" 
+                               name="Entries[@i].SetsPerformed" 
+                               value="@Model.Entries[i].SetsPerformed" 
+                               min="1" max="20"
+                               placeholder="e.g. 3" />
+                    </div>
+                    <div class="log-input-item">
+                        <label>Reps (Target: @Model.Entries[i].TargetReps)</label>
+                        <input type="text" 
+                               name="Entries[@i].RepsPerformed" 
+                               value="@Model.Entries[i].RepsPerformed"
+                               placeholder="e.g. 12, 10, 8" />
+                    </div>
+                    <div class="log-input-item">
+                        <label>Weight Lifted</label>
+                        <input type="text" 
+                               name="Entries[@i].WeightLifted" 
+                               value="@Model.Entries[i].WeightLifted"
+                               placeholder="e.g. 60kg, 55kg, 50kg" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="workout-summary-card">
+            <h5 class="summary-title"><i class="fas fa-clock me-2"></i>Workout Summary</h5>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="log-input-item">
+                        <label>Total Duration (minutes)</label>
+                        <input type="number" asp-for="DurationMinutes" min="1" max="300" placeholder="e.g. 45" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="log-input-item">
+                        <label>Notes (optional)</label>
+                        <input type="text" asp-for="Notes" placeholder="How did it feel?" />
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-log-workout">
+                <i class="fas fa-check-circle me-2"></i> Log Workout
+            </button>
+        </div>
+    </form>
+</div>

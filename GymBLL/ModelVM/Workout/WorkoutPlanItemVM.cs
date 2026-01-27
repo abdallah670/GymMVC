@@ -9,7 +9,7 @@ namespace GymBLL.ModelVM.Workout
         [Required(ErrorMessage = "Workout plan is required")]
         public int WorkoutPlanId { get; set; }
 
-      
+
 
         [Required(ErrorMessage = "Day number is required")]
         [Range(1, 7, ErrorMessage = "Day must be between 1 and 7")]

@@ -1,0 +1,80 @@
+@model GymBLL.ModelVM.Workout.WorkoutAssignmentVM
+
+@{
+    ViewData["Title"] = "Workout Assignment Details";
+    var member = ViewBag.Member as GymBLL.ModelVM.Member.MemberVM;
+    var memberId = ViewBag.MemberId as string;
+    var returnUrl = ViewBag.ReturnUrl as string;
+}
+
+<div class="assignment-container">
+    <div class="assignment-header">
+        @if (!string.IsNullOrEmpty(returnUrl))
+        {
+            <a href="@returnUrl" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Member" asp-action="Details" asp-route-id="@memberId" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Member
+            </a>
+        }
+    </div>
+
+    <div class="assignment-card">
+        <div class="assignment-title-section">
+            <h2>
+                <i class="fas fa-dumbbell text-primary"></i>
+                Workout Assignment Details
+            </h2>
+            <p class="assignment-subtitle">Assignment for <strong>@member?.FullName</strong></p>
+        </div>
+
+        <div class="assignment-grid">
+            <div class="assignment-info-block">
+                <div class="assignment-info-label">Workout Plan</div>
+                <div class="assignment-info-value">@Model.WorkoutPlan?.Name</div>
+                @if (Model.WorkoutPlan?.DurationWeeks != null)
+                {
+                    <div class="assignment-info-subtext">Duration: @Model.WorkoutPlan.DurationWeeks weeks</div>
+                }
+            </div>
+
+            <div class="assignment-columns">
+                <div class="assignment-info-block">
+                    <div class="assignment-info-label">Start Date</div>
+                    <div class="assignment-info-value">@Model.StartDate.ToString("MMMM dd, yyyy")</div>
+                </div>
+
+                <div class="assignment-info-block">
+                    <div class="assignment-info-label">End Date</div>
+                    <div class="assignment-info-value">@Model.EndDate.ToString("MMMM dd, yyyy")</div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="assignment-info-block">
+                    <div class="assignment-info-label">Notes</div>
+                    <div class="assignment-info-value">@Model.Notes</div>
+                </div>
+            }
+
+            <div class="assignment-info-block">
+                <div class="assignment-info-label">Status</div>
+                <span class="badge @(Model.IsActive ? "badge-success" : "badge-secondary")">
+                    @(Model.IsActive ? "Active" : "Inactive")
+                </span>
+            </div>
+        </div>
+
+        <div class="assignment-actions">
+            <a asp-controller="WorkoutPlanAssignment" asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Assignment
+            </a>
+        </div>
+    </div>
+</div>
+

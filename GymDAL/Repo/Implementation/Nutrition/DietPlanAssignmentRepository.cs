@@ -2,7 +2,7 @@ using AutoMapper;
 using GymDAL.Repo.Abstract.Nutrition;
 using System.Linq.Expressions;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Nutrition
 {
     public class DietPlanAssignmentRepository : Repository<DietPlanAssignment>, IDietPlanAssignmentRepository
     {
@@ -26,6 +26,19 @@ namespace GymDAL.Repo.Implementation
             }
         }
 
-
+        public async Task<DietPlanAssignment> GetDetailed(int? dietPlanAssignmentId)
+        {
+            try
+            {
+                return await _context.DietPlanAssignments
+                    .Where(a => a.IsActive && a.Id == dietPlanAssignmentId)
+                    .Include(a => a.DietPlan)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error fetching detailed diet assignment", ex);
+            }
+        }
     }
 }

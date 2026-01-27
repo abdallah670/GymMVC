@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using GymDAL.Entities.Core;
+
 namespace GymDAL.Entities.Workout
 {
     public class WorkoutPlanItem : BaseEntity

@@ -1,0 +1,88 @@
+/* Assignment Details & Management Styles */
+
+.assignment-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.assignment-header {
+  margin-bottom: 1.5rem;
+}
+
+.assignment-card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e3e6f0;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  padding: 2rem;
+}
+
+.assignment-title-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.assignment-title-section h2 {
+  color: #5a5c69;
+  margin-bottom: 0.5rem;
+}
+
+.assignment-subtitle {
+  color: #858796;
+}
+
+.assignment-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.assignment-info-block {
+  padding: 1rem;
+  background: #f8f9fc;
+  border-radius: 8px;
+}
+
+.assignment-info-label {
+  font-weight: 600;
+  color: #5a5c69;
+  margin-bottom: 0.5rem;
+}
+
+.assignment-info-value {
+  color: #858796;
+  font-size: 1.1rem;
+}
+
+.assignment-info-subtext {
+  color: #858796;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.assignment-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.assignment-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* Badge overrides for assignment context if needed, 
+   otherwise rely on components.css */
+.badge-assignment {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .assignment-columns {
+    grid-template-columns: 1fr;
+  }
+}

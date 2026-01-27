@@ -1,17 +1,23 @@
-﻿using GymBLL.ModelVM.AccountVM;
-using GymBLL.ModelVM.User.Member;
-using GymBLL.ModelVM.User.Trainer;
-using GymBLL.Service.Abstract;
+using GymBLL.ModelVM.Identity;
+using GymBLL.ModelVM.Member;
+using GymBLL.ModelVM.Trainer;
+using GymBLL.Service.Abstract.Identity;
 using GymBLL.Service.Implementation;
 using GymDAL.Entities.Users;
-using GymWeb.Extensions;
-using MenoBLL.ModelVM.AccountVM;
-using MenoBLL.Service.Abstract;
+using GymPL.Extensions;
+using GymBLL.ModelVM;
+using GymBLL.ModelVM.Identity;
+using GymBLL.Service.Abstract.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GymBLL.Service.Abstract.Trainer;
+using GymBLL.Service.Abstract.Member;
+using GymBLL.Service.Abstract;
+using GymBLL.Service.Abstract.Financial;
+using GymBLL.ModelVM.Financial;
 
 namespace GymPL.Controllers
 {
@@ -22,12 +28,19 @@ namespace GymPL.Controllers
         private readonly IMemberService memberService;
 
 
-        public AccountController(IAccountService _accountService, ITrainerService trainerService, IMemberService memberService)
+        private readonly ITempRegistrationService _tempRegistrationService;
+        private readonly IStripePaymentService _stripePaymentService;
+        private readonly IMembershipService _membershipService;
+
+
+        public AccountController(IAccountService _accountService, ITrainerService trainerService, IMemberService memberService, ITempRegistrationService tempRegistrationService, IStripePaymentService stripePaymentService, IMembershipService membershipService)
         {
             accountService = _accountService;
             this.trainerService = trainerService;
             this.memberService = memberService;
-
+            _tempRegistrationService = tempRegistrationService;
+            _stripePaymentService = stripePaymentService;
+            _membershipService = membershipService;
         }
 
         public IActionResult Index()
@@ -64,9 +77,7 @@ namespace GymPL.Controllers
                         else if (user.Role== "Trainer")
                         {
                             var trainer =  await trainerService.GetTrainerByEmailAsync(model.Email);
-                            // DEBUG: Check trainer data
-                            Console.WriteLine($"Trainer FullName: {trainer.Result.FullName}");
-                            Console.WriteLine($"Trainer Email: {trainer.Result.Email}");
+                         
                             await AddTrainerClaimsAsync(trainer.Result);
                          
                             return RedirectToAction("Dashboard", "Trainer");
@@ -92,14 +103,7 @@ namespace GymPL.Controllers
 
             return View(model);
         }
-        public IActionResult Settings()
-        {
-            return View();
-        }
-        public IActionResult SaveSettings()
-        {
-            return View();
-        }
+        
         [HttpGet]
         [Authorize]
         public IActionResult ChangePassword()
@@ -213,7 +217,6 @@ namespace GymPL.Controllers
                 TempData["Error"] = "Invalid reset link.";
                 return RedirectToAction("Login");
             }
-
             var model = new ResetPasswordVM
             {
                 Email = email,
@@ -273,6 +276,188 @@ namespace GymPL.Controllers
             return RedirectToAction("Index", "Home");
         }
         
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult RegisterStep1()
+        {
+            return View(new TempRegistrationVM());
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterStep1(TempRegistrationVM model)
+        {
+            if (string.IsNullOrEmpty(model.Email))
+            {
+                ModelState.AddModelError("Email", "Email is required");
+                return View(model);
+            }
+
+            var result = await _tempRegistrationService.InitiateregistrationAsync(model.Email);
+            if (result.ISHaveErrorOrnNot)
+            {
+                ModelState.AddModelError("", result.ErrorMessage);
+                return View(model);
+            }
+
+            // Redirect to OTP verification page with Email in TempData or query
+            TempData["RegistrationEmail"] = model.Email;
+            return RedirectToAction("VerifyOtp");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult VerifyOtp()
+        {
+            var email = TempData["RegistrationEmail"] as string;
+            // If email is lost, maybe redirect to Step 1 or let user enter it?
+            if (string.IsNullOrEmpty(email))
+            
+               return RedirectToAction("RegisterStep1");
+
+
+            return View(new TempRegistrationVM { Email = email });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyOtp(string email, string otp)
+        {
+            var result = await _tempRegistrationService.VerifyOtpAsync(email, otp);
+            if (result.ISHaveErrorOrnNot)
+            {
+                ModelState.AddModelError("", result.ErrorMessage);
+                return View(new TempRegistrationVM { Email = email });
+            }
+
+            // OTP Verified -> Go to Step 2
+            return RedirectToAction("RegisterStep2", new { email = email });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterStep2(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("RegisterStep1");
+            
+            var existing = await _tempRegistrationService.GetByEmailAsync(email);
+            if (existing.Result == null) return RedirectToAction("RegisterStep1");
+
+            // Check if OTP verified? Service handles logic mostly, but good to check status
+           // if (!existing.Result.IsOtpVerified) return RedirectToAction("VerifyOtp", new { email = email });
+
+            return View(existing.Result);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterStep2(TempRegistrationVM model)
+        {
+             // Validate model
+             if (!ModelState.IsValid) return View(model);
+
+             var result = await _tempRegistrationService.UpdateDetailsAsync(model);
+             if (result.ISHaveErrorOrnNot)
+             {
+                 ModelState.AddModelError("", result.ErrorMessage);
+                 return View(model);
+             }
+
+             // If success -> Go to Pricing/Membership selection (or directly complete if pricing is next)
+             // For now, assume Step 3 is Membership Selection
+             return RedirectToAction("MembershipSelection", new { email = model.Email });
+        }
+        
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> MembershipSelection(string email)
+        {
+              ViewBag.Email = email;
+              var memberships = await _membershipService.GetActiveAsync();
+              if (memberships.ISHaveErrorOrnNot)
+              {
+                   ModelState.AddModelError("", "Failed to load membership plans.");
+                   return View(new List<MembershipVM>());
+              }
+              return View(memberships.Result);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MembershipSelection(string email, int membershipId)
+        {
+             // Get temp registration
+             var tempReg = await _tempRegistrationService.GetByEmailAsync(email);
+             if (tempReg.Result == null) return RedirectToAction("RegisterStep1");
+
+             var successUrl = Url.Action("PaymentSuccess", "Account", null, Request.Scheme);
+             var cancelUrl = Url.Action("MembershipSelection", "Account", new { email = email }, Request.Scheme);
+
+             var checkoutUrl = await _stripePaymentService.CreateCheckoutSessionAsync(
+                 email, 
+                 membershipId, 
+                 tempReg.Result.Id, 
+                 successUrl, 
+                 cancelUrl);
+
+             return Redirect(checkoutUrl);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult PaymentSuccess(string session_id)
+        {
+            // Display success message. Actual account creation happens via webhook.
+            ViewBag.SessionId = session_id;
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GoogleLogin(string returnUrl = null)
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Account", new { returnUrl });
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, "Google");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GoogleResponse(string returnUrl = null)
+        {
+            var info = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+            if (info?.Principal == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var email = System.Security.Claims.PrincipalExtensions.FindFirstValue(info.Principal, ClaimTypes.Email);
+            var name = System.Security.Claims.PrincipalExtensions.FindFirstValue(info.Principal, ClaimTypes.Name);
+
+            // Check if user already exists
+            var existingMember = await memberService.GetMemberByEmailAsync(email);
+            if (existingMember.Result != null)
+            {
+                // User exists, sign them in
+                await AddMemberClaimsAsync(existingMember.Result);
+                return RedirectToAction("Dashboard", "Member");
+            }
+
+            // New user - start registration flow with pre-filled email
+            var result = await _tempRegistrationService.InitiateregistrationAsync(email);
+            if (!result.ISHaveErrorOrnNot)
+            {
+                // Mark OTP as verified since Google already verified the email
+                await _tempRegistrationService.VerifyOtpAsync(email, result.Result.OtpCode);
+            }
+
+            return RedirectToAction("RegisterStep2", new { email = email });
+        }
 
         private async Task AddTrainerClaimsAsync(TrainerVM result)
         {

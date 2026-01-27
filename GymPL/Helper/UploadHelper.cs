@@ -56,14 +56,13 @@ namespace GymPL.Services
 
         public void DeleteProfilePicture(string imagePath)
         {
-            if (!string.IsNullOrEmpty(imagePath) && !imagePath.StartsWith("/"))
-            {
+            
                 var fullPath = Path.Combine(_environment.WebRootPath, imagePath.TrimStart('/'));
                 if (File.Exists(fullPath))
                 {
                     File.Delete(fullPath);
                 }
-            }
+            
         }
 
         public string GetProfilePicturePath(string imageName)

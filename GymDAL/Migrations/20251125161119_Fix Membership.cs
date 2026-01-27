@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,20 +11,13 @@ namespace GymDAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "HasWorkoutPlan",
-                table: "Memberships",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            // Neuteralized to baseline against existing database
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "HasWorkoutPlan",
-                table: "Memberships");
+            // Neuteralized to baseline against existing database
         }
     }
 }

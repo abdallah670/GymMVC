@@ -1,6 +1,6 @@
 using GymBLL.ModelVM;
 using GymBLL.ModelVM.Nutrition;
-using GymBLL.Service.Abstract;
+using GymBLL.Service.Abstract.Nutrition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -41,7 +41,7 @@ namespace GymPL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create(int returnPage = 1)
+        public IActionResult Create(int returnPage = 1, string returnUrl = null)
         {
             var model = new DietPlanVM
             {
@@ -50,12 +50,13 @@ namespace GymPL.Controllers
             };
 
             ViewData["ReturnPage"] = returnPage;
+            ViewData["ReturnUrl"] = returnUrl;
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DietPlanVM model, int returnPage = 1)
+        public async Task<IActionResult> Create(DietPlanVM model, int returnPage = 1, string returnUrl = null)
         {
             // Clear validation for DietPlanId in items - it will be set by the service
             foreach (var key in ModelState.Keys.Where(k => k.Contains("DietPlanItemsVM") && k.Contains("DietPlanId")).ToList())
@@ -66,6 +67,7 @@ namespace GymPL.Controllers
             if (!ModelState.IsValid)
             {
                 ViewData["ReturnPage"] = returnPage;
+                ViewData["ReturnUrl"] = returnUrl;
                 return View(model);
             }
 
@@ -74,11 +76,12 @@ namespace GymPL.Controllers
             {
                 TempData["Error"] = response.ErrorMessage;
                 ViewData["ReturnPage"] = returnPage;
+                ViewData["ReturnUrl"] = returnUrl;
                 return View(model);
             }
 
             TempData["Success"] = "Diet Plan created successfully!";
-            return RedirectToAction(nameof(Index), returnPage);
+            return RedirectToAction(nameof(Index), new { page = returnPage });
         }
 
         [HttpGet]

@@ -1,18 +1,19 @@
-﻿using AutoMapper;
-using GymBLL.ModelVM.User.AppUser;
-using GymBLL.ModelVM.User.Member;
-using GymBLL.ModelVM.User.Trainer;
+using AutoMapper;
+using GymBLL.ModelVM.Identity;
+using GymBLL.ModelVM.Member;
+using GymBLL.ModelVM.Trainer;
 using GymBLL.ModelVM.Workout;
 using GymBLL.ModelVM.Nutrition;
-using GymBLL.ModelVM.Notification;
-using GymBLL.ModelVM.External;
+using GymBLL.ModelVM.Communication;
+using GymBLL.ModelVM.Financial;
 using GymDAL.Entities.Users;
 using GymDAL.Entities.Workout;
 using GymDAL.Entities.Nutrition;
-using GymDAL.Entities.Progress_and_Notification;
-using GymDAL.Entities.External;
-using GymDAL.Entities;
-using MenoBLL.ModelVM.AccountVM;
+using GymDAL.Entities.Communication;
+using GymDAL.Entities.Financial;
+using GymDAL.Entities.Core;
+using GymBLL.ModelVM.Identity;
+using GymBLL.ModelVM;
 
 namespace GymBLL.Mappper
 {
@@ -24,13 +25,16 @@ namespace GymBLL.Mappper
             CreateMap<RegisterUserVM, ApplicationUser>().ReverseMap();
 
             // Member mappings
-            CreateMap<MemberDetailsVM, Member>().ReverseMap();
-            
+          
+            CreateMap<TempRegistrationVM, TempRegistration>().ReverseMap();
+
             CreateMap<Member, MemberVM>().ReverseMap();
             CreateMap<RegisterUserVM, Member>();
             CreateMap<MemberVM, RegisterUserVM>();
-            CreateMap<MemberDetailsVM, RegisterUserVM>().ReverseMap();
+           
             CreateMap<Member, MemberProfileVM>().ReverseMap();
+            CreateMap<MemberProfileVM, RegisterUserVM>()
+                .ForMember(dest => dest.ConfirmPassword, opt => opt.MapFrom(src => src.Password));
 
             // Trainer mappings
             CreateMap<TrainerVM, Trainer>().ReverseMap();
@@ -55,6 +59,12 @@ namespace GymBLL.Mappper
             CreateMap<Subscription, SubscriptionDetailsVM>().ReverseMap();
             CreateMap<Membership, MembershipVM>().ReverseMap();
             CreateMap<FitnessGoalsVM, FitnessGoals>().ReverseMap();
+            CreateMap<ChatMessage, ChatMessageVM>()
+                .ForMember(dest => dest.SenderName, opt => opt.MapFrom(src => src.Sender.FullName))
+                .ForMember(dest => dest.ReceiverName, opt => opt.MapFrom(src => src.Receiver.FullName))
+                .ForMember(dest => dest.SenderPicture, opt => opt.MapFrom(src => src.Sender.ProfilePicture))
+                .ForMember(dest => dest.ReceiverPicture, opt => opt.MapFrom(src => src.Receiver.ProfilePicture))
+                .ReverseMap();
 
         }
     }

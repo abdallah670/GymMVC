@@ -1,36 +1,52 @@
-﻿
-   
+@{
+    var reviews = ViewBag.Reviews as List<TrainerReviewVM>;
+    var reviewscount = (int)ViewBag.ReviewsCount ;
+}
+
 
     <!-- Hero Section -->
-    <section class="hero" id="Home">
+ <section class="hero" id="Home">
         <div class="hero-content">
-            <h1>Transform Your Body, Transform Your Life</h1>
-            <p>Join our state-of-the-art fitness center with expert trainers, cutting-edge equipment, and a supportive community to help you achieve your fitness goals.</p>
+            <div class="hero-badge">BEST FITNESS CHOICE 2025</div>
+            <h1>Transform Your <span>Body</span>, Transform Your <span>Life</span></h1>
+            <p>Experience the ultimate fitness journey with elite coaching, high-tech facilities, and a community that pushes you further.</p>
             <div class="hero-buttons">
-                <a href="#" class="btn btn-primary"><i class="fas fa-play-circle"></i> Start Your Journey</a>
-                <a href="#" class="btn btn-secondary"><i class="fas fa-video"></i> Virtual Tour</a>
+                <a href="#membership" class="btn btn-primary"><i class="fas fa-bolt"></i> Start Journey</a>
+                <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="btn btn-secondary glass-btn"><i class="fas fa-play-circle"></i> Watch Video</a>
             </div>
-            <div class="stats">
-                <div class="stat">
-                    <span class="stat-number">500+</span>
-                    <span class="stat-label">Happy Members</span>
+            <div class="stats-glass">
+                <div class="stat-item">
+                    <div class="stat-val">500+</div>
+                    <div class="stat-lab">Active Members</div>
                 </div>
-                <div class="stat">
-                    <span class="stat-number">10 Year</span>
-                    <span class="stat-label">Experienced Trainer</span>
+                <div class="stat-item">
+                    <div class="stat-val">1:1</div>
+                    <div class="stat-lab">Expert Coaching</div>
                 </div>
-                <div class="stat">
-                    <span class="stat-number">50+</span>
-                    <span class="stat-label">Transformations</span>
+                <div class="stat-item">
+                    <div class="stat-val">50+</div>
+                    <div class="stat-lab">Daily Classes</div>
                 </div>
             </div>
         </div>
-        <div class="hero-image">
-            <!-- This would be an image in a real implementation -->
-            
-            <div style="border-color:aqua; width:100%;height:600px;background:linear-gradient(135deg, var(--main-color), var(--secondary-color));display:flex;align-items:center;justify-content:center;color:var(--accent-ink);font-size:1.5rem;">
-               <img src="~/Images/Cbum.jpg" alt="Cbum" style=""/>
-
+        <div class="hero-visual">
+            <div class="hero-image-stack">
+                <img src="/Images/Cbum.jpg" alt="Elite Fitness" class="main-img">
+                <div class="img-overlay"></div>
+                <div class="glass-card floating-1">
+                    <i class="fas fa-heartbeat text-danger"></i>
+                    <div>
+                        <strong>Heart Rate</strong>
+                        <span>120 BPM</span>
+                    </div>
+                </div>
+                <div class="glass-card floating-2">
+                    <i class="fas fa-fire text-warning"></i>
+                    <div>
+                        <strong>Calories</strong>
+                        <span>850 kcal</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -181,28 +197,94 @@
             <p class="section-subtitle">Hear from our members who have transformed their lives with MenoPro.</p>
         </div>
         <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <p class="testimonial-text">I've tried many gyms before, but MenoPro is different. The trainers actually care about your progress and the community is so supportive. I've lost 30 pounds in 4 months!</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">JS</div>
-                    <div class="author-info">
-                        <h4>Jessica Smith</h4>
-                        <p>Member for 2 years</p>
+            @if (reviewscount > 0)
+            {
+                foreach(var review in reviews)
+                {
+                var joinDate = review.JoinDate;
+                var timeSpan = DateTime.Now - joinDate.Value;
+                var years = (int)(timeSpan.TotalDays / 365.25);
+                var months = (int)((timeSpan.TotalDays % 365.25) / 30.44);
+
+                var memberDurationText = "";
+                if (years > 0 && months > 0)
+                {
+                    memberDurationText = $"Member for {years} {(years == 1 ? "year" : "years")} {months} {(months == 1 ? "month" : "months")}";
+                }
+                else if (years > 0)
+                {
+                    memberDurationText = $"Member for {years} {(years == 1 ? "year" : "years")}";
+                }
+                else if (months > 0)
+                {
+                    memberDurationText = $"Member for {months} {(months == 1 ? "month" : "months")}";
+                }
+                else
+                {
+                    memberDurationText = "New member";
+                }
+
+
+                <div class="testimonial-card">
+                    <div class="testimonial-author">
+                        @if (!string.IsNullOrEmpty(review.MemberPicture))
+                        {
+                            <img src="@review.MemberPicture"
+                                 class="rounded-circle w-100 h-100 object-fit-cover border border-gray-600"
+                                 style="min-width: 10px; min-height: 10px; max-width:60px;max-height:60px;"
+                                 alt="@review.MemberName">
+                        }
+                        else
+                        {
+                            var firstlettername = @review.MemberName[0];
+                            var secondlettername = @review.MemberName.Split(" ")[1][0];
+                            <div class="author-avatar">@firstlettername+@secondlettername</div>
+                        }
+                      
+                        <div class="author-info">
+                            <h4>@review.MemberName</h4>
+                            <p>@memberDurationText</p>
+                        </div>
                     </div>
+                    <p class="testimonial-text">@review.Comment</p>
+
+                    </div>
+                
+                }
+              
+            
+            }
+        @if (reviewscount == 0)
+        {
+            <div class="testimonial-card">
+                <div class="testimonial-author">
+                <div class="author-avatar">JS</div>
+                <div class="author-info">
+                    <h4>Jessica Smith</h4>
+                    <p>Member for 2 years</p>
                 </div>
             </div>
+                <p class="testimonial-text">I've tried many gyms before, but MenoPro is different. The trainer actually cares about your progress and the community is so supportive. I've lost 30 pounds in 4 months!</p>
+               
+            </div>
+        }
+        @if (reviewscount == 1 || reviewscount == 0)
+        {
             <div class="testimonial-card">
+            <div class="testimonial-author">
+                <div class="author-avatar">MR</div>
+                <div class="author-info">
+                    <h4>Michael Rodriguez</h4>
+                    <p>Member for 1 year</p>
+                </div>
+            </div>
                 <p class="testimonial-text">The 24/7 access is a game-changer for my busy schedule. I can come in early before work or late at night. The equipment is always clean and well-maintained.</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">MR</div>
-                    <div class="author-info">
-                        <h4>Michael Rodriguez</h4>
-                        <p>Member for 1 year</p>
-                    </div>
-                </div>
+               
             </div>
+          }
+        @if (reviewscount == 2 || reviewscount == 1)
+        {
             <div class="testimonial-card">
-                <p class="testimonial-text">I was nervous about joining a gym, but the staff made me feel welcome from day one. The small group classes are perfect - I've made friends while getting fit!</p>
                 <div class="testimonial-author">
                     <div class="author-avatar">SK</div>
                     <div class="author-info">
@@ -210,9 +292,13 @@
                         <p>Member for 6 months</p>
                     </div>
                 </div>
+                <p class="testimonial-text">I was nervous about joining a gym, but the trainer made me feel welcome from day one. The small group classes are perfect - I've made friends while getting fit!</p>
+
             </div>
-        </div>
-    </section>
+            
+        }
+    </div>
+</section>
 
     <!-- Membership Section -->
     <section class="membership" id="membership">
@@ -221,113 +307,91 @@
             <p class="section-subtitle">Flexible membership options designed to fit your lifestyle and budget.</p>
         </div>
         <div class="pricing-cards">
-            <div class="pricing-card">
-                <h3 class="plan-name">Basic</h3>
-                <div class="plan-price">$29<span>/mo</span></div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Gym Access</li>
-                    <li><i class="fas fa-check"></i> Locker Room</li>
-                    <li><i class="fas fa-times"></i> Group Classes</li>
-                    <li><i class="fas fa-times"></i> Personal Trainer</li>
-                    <li><i class="fas fa-times"></i> Fitness Assessment</li>
-                </ul>
-            <a href="#" class="btn btn-secondary get-started-btn" style="width:100%;text-align:center;"
-               onclick="highlightJoinNow()">
-                Get Started
-            </a>
-            </div>
-            <div class="pricing-card popular">
-                <div class="popular-badge">MOST POPULAR</div>
-                <h3 class="plan-name">Pro</h3>
-                <div class="plan-price">$49<span>/mo</span></div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Gym Access</li>
-                    <li><i class="fas fa-check"></i> Locker Room</li>
-                    <li><i class="fas fa-check"></i> All Group Classes</li>
-                    <li><i class="fas fa-check"></i> 1 PT Session/Month</li>
-                    <li><i class="fas fa-times"></i> Fitness Assessment</li>
-                </ul>
-            <a href="#" class="btn btn-secondary get-started-btn" style="width:100%;text-align:center;"
-               onclick="highlightJoinNow()">
-                Get Started
-            </a>
-            </div>
-            <div class="pricing-card">
-                <h3 class="plan-name">Elite</h3>
-                <div class="plan-price">$79<span>/mo</span></div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Gym Access</li>
-                    <li><i class="fas fa-check"></i> Locker Room</li>
-                    <li><i class="fas fa-check"></i> All Group Classes</li>
-                    <li><i class="fas fa-check"></i> 4 PT Sessions/Month</li>
-                    <li><i class="fas fa-check"></i> Fitness Assessment</li>
-                </ul>
-            <a href="#" class="btn btn-secondary get-started-btn" style="width:100%;text-align:center;"
-               onclick="highlightJoinNow()">
-                Get Started
-            </a>
-            </div>
+            @if (ViewBag.Memberships != null && (ViewBag.Memberships as List<GymBLL.ModelVM.Financial.MembershipVM>).Any())
+            {
+                var memberships = (ViewBag.Memberships as List<GymBLL.ModelVM.Financial.MembershipVM>).OrderBy(m => m.Price).ToList();
+                foreach (var plan in memberships)
+                {
+                    bool isPopular = plan.MembershipType.Contains("Pro", StringComparison.OrdinalIgnoreCase) || 
+                                     plan.MembershipType.Contains("Popular", StringComparison.OrdinalIgnoreCase);
+                                     
+                    <div class="pricing-card @(isPopular ? "popular" : "")">
+                        @if (isPopular)
+                        {
+                            <div class="popular-badge">MOST POPULAR</div>
+                        }
+                        <h3 class="plan-name">@plan.MembershipType</h3>
+                        <div class="plan-price">$@plan.Price.ToString("0")<span>/mo</span></div>
+                        <ul class="plan-features">
+                            @if (!string.IsNullOrEmpty(plan.Features))
+                            {
+                                @foreach (var feature in plan.Features.Split('|'))
+                                {
+                                    <li><i class="fas fa-check"></i> @feature</li>
+                                }
+                            }
+                            else
+                            {
+                                <li><i class="fas fa-check"></i> Gym Access</li>
+                                <li><i class="fas fa-check"></i> Expert Coaching</li>
+                                <li><i class="fas fa-check"></i> Locker Room</li>
+                            }
+                        </ul>
+                    <a href="/Account/RegisterStep1" class="btn btn-primary" style="width:100%;text-align:center;">
+                            Get Started
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Fallback to static cards if no memberships found in DB -->
+                <div class="pricing-card">
+                    <h3 class="plan-name">Basic</h3>
+                    <div class="plan-price">$29<span>/mo</span></div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> Gym Access</li>
+                        <li><i class="fas fa-check"></i> Locker Room</li>
+                        <li><i class="fas fa-times"></i> Group Classes</li>
+                    </ul>
+                    <a href="/Member/Create?membershipId=1" class="btn btn-primary" style="width:100%;text-align:center;">
+                        Get Started
+                    </a>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <h3 class="plan-name">Pro</h3>
+                    <div class="plan-price">$49<span>/mo</span></div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> Gym Access</li>
+                        <li><i class="fas fa-check"></i> Professional Coaching</li>
+                        <li><i class="fas fa-check"></i> All Classes</li>
+                    </ul>
+                    <a href="/Member/Create?membershipId=2" class="btn btn-primary" style="width:100%;text-align:center;">
+                        Get Started
+                    </a>
+                </div>
+                <div class="pricing-card">
+                    <h3 class="plan-name">Elite</h3>
+                    <div class="plan-price">$79<span>/mo</span></div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> VIP Access</li>
+                        <li><i class="fas fa-check"></i> Personal Trainer</li>
+                        <li><i class="fas fa-check"></i> Nutrition Plan</li>
+                    </ul>
+                    <a href="/Member/Create?membershipId=3" class="btn btn-primary" style="width:100%;text-align:center;">
+                        Get Started
+                    </a>
+                </div>
+            }
         </div>
     </section>
 @section Scripts {
-    <script>
-        function highlightJoinNow() {
-            // Prevent default link behavior
-            event.preventDefault();
-
-            // Find the Join Now button in the header
-            const joinButton = document.querySelector('a[href="/Member/Create"]');
-            const joinInstruction = document.getElementById('joinInstruction');
-
-            if (joinButton) {
-                // Add highlight animation
-                joinButton.classList.add('join-now-highlight');
-
-                // Show instruction message
-                if (joinInstruction) {
-                    joinInstruction.style.display = 'block';
-                    joinInstruction.classList.add('join-now-flash');
-                }
-
-                // Scroll to the Join Now button smoothly
-                joinButton.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-
-                // Remove animation after 8 seconds
-                setTimeout(() => {
-                    joinButton.classList.remove('join-now-highlight');
-                    if (joinInstruction) {
-                        joinInstruction.style.display = 'none';
-                    }
-                }, 8000);
-
-                // Optional: Add click event to remove animation when Join Now is clicked
-                joinButton.addEventListener('click', function() {
-                    this.classList.remove('join-now-highlight');
-                    if (joinInstruction) {
-                        joinInstruction.style.display = 'none';
-                    }
-                }, { once: true }); // Remove after one click
-            }
-        }
-
-        // Alternative: Add event listeners to all Get Started buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            const getStartedButtons = document.querySelectorAll('.get-started-btn');
-
-            getStartedButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    highlightJoinNow();
-                });
-            });
-        });
-    </script>
+    <script src="~/js/home.js" asp-append-version="true"></script>
 }
 
  
    
 
   
+

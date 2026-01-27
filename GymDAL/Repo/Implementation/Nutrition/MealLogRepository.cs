@@ -2,7 +2,7 @@ using AutoMapper;
 using GymDAL.Repo.Abstract.Nutrition;
 using System.Linq.Expressions;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Nutrition
 {
     public class MealLogRepository : Repository<MealLog>, IMealLogRepository
     {

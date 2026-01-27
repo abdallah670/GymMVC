@@ -7,7 +7,7 @@
 using GymDAL.Repo.Abstract.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Users
 {
     public class MemberRepository : Repository<Member>, IMemberRepository
     {
@@ -76,6 +76,26 @@ namespace GymDAL.Repo.Implementation
                .Skip((page - 1) * pageSize)
                .Take(pageSize)
                .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public Task<Member> GetByEmailAsync(string email)
+        {
+          
+            try
+            {
+                var member =  _context.Members
+               .Include(m => m.FitnessGoal) // Include the FitnessGoal navigation property
+               .FirstOrDefault(m => m.Email == email);
+                if (member != null)
+                {
+                    return Task.FromResult(member);
+                }
+                return Task.FromResult<Member>(null);
             }
             catch (Exception ex)
             {

@@ -1,0 +1,640 @@
+@using GymPL.Extensions
+@model List<GymBLL.ModelVM.Communication.ChatMessageVM>
+
+@{
+    ViewData["Title"] = "Chat";
+    var otherUserId = ViewBag.OtherUserId as string;
+    var otherUserName = ViewBag.OtherUserName as string ?? "User";
+    var otherUserPicture = ViewBag.OtherUserPicture as string;
+    var currentUserId = User.GetUserId();
+    Layout = "_MyLayout";
+}
+
+<div class="container-fluid py-4 min-vh-80 d-flex flex-column">
+    <div class="row flex-grow-1">
+        <div class="col-12 col-lg-10 mx-auto d-flex flex-column">
+            <div class="card glass-chat shadow-lg border-0 d-flex flex-column flex-grow-1 overflow-hidden" style="max-height: 80vh;">
+                <!-- Chat Header -->
+                <div class="card-header p-3 border-bottom border-white-10 bg-transparent d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        @if (User.IsInRole("Trainer"))
+                        {
+                            <a asp-action="Index" class="btn btn-link text-white p-0 me-3 transition-all hover-translate-x">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                        }
+                        <div class="avatar avatar-header rounded-circle me-3 bg-gradient-primary show-shadow overflow-hidden" style="width: 50px; height: 50px;">
+                            @if (!string.IsNullOrEmpty(otherUserPicture))
+                            {
+                                <img src="@otherUserPicture" class="w-100 h-100 object-fit-cover" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                    <span class="text-white font-weight-bold">@otherUserName[0]</span>
+                                </div>
+                            }
+                        </div>
+                        <div>
+                            <h6 class="text-white mb-0 font-weight-bold">@otherUserName</h6>
+                            <small id="userStatusBadge" class="text-white-50"><i class="fas fa-circle text-secondary text-xxs me-1"></i> Offline</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div id="chatMessages" class="card-body flex-grow-1 overflow-auto p-4 custom-scrollbar bg-chat-pattern">
+                    <div id="loadMoreContainer" class="text-center mb-3">
+                        <button type="button" id="btnLoadMore" class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="loadMoreMessages()">
+                            <i class="fas fa-history me-1"></i> Load Older Messages
+                        </button>
+                    </div>
+                    <div id="messagesList">
+                        @foreach (var msg in Model)
+                        {
+                        var isMine = msg.SenderId == currentUserId;
+                        <div class="d-flex @(isMine ? "justify-content-end" : "justify-content-start") mb-4 animate-fade-in">
+                            <div class="message-bubble @(isMine ? "bubble-out" : "bubble-in") shadow-sm">
+                                @if (!string.IsNullOrEmpty(msg.AttachmentUrl))
+                                {
+                                    <div class="attachment-container mb-2">
+                                        @if (msg.AttachmentType == "image")
+                                        {
+                                            <img src="@msg.AttachmentUrl" class="img-fluid rounded-3 cursor-pointer shadow-sm hover-scale" onclick="window.open(this.src)" />
+                                        }
+                                        else if (msg.AttachmentType == "video")
+                                        {
+                                            <video controls class="w-100 rounded-3 shadow-sm">
+                                                <source src="@msg.AttachmentUrl" type="video/mp4">
+                                            </video>
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-dark-overlay p-2 rounded-3 d-flex align-items-center">
+                                                <i class="fas fa-file-alt text-lg me-2 text-primary"></i>
+                                                <a href="@msg.AttachmentUrl" target="_blank" class="text-white text-xs mb-0 text-decoration-none">
+                                                    Download Attachment
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                <div class="message-text">@msg.Message</div>
+                                <div class="message-footer d-flex align-items-center mt-1 justify-content-end">
+                                    <small class="text-xxs opacity-60">@msg.Timestamp.ToString("HH:mm")</small>
+                                    @if (isMine)
+                                    {
+                                        <span class="ms-1 status-icon" data-message-id="@msg.Id">
+                                            @if (msg.IsRead)
+                                            {
+                                                <i class="fas fa-check-double text-xxs text-info"></i>
+                                            }
+                                            else if (msg.IsDelivered)
+                                            {
+                                                <i class="fas fa-check-double text-xxs text-white-50"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-check text-xxs text-white-50"></i>
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="card-footer p-3 bg-transparent border-top border-white-10">
+                    <form id="chatForm" enctype="multipart/form-data">
+                        <div class="input-group glass-input-group p-1 align-items-center">
+                            <button type="button" class="btn btn-link text-white shadow-none mb-0 px-3 hover-scale" onclick="document.getElementById('attInput').click()" title="Add Media">
+                                <i class="fas fa-plus-circle text-xl"></i>
+                            </button>
+                            <input type="file" id="attInput" class="d-none" accept="image/*,video/*" onchange="handleFileSelect(this)">
+                            
+                            <input type="text" id="messageInput" class="form-control border-0 bg-transparent text-white px-0" placeholder="Type your message..." autocomplete="off">
+                            
+                            <button type="submit" class="btn bg-gradient-primary rounded-pill px-4 mb-0 ms-2 show-shadow hover-scale">
+                                <i class="fas fa-paper-plane me-1"></i> Send
+                            </button>
+                        </div>
+                        <div id="previewArea" class="mt-2 d-none">
+                            <div class="position-relative d-inline-block animate-bounce-in">
+                                <img id="filePreview" src="" class="rounded-3 border border-white-20 shadow-lg d-none" style="max-height: 300px; max-width: 100%; width: auto;" />
+                                <video id="videoFilePreview" class="rounded-3 border border-white-20 shadow-lg d-none" style="max-height: 300px; max-width: 100%; width: auto;" controls></video>
+                                <button type="button" class="btn btn-dark btn-icon-only btn-rounded btn-sm position-absolute top-0 end-0 translate-middle-y me-n2 shadow-lg" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --glass-bg: rgba(15, 15, 15, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --primary-gradient: linear-gradient(135deg, #7928CA 0%, #FF0080 100%);
+    }
+
+    .glass-chat {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 1.5rem;
+    }
+
+    .bg-chat-pattern {
+        background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+        background-color: rgba(0,0,0,0.2);
+    }
+
+    .message-bubble {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 1.25rem;
+        position: relative;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        word-wrap: break-word;
+    }
+
+    .bubble-in {
+        background: #ffffff;
+        color: #111;
+        border-bottom-left-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .bubble-out {
+        background: #dcf8c6;
+        color: #111;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bubble-out .message-text, .bubble-in .message-text {
+        color: #111;
+    }
+
+    .bubble-out .message-footer small, .bubble-in .message-footer small {
+        color: #666;
+    }
+    
+    .status-icon i {
+        font-size: 0.75rem;
+    }
+
+    .glass-input-group {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2rem;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+    }
+
+    .glass-input-group:focus-within {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+    .animate-pulse { animation: pulse 2s infinite; }
+    @@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+    .hover-scale:hover { transform: scale(1.05); }
+    .transition-all { transition: all 0.2s ease-in-out; }
+    .hover-translate-x:hover { transform: translateX(-5px); }
+
+    .text-xxs { font-size: 0.65rem; }
+    .border-white-20 { border-color: rgba(255, 255, 255, 0.2) !important; }
+    .bg-dark-overlay { background: rgba(0,0,0,0.4); }
+
+    .show-shadow { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    
+    .attachment-container img {
+        max-height: 250px;
+        width: auto;
+        max-width: 100%;
+        object-fit: cover;
+    }
+    
+    .show-shadow { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    
+    .attachment-container img {
+        max-height: 250px;
+        width: auto;
+        max-width: 100%;
+        object-fit: cover;
+    }
+    
+    .attachment-container video {
+        max-height: 250px;
+    }
+
+    .group-hover:hover .delete-btn {
+        opacity: 1 !important;
+    }
+    .delete-btn {
+        opacity: 0.4; /* Visible but subtle by default */
+        transition: opacity 0.2s;
+        z-index: 10;
+        cursor: pointer;
+    }
+    .delete-btn:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const otherUserId = '@otherUserId';
+        const currentUserId = '@currentUserId';
+        let skip = @(ViewBag.Skip ?? 0);
+        const take = @(ViewBag.Take ?? 50);
+        let selectedFile = null;
+        let isLoadingMore = false;
+
+        const chatConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        chatConnection.on("ReceiveMessage", async function (senderId, message, timestamp, attachmentUrl, attachmentType, senderName, senderPicture, messageId) {
+            try {
+                const isMine = (senderId || "").toLowerCase() === currentUserId.toLowerCase();
+                const isFromOther = (senderId || "").toLowerCase() === (otherUserId || "").toLowerCase();
+                
+                const msgId = messageId || 0;
+
+                if (isFromOther || isMine) {
+                    appendMessage(isMine, message, timestamp, attachmentUrl, attachmentType, false, false, msgId);
+                    scrollToBottom();
+
+                    if (isFromOther) {
+                        // Mark as Delivered
+                        try {
+                            await fetch(`/Chat/MarkAsDelivered?messageId=${msgId}`, { method: 'POST' });
+                            await chatConnection.invoke("MessageDelivered", msgId, otherUserId);
+                        } catch (e) {}
+                        
+                        // Mark as Read
+                        if (!document.hidden) {
+                            try {
+                                await fetch(`/Chat/MarkAsRead?messageId=${msgId}`, { method: 'POST' });
+                                await chatConnection.invoke("MessageRead", msgId, otherUserId);
+                                if (typeof loadUnreadMessages === 'function') loadUnreadMessages();
+                            } catch (e) {}
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("ReceiveMessage Error:", err);
+            }
+        });
+
+        chatConnection.on("UserIsOnline", function (userId) {
+            if (userId.toLowerCase() === otherUserId.toLowerCase()) {
+                updateUserStatus(true);
+            }
+        });
+
+        chatConnection.on("UserIsOffline", function (userId) {
+            if (userId.toLowerCase() === otherUserId.toLowerCase()) {
+                updateUserStatus(false);
+            }
+        });
+
+        function updateUserStatus(isOnline) {
+            const badge = document.getElementById('userStatusBadge');
+            if (isOnline) {
+                badge.innerHTML = '<i class="fas fa-circle text-success text-xxs me-1 animate-pulse"></i> Online';
+            } else {
+                badge.innerHTML = '<i class="fas fa-circle text-secondary text-xxs me-1"></i> Offline';
+            }
+        }
+
+        async function markAllAsRead() {
+            if (document.hidden || !otherUserId) return;
+            
+            try {
+                const response = await fetch('/Chat/GetUnreadMessages');
+                const data = await response.json();
+                
+                if (data.success && data.messages) {
+                    const unreadFromThisUser = data.messages.filter(msg => 
+                        msg.senderId.toLowerCase() === otherUserId.toLowerCase()
+                    );
+                    
+                    for (const msg of unreadFromThisUser) {
+                         // Mark as read in DB
+                         await fetch(`/Chat/MarkAsRead?messageId=${msg.id}`, { method: 'POST' });
+                         // Notify other user via SignalR
+                         if (chatConnection.state === signalR.HubConnectionState.Connected) {
+                            await chatConnection.invoke("MessageRead", msg.id, otherUserId);
+                         }
+                    }
+                    // Refresh navbar badge if the function exists
+                    if (typeof loadUnreadMessages === 'function') {
+                        loadUnreadMessages();
+                    }
+                }
+            } catch (err) {
+                console.error("Error in markAllAsRead:", err);
+            }
+        }
+
+        window.addEventListener('focus', markAllAsRead);
+
+        chatConnection.on("MessageDelivered", function (messageId) {
+            updateMessageStatus(messageId, 'delivered');
+        });
+
+        chatConnection.on("MessageRead", function (messageId) {
+            updateMessageStatus(messageId, 'read');
+        });
+
+        chatConnection.start().then(function () {
+            if (otherUserId) {
+                chatConnection.invoke("IsUserOnline", otherUserId).then(function (isOnline) {
+                    updateUserStatus(isOnline);
+                });
+            }
+        }).catch(err => console.error(err.toString()));
+
+        async function loadMoreMessages() {
+            if (isLoadingMore) return;
+            isLoadingMore = true;
+            const btn = document.getElementById('btnLoadMore');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+            try {
+                const response = await fetch(`/Chat/GetChatHistory?otherUserId=${otherUserId}&skip=${skip}&take=${take}`);
+                const data = await response.json();
+
+                if (data.success && data.messages.length > 0) {
+                    const list = document.getElementById('messagesList');
+                    const firstMsg = list.firstElementChild;
+                    
+                    data.messages.forEach(msg => {
+                        const isMine = msg.senderId === currentUserId;
+                        const html = renderMessage(isMine, msg.message, msg.timestamp, msg.attachmentUrl, msg.attachmentType, msg.isRead, msg.isDelivered, msg.id);
+                        list.insertAdjacentHTML('afterbegin', html);
+                    });
+
+                    skip += take;
+                    if (data.messages.length < take) {
+                        document.getElementById('loadMoreContainer').classList.add('d-none');
+                    }
+                    
+                    // Maintain scroll position roughly
+                    if (firstMsg) firstMsg.scrollIntoView({ block: 'start' });
+                } else {
+                    document.getElementById('loadMoreContainer').classList.add('d-none');
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.innerHTML = originalText;
+                isLoadingMore = false;
+            }
+        }
+
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message && !selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('ReceiverId', otherUserId);
+            formData.append('Message', message || '');
+            if (selectedFile) {
+                formData.append('attachment', selectedFile);
+            }
+
+            try {
+                const response = await fetch('/Chat/SendMessage', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    // Broadcast via SignalR
+                    await chatConnection.invoke("SendMessage", 
+                        data.result.id,
+                        otherUserId, 
+                        message || '', 
+                        data.result.attachmentUrl || null, 
+                        data.result.attachmentType || null,
+                        data.result.senderName,
+                        data.result.senderPicture);
+                    
+                    // We can also trigger a "Delivered" check here if the receiver is online
+                    // But SignalR does its thing.
+                    
+                    input.value = '';
+                    clearFile();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message,
+                        background: '#1a1a1a',
+                        color: '#fff'
+                    });
+                }
+            } catch (err) {
+                console.error(err.toString());
+            }
+        });
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                selectedFile = input.files[0];
+                const area = document.getElementById('previewArea');
+                const imgPreview = document.getElementById('filePreview');
+                const videoPreview = document.getElementById('videoFilePreview');
+                
+                area.classList.remove('d-none');
+                
+                if (selectedFile.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        imgPreview.src = e.target.result;
+                        imgPreview.classList.remove('d-none');
+                        videoPreview.classList.add('d-none');
+                        videoPreview.src = '';
+                    };
+                    reader.readAsDataURL(selectedFile);
+                } else if (selectedFile.type.startsWith('video/')) {
+                    const videoUrl = URL.createObjectURL(selectedFile);
+                    videoPreview.src = videoUrl;
+                    videoPreview.classList.remove('d-none');
+                    imgPreview.classList.add('d-none');
+                    imgPreview.src = '';
+                }
+            }
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            document.getElementById('attInput').value = '';
+            document.getElementById('previewArea').classList.add('d-none');
+            const videoPreview = document.getElementById('videoFilePreview');
+            if (videoPreview.src) {
+                URL.revokeObjectURL(videoPreview.src);
+            }
+            videoPreview.src = '';
+            document.getElementById('filePreview').src = '';
+        }
+
+        function appendMessage(isMine, message, timestamp, attachmentUrl, attachmentType, isRead, isDelivered, messageId) {
+            if (!message && !attachmentUrl) return; // Ignore empty notifications if any
+            const container = document.getElementById('messagesList');
+            const html = renderMessage(isMine, message, timestamp, attachmentUrl, attachmentType, isRead || false, isDelivered || false, messageId || 0);
+            container.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function renderMessage(isMine, message, timestamp, attachmentUrl, attachmentType, isRead, isDelivered, messageId) {
+            const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            let attachmentHtml = '';
+            if (attachmentUrl) {
+                if (attachmentType === 'image') {
+                    attachmentHtml = `<div class="attachment-container mb-2"><img src="${attachmentUrl}" class="img-fluid rounded-3 shadow-sm hover-scale cursor-pointer" onclick="window.open(this.src)" /></div>`;
+                } else if (attachmentType === 'video') {
+                    attachmentHtml = `<div class="attachment-container mb-2"><video controls class="w-100 rounded-3 shadow-sm"><source src="${attachmentUrl}" type="video/mp4"></video></div>`;
+                } else {
+                    attachmentHtml = `
+                        <div class="bg-dark-overlay p-2 rounded-3 d-flex align-items-center mb-2">
+                            <i class="fas fa-file-alt text-lg me-2 text-primary"></i>
+                            <a href="${attachmentUrl}" target="_blank" class="text-white text-xs mb-0 text-decoration-none">Download Attachment</a>
+                        </div>`;
+                }
+            }
+
+            let statusHtml = '';
+            if (isMine) {
+                let iconClass = 'fa-check';
+                let iconColor = 'text-muted'; // Gray for sent/delivered
+                if (isRead) {
+                    iconClass = 'fa-check-double';
+                    iconColor = 'text-info'; // Blue for read
+                } else if (isDelivered) {
+                    iconClass = 'fa-check-double';
+                }
+                statusHtml = `<span class="ms-1 status-icon" data-message-id="${messageId}"><i class="fas ${iconClass} text-xxs ${iconColor}"></i></span>`;
+            }
+
+            return `
+                <div class="d-flex ${isMine ? 'justify-content-end' : 'justify-content-start'} mb-4 animate-fade-in shadow-animate message-container-${messageId}">
+                    <div class="message-bubble ${isMine ? 'bubble-out' : 'bubble-in'} shadow-sm position-relative group-hover">
+                        ${attachmentHtml}
+                        <div class="message-text">${message}</div>
+                        <div class="message-footer d-flex align-items-center mt-1 justify-content-end">
+                            ${isMine ? `
+                                <button type="button" class="btn btn-link btn-sm p-0 me-2 text-danger delete-btn" onclick="deleteMessage(${messageId})" title="Delete Message">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                            ` : ''}
+                            <small class="text-xxs opacity-60">${time}</small>
+                            ${statusHtml}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function updateMessageStatus(messageId, status) {
+            const iconContainer = document.querySelector(`.status-icon[data-message-id="${messageId}"]`);
+            if (!iconContainer) return;
+
+            if (status === 'delivered') {
+                iconContainer.innerHTML = '<i class="fas fa-check-double text-xxs text-muted"></i>';
+            } else if (status === 'read') {
+                iconContainer.innerHTML = '<i class="fas fa-check-double text-xxs text-info"></i>';
+            }
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('chatMessages');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        chatConnection.on("MessageDeleted", function (messageId) {
+            const statusIcon = document.querySelector(`.status-icon[data-message-id="${messageId}"]`);
+            if (statusIcon) {
+                // Find the closest message container and remove it
+                const bubble = statusIcon.closest('.d-flex.mb-4');
+                if (bubble) {
+                    bubble.style.transition = "all 0.3s ease";
+                    bubble.style.opacity = "0";
+                    bubble.style.transform = "scale(0.9)";
+                    setTimeout(() => bubble.remove(), 300);
+                }
+            } else {
+               // Fallback if not sender side (receiver doesn't have status-icon usually but let's select by other means if needed)
+               // Receiver side implementation:
+               // We need a unique ID for the message container. 
+               // Currently data-message-id is only on status-icon (sender only).
+               // Let's rely on reloading or add data-id to bubble.
+               // BETTER: Add data-msg-id to the top level div.
+            }
+            
+            // Try to find by attribute added in render
+            const msgContainer = document.querySelector(`.message-container-${messageId}`);
+            if (msgContainer) {
+                 msgContainer.style.transition = "all 0.3s ease";
+                 msgContainer.style.opacity = "0";
+                 msgContainer.style.transform = "scale(0.9)";
+                 setTimeout(() => msgContainer.remove(), 300);
+            }
+        });
+
+        async function deleteMessage(messageId) {
+            const result = await Swal.fire({
+                title: 'Delete Message?',
+                text: "This will remove the message for everyone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/Chat/DeleteMessage?messageId=${messageId}`, { method: 'POST' });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // SignalR will handle the removal
+                        await chatConnection.invoke("DeleteMessage", messageId, otherUserId);
+                    } else {
+                         Swal.fire('Error', data.message || 'Could not delete message', 'error');
+                    }
+                } catch (e) {
+                    console.error("Delete error:", e);
+                }
+            }
+        }
+
+        scrollToBottom();
+        markAllAsRead();
+    </script>
+}

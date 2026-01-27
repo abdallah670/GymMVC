@@ -1,4 +1,4 @@
-﻿
+
 //using System.IO;
 
 //namespace TestMVC.Helper
@@ -14,7 +14,7 @@
 
 //                string FolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Files", FolderName);
 
-//                // ✅ FIX: Ensure directory exists
+//                // ? FIX: Ensure directory exists
 //                if (!Directory.Exists(FolderPath))
 //                {
 //                    Directory.CreateDirectory(FolderPath);
@@ -24,7 +24,7 @@
 //                using(var FileStream=new FileStream(FinalPath,FileMode.Create))
 //                {
 //                    file.CopyTo(FileStream);
-                   
+
 //                }
 //                return FileName;
 
@@ -34,7 +34,7 @@
 //                return ex.Message;
 //            }
 //            return null;
-            
+
 //        }
 //        public static bool Delete(string FolderName, string fileName)
 //        {
@@ -56,7 +56,7 @@
 //            {
 //                return false;
 //            }
-          
+
 //        }
 //    }
 //}

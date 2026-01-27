@@ -9,9 +9,9 @@ namespace GymBLL.ModelVM.Nutrition
 
         [Required(ErrorMessage = "Diet plan is required")]
         public int DietPlanId { get; set; }
-        public DietPlanVM ? DietPlan { get; set; }
+        public DietPlanVM? DietPlan { get; set; }
 
-       
+
 
         public string? MemberName { get; set; }
 

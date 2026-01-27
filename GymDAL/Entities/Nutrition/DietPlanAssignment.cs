@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using GymDAL.Entities.Core;
 
 namespace GymDAL.Entities.Nutrition
 {
@@ -12,6 +16,8 @@ namespace GymDAL.Entities.Nutrition
         public int Id { get; set; }
         [Required]
         public int DietPlanId { get; set; }
+
+     
 
         [DataType(DataType.Date)]
         public DateTime StartDate { get; set; }

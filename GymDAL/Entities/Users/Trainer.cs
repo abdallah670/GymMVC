@@ -8,6 +8,7 @@ namespace GymDAL.Entities.Users
 
         [StringLength(1000)]
         public string? Bio { get; set; }
+        public IEnumerable<TrainerReview> Reviews { get; set; }
        
     }
 }

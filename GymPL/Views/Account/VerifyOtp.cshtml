@@ -1,0 +1,47 @@
+@model GymBLL.ModelVM.TempRegistrationVM
+
+@{
+    ViewData["Title"] = "Verify Email";
+}
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="gym-icon">
+             <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <div class="login-header">
+            <h1 class="login-title">Verify Your Email</h1>
+            <p class="login-subtitle">We sent a code to <strong>@Model.Email</strong>. Please enter it below.</p>
+        </div>
+
+        <form asp-action="VerifyOtp" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Email" />
+
+            <div class="form-group">
+                <label name="otp" class="form-label">
+                    <i class="fas fa-key me-1"></i>Verification Code
+                </label>
+                <div class="input-with-icon">
+                    <i class="fas fa-key input-icon"></i>
+                    <input name="otp" class="form-control-custom" placeholder="Enter 6-digit code" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Verify <i class="fas fa-check ms-2"></i>
+            </button>
+        </form>
+
+        <div class="login-footer">
+             <a href="@Url.Action("RegisterStep1", "Account")" class="join-link" style="font-size: 0.9rem;">
+                Change Email / Resend
+             </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

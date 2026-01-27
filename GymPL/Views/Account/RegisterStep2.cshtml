@@ -1,0 +1,102 @@
+@model GymBLL.ModelVM.TempRegistrationVM
+
+@{
+    ViewData["Title"] = "Complete Registration";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0" style="border-radius: 15px; overflow: hidden;">
+                <div class="card-header bg-primary text-white p-4">
+                    <h2 class="mb-0 fs-4"><i class="fas fa-user-edit me-2"></i>Complete Your Profile</h2>
+                    <p class="mb-0 opacity-75">Tell us a bit about yourself to get started.</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                     <form asp-action="RegisterStep2" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="Email" />
+
+                        <h5 class="mb-3 text-muted border-bottom pb-2">Personal Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label">Gender</label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-12">
+                                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4 mb-3 text-muted border-bottom pb-2">Fitness Profile</h5>
+                        <div class="row g-3">
+                             <div class="col-md-6">
+                                <label asp-for="Height" class="form-label">Height (cm)</label>
+                                <input asp-for="Height" class="form-control" />
+                                <span asp-validation-for="Height" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Weight" class="form-label">Weight (kg)</label>
+                                <input asp-for="Weight" class="form-control" />
+                                <span asp-validation-for="Weight" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ActivityLevel" class="form-label">Activity Level</label>
+                                <select asp-for="ActivityLevel" class="form-select">
+                                    <option value="Sedentary">Sedentary</option>
+                                    <option value="Lightly Active">Lightly Active</option>
+                                    <option value="Moderately Active">Moderately Active</option>
+                                    <option value="Very Active">Very Active</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="FitnessGoal" class="form-label">Fitness Goal</label>
+                                <select asp-for="FitnessGoal" class="form-select">
+                                    <option value="">Select Goal</option>
+                                    <option value="Weight Loss">Weight Loss</option>
+                                    <option value="Muscle Gain">Muscle Gain</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Improve Endurance">Improve Endurance</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Continue to Membership Selection
+                            </button>
+                        </div>
+
+                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

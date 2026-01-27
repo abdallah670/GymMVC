@@ -1,7 +1,7 @@
 using AutoMapper;
 using GymDAL.Repo.Abstract.Workout;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Workout
 {
     public class WorkoutAssignmentRepository : Repository<WorkoutAssignment>, IWorkoutAssignmentRepository
     {
@@ -25,6 +25,19 @@ namespace GymDAL.Repo.Implementation
             }
         }
 
-
+        public async Task<WorkoutAssignment> GetDetailed(int? WorkoutasssignmentId)
+        {
+            try
+            {
+                return await _context.WorkoutAssignments
+                    .Where(a=> a.IsActive&&a.Id== WorkoutasssignmentId)
+                    .Include(a => a.WorkoutPlan)
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error fetching detailed workout assignment", ex);
+            }
+        }
     }
 }

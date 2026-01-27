@@ -1,0 +1,589 @@
+﻿/* Custom Card Styles */
+.password-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.password-card .card-header {
+  background: var(--grad-main);
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.password-card .card-body {
+  padding: 2rem;
+  background: var(--tile);
+}
+
+/* Form Styles */
+.form-label {
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-control {
+  border: 2px solid var(--frame);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+}
+
+.form-control:focus {
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+  background-image: none;
+}
+
+.form-control.is-valid {
+  border-color: #28a745;
+}
+
+/* Input Group Styles */
+.input-group {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.input-group .form-control {
+  border-right: none;
+}
+
+.input-group .btn-outline-secondary {
+  border: 2px solid #e9ecef;
+  border-left: none;
+  background: white;
+  color: #6c757d;
+  transition: all 0.3s;
+}
+
+.input-group .btn-outline-secondary:hover {
+  background: #f8f9fa;
+  border-color: #ced4da;
+  color: #495057;
+}
+
+/* Validation Styles */
+.text-danger {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.field-validation-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.field-validation-error::before {
+  content: "⚠";
+  font-size: 0.9rem;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  margin-top: 0.75rem;
+}
+
+.password-strength .progress {
+  border-radius: 10px;
+  background: #e9ecef;
+  overflow: hidden;
+  height: 8px !important;
+}
+
+.password-strength .progress-bar {
+  transition: width 0.5s ease, background-color 0.5s ease;
+  border-radius: 10px;
+}
+
+#passwordStrengthText {
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Password Match Indicator */
+#passwordMatchText {
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Requirements Alert */
+.requirements-alert {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.requirements-alert .alert-heading {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.requirements-alert ul {
+  margin-bottom: 0;
+  padding-left: 1.5rem;
+}
+
+.requirements-alert li {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
+/* Submit Button */
+.btn-primary {
+  background: var(--grad-main);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Forgot Password Link */
+.btn-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.btn-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* History Card */
+.history-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: var(--shadow-rest);
+  background: var(--tile);
+  margin-top: 2rem;
+}
+
+.history-card .card-header {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.history-card .card-body {
+  padding: 1.5rem;
+  background: var(--tile);
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .password-card .card-body {
+    padding: 1.5rem;
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Animation for success/error messages */
+.alert {
+  border: none;
+  border-radius: 10px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus animation for inputs */
+.form-control:focus {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(102, 126, 234, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+/* Password visibility toggle button animation */
+.btn-outline-secondary i {
+  transition: transform 0.3s ease;
+}
+
+.btn-outline-secondary:hover i {
+  transform: scale(1.1);
+}
+
+/* Loading spinner animation */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Password strength colors */
+.bg-danger {
+  background: linear-gradient(90deg, #ff6b6b 0%, #ff8e8e 100%) !important;
+}
+
+.bg-warning {
+  background: linear-gradient(90deg, #ffd166 0%, #ffdf8e 100%) !important;
+}
+
+.bg-success {
+  background: linear-gradient(90deg, #06d6a0 0%, #4df0c5 100%) !important;
+}
+
+/* Match indicator colors */
+.text-success {
+  color: #06d6a0 !important;
+  font-weight: 600;
+}
+
+.text-danger {
+  color: #ff6b6b !important;
+  font-weight: 600;
+}
+
+/* Form text spacing */
+.form-text {
+  margin-top: 0.5rem;
+  display: block;
+}
+/* Add this to your existing style section */
+.highlight {
+  animation: highlight-pulse 1s ease;
+}
+
+@keyframes highlight-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+}
+
+.forgot-password-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 20px;
+}
+
+.forgot-password-card {
+  background: var(--tile);
+  border-radius: 20px;
+  box-shadow: var(--shadow-hover);
+  overflow: hidden;
+  max-width: 500px;
+  width: 100%;
+  animation: slideUp 0.5s ease;
+}
+
+.forgot-password-header {
+  background: var(--grad-main);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.forgot-password-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.forgot-password-header p {
+  opacity: 0.9;
+  margin: 10px 0 0;
+  font-size: 16px;
+}
+
+.forgot-password-body {
+  padding: 40px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 10px;
+  display: block;
+  font-size: 15px;
+}
+
+.form-control {
+  border: 2px solid var(--frame);
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 16px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+}
+
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+  background: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 15px 30px;
+  font-weight: 600;
+  font-size: 16px;
+  width: 100%;
+  transition: all 0.3s;
+  margin-top: 20px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.back-to-login {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #e9ecef;
+}
+
+.back-to-login a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-to-login a:hover {
+  text-decoration: underline;
+}
+
+.alert {
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 25px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reset-password-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 20px;
+}
+
+.reset-password-card {
+  background: var(--tile);
+  border-radius: 20px;
+  box-shadow: var(--shadow-hover);
+  overflow: hidden;
+  max-width: 500px;
+  width: 100%;
+  animation: slideUp 0.5s ease;
+}
+
+.reset-password-header {
+  background: var(--grad-main);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.reset-password-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.reset-password-body {
+  padding: 40px;
+}
+
+/* Reuse the same styles from change password page */
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 16px;
+  transition: all 0.3s;
+  background: #f8f9fa;
+}
+
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+  background: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 15px 30px;
+  font-weight: 600;
+  font-size: 16px;
+  width: 100%;
+  transition: all 0.3s;
+  margin-top: 20px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.password-strength {
+  margin-top: 10px;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 10px;
+  background: #e9ecef;
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.alert {
+  border-radius: 10px;
+  border: none;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

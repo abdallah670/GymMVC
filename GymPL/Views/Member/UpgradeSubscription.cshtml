@@ -1,4 +1,4 @@
-@model GymBLL.ModelVM.External.UpgradeSubscriptionVM
+@model GymBLL.ModelVM.Financial.UpgradeSubscriptionVM
 
 @{
     ViewData["Title"] = "Upgrade Subscription";
@@ -74,6 +74,8 @@
                 <input type="hidden" asp-for="NewMembershipId" id="selectedPlanId" />
                 <input type="hidden" asp-for="NewMembershipType" id="selectedPlanName" />
                 <input type="hidden" asp-for="NewPrice" id="selectedPlanPrice" />
+                <input type="hidden" asp-for="Notes" id="Notes" />
+
 
                 <div id="paymentSection" style="display: none;">
                     <div class="form-section" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--frame); border-radius: var(--radius);">

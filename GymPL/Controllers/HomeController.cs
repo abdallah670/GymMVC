@@ -1,7 +1,10 @@
+using GymBLL.ModelVM.Trainer;
+using GymBLL.Service.Abstract.Trainer;
+using GymBLL.Service.Implementation.Member;
 using GymDAL.Entities.Users;
+using GymPL.Extensions;
 using GymPL.Global;
 using GymPL.Models;
-using GymWeb.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -14,17 +17,22 @@ namespace GymPL.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly GymSettings _settings;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly GymBLL.Service.Abstract.Financial.IMembershipService _membershipService;
+        private readonly ITrainerReviewService _trainerReviewService;
 
         public HomeController(ILogger<HomeController> logger,
                             IOptions<GymSettings> settings,
-                            UserManager<ApplicationUser> userManager) // Add UserManager
+                            UserManager<ApplicationUser> userManager,
+                            GymBLL.Service.Abstract.Financial.IMembershipService membershipService,ITrainerReviewService trainerReviewService)
         {
             _logger = logger;
             _settings = settings.Value;
             _userManager = userManager;
+            _membershipService = membershipService;
+            _trainerReviewService= trainerReviewService;
         }
 
-        public  IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             ViewBag.HeaderType = "Public";
             if (_settings.IsFirstRun)
@@ -44,15 +52,27 @@ namespace GymPL.Controllers
               
                
                 ViewBag.HeaderType = "Member";
-                
                 return RedirectToAction("Dashboard", "Member");
             }
+            var response = await _membershipService.GetActiveAsync();
+            var Reviews=await _trainerReviewService.GetTop3ReviewsAsync();
+            ViewBag.Memberships = response.ISHaveErrorOrnNot ? new List<GymBLL.ModelVM.Financial.MembershipVM>() : response.Result;
+            ViewBag.Reviews = Reviews.ISHaveErrorOrnNot ? new List<TrainerReviewVM>() : Reviews.Result;
+            ViewBag.ReviewsCount=Reviews.Result.Count;
+
+
+
             return View();
         }
 
 
         public IActionResult Privacy()
         {
+            return View();
+        }
+        public IActionResult Help()
+        {
+            ViewBag.Email=User.GetUserEmail();
             return View();
         }
 

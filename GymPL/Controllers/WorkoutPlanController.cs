@@ -1,6 +1,6 @@
 using GymBLL.ModelVM;
 using GymBLL.ModelVM.Workout;
-using GymBLL.Service.Abstract;
+using GymBLL.Service.Abstract.Workout;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -43,19 +43,21 @@ namespace GymPL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create(int page = 1)
+        public IActionResult Create(int page = 1, string returnUrl = null)
         {
             ViewData["ReturnPage"] = page;
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(WorkoutPlanVM model, int page = 1)
+        public async Task<IActionResult> Create(WorkoutPlanVM model, int page = 1, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
                 ViewData["ReturnPage"] = page;
+                ViewData["ReturnUrl"] = returnUrl;
                 return View(model);
             }
 
@@ -63,6 +65,7 @@ namespace GymPL.Controllers
             if (response.ISHaveErrorOrnNot)
             {
                 ViewData["ReturnPage"] = page;
+                ViewData["ReturnUrl"] = returnUrl;
                 TempData["Error"] = response.ErrorMessage;
                 return View(model);
             }

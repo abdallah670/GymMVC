@@ -1,54 +1,62 @@
-﻿@model GymPL.ViewModels.MemberDashboardVM
+@model GymPL.ViewModels.MemberDashboardVM
 
 @{
     ViewData["Title"] = "My Dashboard";
 }
 
+<!-- Review Modal Container -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white" id="reviewModalContent">
+            <!-- Modal content will be loaded here via AJAX -->
+        </div>
+    </div>
+</div>
+
 <div class="container py-4">
     <!-- Welcome Header -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
-            <h1 class="display-5 fw-bold text-white mb-2">Hello, @Model.MemberName!</h1>
+            <h1 class="display-5 fw-bold text-white mb-2">Hello, <span class="text-primary">@Model.MemberName!</span></h1>
             <p class="text-muted h5">Here's your comprehensive fitness overview for today.</p>
         </div>
         <div class="text-end d-none d-md-block">
             <h4 class="text-primary fw-bold mb-0">@DateTime.Now.ToString("dddd")</h4>
-            <p class="text-white mb-0">@DateTime.Now.ToString("dd MMMM yyyy")</p>
+            <p class="text-white mb-0 opacity-75">@DateTime.Now.ToString("dd MMMM yyyy")</p>
         </div>
     </div>
 
     <!-- Main Content Grid -->
     <div class="row g-4">
         <!-- Left Column: Subscription & Quick Stats -->
-        <div class="col-lg-4">
-            
+        <div class="col-md-4">
             <!-- Subscription Card -->
-            <div class="card border-0 shadow-lg bg-dark text-white mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="card border-0 text-white mb-4 premium-sub-card">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-4">
-                        <div>
-                            <h5 class="text-muted text-uppercase small mb-1">Current Plan</h5>
-                            <h3 class="fw-bold text-white mb-0">
-                                @(Model.SubscriptionStatus != null ? Model.SubscriptionStatus.MembershipType : "No Active Plan")
-                            </h3>
-                        </div>
-                        @if (Model.SubscriptionStatus != null)
-                        {
-                            <span class="badge @Model.SubscriptionStatus.StatusBadgeClass fs-6">
-                                @Model.SubscriptionStatus.Status
-                            </span>
-                        }
-                    </div>
-
                     @if (Model.SubscriptionStatus != null)
                     {
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h5 class="plan-label mb-1">Current Plan</h5>
+                                <h3 class="plan-name-display mb-0">
+                                    @Model.SubscriptionStatus.MembershipType
+                                </h3>
+                            </div>
+                            <span class="sub-status-badge @Model.SubscriptionStatus.StatusBadgeClass">
+                                @Model.SubscriptionStatus.Status
+                            </span>
+                        </div>
+
                         <div class="mb-4">
                             <div class="d-flex justify-content-between text-muted small mb-2">
-                                <span>Progress</span>
-                                <span>@Model.SubscriptionStatus.DaysRemaining days left</span>
+                                <span class="text-uppercase" style="letter-spacing: 1px;">Plan Progress</span>
+                                <span class="@(Model.SubscriptionStatus.DaysRemaining < 10 ? (Model.SubscriptionStatus.DaysRemaining <= 3 ? "text-danger fw-bold" : "text-warning fw-bold") : "text-white")">
+                                    @Model.SubscriptionStatus.DaysRemaining days left
+                                </span>
                             </div>
-                            <div class="progress bg-secondary bg-opacity-25" style="height: 6px;">
-                                <div class="progress-bar bg-success" role="progressbar" 
+                            <div class="progress progress-glow">
+                                <div class="progress-bar @(Model.SubscriptionStatus.DaysRemaining < 10 ? (Model.SubscriptionStatus.DaysRemaining <= 3 ? "bg-danger" : "bg-warning") : "bg-success")"
+                                     role="progressbar"
                                      style="width: @(Model.SubscriptionStatus.DaysRemaining > 0 ? "75" : "0")%"></div>
                             </div>
                         </div>
@@ -56,115 +64,291 @@
                         <div class="d-grid gap-2">
                             @if (Model.SubscriptionStatus.CanRenew)
                             {
-                                <a asp-action="RenewSubscription" class="btn btn-primary">Renew Subscription</a>
+                                <a asp-action="RenewSubscription" class="btn btn-primary glass-btn">Renew Subscription</a>
                             }
                             @if (Model.SubscriptionStatus.CanUpgrade)
                             {
-                                <a asp-action="UpgradeSubscription" class="btn btn-outline-light">Upgrade Plan</a>
+                                <a asp-action="UpgradeSubscription" class="btn btn-outline-light glass-btn-outline">Upgrade Plan</a>
                             }
                         </div>
                     }
                     else
                     {
                         <div class="text-center py-3">
-                            <p class="text-muted mb-3">You don't have an active subscription.</p>
-                            <a asp-action="Create" class="btn btn-primary w-100">Browse Plans</a>
+                            <i class="fas fa-exclamation-circle fa-3x mb-3 opacity-50"></i>
+                            <h5 class="mb-2">No Active Subscription</h5>
+                            <p class="text-muted small mb-3">You don't have an active membership plan yet.</p>
+                            <a asp-controller="Home" asp-action="Index" asp-fragment="pricing" class="btn btn-primary">
+                                <i class="fas fa-star me-2"></i> View Plans
+                            </a>
                         </div>
                     }
                 </div>
             </div>
 
+            <!-- Weight Tracking Card -->
+            <div class="card border-0 shadow-lg text-white mb-4" id="LogWeightContainer" style="background: var(--tile); border: 1px solid var(--frame) !important;">
+                <div class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-weight me-2 text-primary"></i>Log Weight</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="LogWeight" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label small opacity-75">Today's Weight (kg)</label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" id="WeightInput" name="weight" class="form-control bg-dark text-white border-secondary" required placeholder="e.g. 75.5">
+                                <span class="input-group-text bg-dark border-secondary text-muted">kg</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small opacity-75" for="Notes">Notes (optional)</label>
+                            <textarea id="Notes" name="notes" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Morning weigh-in..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary glass-btn w-100">Log Weight</button>
+                    </form>
+                </div>
+            </div>
+
             <!-- Quick Links -->
-            <div class="card border-0 shadow-lg bg-dark text-white">
+            <div class="card border-0 shadow-lg text-white mb-4" style="background: var(--tile); border: 1px solid var(--frame) !important;">
                 <div class="card-header bg-transparent border-secondary py-3">
                     <h5 class="mb-0"><i class="fas fa-link me-2"></i>Quick Access</h5>
                 </div>
                 <div class="list-group list-group-flush">
-                    <a asp-action="Details" asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                    <a asp-action="Profile" asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-user-circle me-2 text-primary"></i>My Profile</span>
                         <i class="fas fa-chevron-right small text-muted"></i>
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                    <a asp-action="Payments" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-history me-2 text-info"></i>Payment History</span>
                         <i class="fas fa-chevron-right small text-muted"></i>
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                    <a asp-controller="Notification" asp-action="Index" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-bell me-2 text-warning"></i>Notifications</span>
+                        <i class="fas fa-chevron-right small text-muted"></i>
+                    </a>
+                    <a asp-controller="WorkoutLog" asp-action="History" class="list-group-item list-group-item-action bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-dumbbell me-2 text-success"></i>Workout History</span>
                         <i class="fas fa-chevron-right small text-muted"></i>
                     </a>
                 </div>
             </div>
+
+            <!-- Contact Trainer Card -->
+            <div class="card border-0 shadow-lg text-white mb-4" style="background: var(--tile); border: 1px solid var(--frame) !important;">
+                <div class="card-header bg-transparent border-secondary py-3">
+                    <h5 class="mb-0"><i class="fas fa-envelope me-2 text-success"></i>Contact Trainer</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Need help with your workout or diet? Chat with your trainer in real-time.</p>
+                    <a asp-controller="Chat" asp-action="Index" class="btn btn-sm btn-success w-100">
+                        <i class="fas fa-comments me-2"></i>Start Chatting
+                    </a>
+                </div>
+            </div>
+
+            <!-- Rate Trainer Card -->
+            <div class="card border-0 shadow-lg text-white" style="background: var(--tile); border: 1px solid var(--frame) !important;">
+                <div class="card-body text-center">
+                    <button type="button" class="btn btn-warning glass-btn w-100" onclick="loadReviewModal()">
+                        <i class="fas fa-star me-2"></i>Rate Your Trainer
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Right Column: Today's Focus -->
-        <div class="col-lg-8">
+        <!-- Right Column: Today's Focus & Progress -->
+        <div class="col-md-8">
+            <!-- Progress Chart Section -->
+            <div class="card border-0 shadow-lg text-white mb-4" style="background: var(--tile); border: 1px solid var(--frame) !important;">
+                <div class="card-header bg-transparent border-secondary py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Weight Progress</h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (Model.WeightHistory != null && Model.WeightHistory.Any())
+                    {
+                        <div style="height: 300px;">
+                            <canvas id="weightChart"></canvas>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 opacity-50">
+                            <i class="fas fa-chart-area fa-3x mb-3"></i>
+                            <p>No weight logs yet. Start tracking to see your progress!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
             <h4 class="text-white mb-4">Today's Focus</h4>
-            
+
             <div class="row g-4">
                 <!-- Workout Card -->
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-lg h-100 bg-dark text-white overflow-hidden" style="min-height: 250px;">
-                        <div class="card-body p-4 position-relative z-1">
+                    <div class="card border-0 shadow-lg h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative z-1 bg-dark bg-opacity-75">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div class="icon-shape bg-primary bg-opacity-25 text-primary rounded-3 p-3">
                                     <i class="fas fa-dumbbell fa-2x"></i>
                                 </div>
                                 <span class="badge bg-dark border border-secondary">Workout</span>
                             </div>
-                            
+
                             @if (Model.HasWorkoutPlan)
                             {
-                                <h4 class="fw-bold mb-2">@Model.TodayWorkoutName</h4>
+                                <h4 class="fw-bold mb-2 text-white">@Model.TodayWorkoutName</h4>
                                 <p class="text-muted mb-4 small">Ready to crush your goals? Start your scheduled training now.</p>
-                                    <a asp-controller="Member" asp-action="ViewTodayWorkout" class="btn btn-outline-primary stretched-link">
+                                <a asp-controller="WorkoutPlanAssignment" asp-action="ViewTodayWorkout" class="btn btn-outline-primary stretched-link">
                                     Start Workout <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             }
                             else
                             {
-                                <h4 class="fw-bold mb-2">Rest Day</h4>
+                                <h4 class="fw-bold mb-2 text-white">Rest Day</h4>
                                 <p class="text-muted mb-4 small">No workout scheduled for today. Rest and recover!</p>
                                 <button class="btn btn-outline-secondary disabled">No Workout Assigned</button>
                             }
                         </div>
-                        <div class="position-absolute top-0 end-0 h-100 w-100 opacity-10" 
-                             style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'); background-size: cover;">
-                        </div>
+                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark"
+                             style="background-image: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; opacity: 0.3; z-index: 0;"></div>
                     </div>
                 </div>
 
                 <!-- Nutrition Card -->
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-lg h-100 bg-dark text-white overflow-hidden" style="min-height: 250px;">
-                        <div class="card-body p-4 position-relative z-1">
+                    <div class="card border-0 shadow-lg h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative z-1 bg-dark bg-opacity-75">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div class="icon-shape bg-success bg-opacity-25 text-success rounded-3 p-3">
                                     <i class="fas fa-utensils fa-2x"></i>
                                 </div>
                                 <span class="badge bg-dark border border-secondary">Nutrition</span>
                             </div>
-                            
+
                             @if (Model.HasDietPlan)
                             {
-                                <h4 class="fw-bold mb-2">@Model.TodayDietName</h4>
+                                <h4 class="fw-bold mb-2 text-white">@Model.TodayDietName</h4>
                                 <p class="text-muted mb-4 small">Fuel your body efficiently. View your meal plan for today.</p>
-                                <a asp-controller="Member" asp-action="TodayMeal" class="btn btn-outline-success stretched-link">
+                                <a asp-controller="DietPlanAssignment" asp-action="TodayMeal" class="btn btn-outline-success stretched-link">
                                     View Meals <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
                             }
                             else
                             {
-                                <h4 class="fw-bold mb-2">Track Calories</h4>
+                                <h4 class="fw-bold mb-2 text-white">Track Calories</h4>
                                 <p class="text-muted mb-4 small">No specific diet plan assigned. Remember to eat healthy!</p>
                                 <button class="btn btn-outline-secondary disabled">No Plan Assigned</button>
                             }
                         </div>
-                         <div class="position-absolute top-0 end-0 h-100 w-100 opacity-10" 
-                             style="background-image: url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'); background-size: cover;">
-                        </div>
+                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark"
+                             style="background-image: url('https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; opacity: 0.3; z-index: 0;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- AI Floating Button -->
+<a href="@Url.Action("Index", "AI")" class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+   style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 1000; border: 2px solid white;">
+    <i class="fas fa-robot fa-lg"></i>
+</a>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function loadReviewModal() {
+            $.get('/Review/Create', function(data) {
+                $('#reviewModalContent').html(data);
+                $('#reviewModal').modal('show');
+            }).fail(function(xhr, status, error) {
+                console.error('Failed to load review modal:', error);
+                alert('Could not load review form. Please try again.');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Weight Chart
+            const ctx = document.getElementById('weightChart');
+            if (ctx) {
+                const history = @Html.Raw(Json.Serialize(Model.WeightHistory));
+
+                if (history && history.length > 0) {
+                    const labels = history.map(h => new Date(h.dateRecorded).toLocaleDateString());
+                    const data = history.map(h => h.weight);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Weight (kg)',
+                                data: data,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#3b82f6',
+                                pointBorderColor: '#fff',
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: '#1e293b',
+                                    titleColor: '#fff',
+                                    bodyColor: '#fff',
+                                    borderColor: '#334155',
+                                    borderWidth: 1
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    ticks: { color: 'rgba(255, 255, 255, 0.5)' }
+                                },
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { color: 'rgba(255, 255, 255, 0.5)' }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Fix weight input focus
+            const weightContainer = document.getElementById('LogWeightContainer');
+            const weightInput = document.getElementById('WeightInput');
+            const notesTextarea = document.getElementById('Notes');
+
+            if (weightContainer && weightInput) {
+                weightContainer.addEventListener('click', function(e) {
+                    if (!e.target.closest('form')) {
+                        weightInput.focus();
+                    }
+                });
+            }
+
+            if (weightInput && notesTextarea) {
+                weightInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        notesTextarea.focus();
+                    }
+                });
+            }
+        });
+    </script>
+}

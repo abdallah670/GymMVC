@@ -1,4 +1,4 @@
-﻿namespace GymPL.Global
+namespace GymPL.Global
 {
     public class GymSettings
     {

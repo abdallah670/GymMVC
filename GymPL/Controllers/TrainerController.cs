@@ -1,17 +1,14 @@
 using AutoMapper.Execution;
 using GymBLL.ModelVM.Nutrition;
-using GymBLL.ModelVM.User.AppUser;
-using GymBLL.ModelVM.User.Member;
-using GymBLL.ModelVM.User.Trainer;
+using GymBLL.ModelVM.Identity;
+using GymBLL.ModelVM.Member;
+using GymBLL.ModelVM.Trainer;
 using GymBLL.ModelVM.Workout;
-using GymBLL.Service.Abstract;
-using GymBLL.Service.Implementation;
-using GymDAL.Entities.Users;
-using GymPL.Services;
-using GymPL.ViewModels;
-using GymWeb.Extensions;
-using MenoBLL.ModelVM.AccountVM;
-using MenoBLL.Service.Abstract;
+using GymBLL.Service.Abstract.Trainer;
+using GymBLL.Service.Abstract.Member;
+using GymBLL.Service.Abstract.Nutrition;
+using GymBLL.Service.Abstract.Workout;
+using GymBLL.Service.Abstract.Financial;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,8 +17,12 @@ using Newtonsoft.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using GymBLL.ModelVM;
+using GymPL.Services;
+using GymPL.ViewModels;
+using GymPL.Extensions;
+using GymDAL.Repo.Abstract;
 
-namespace GymWeb.Controllers
+namespace GymPL.Controllers
 {
     public class TrainerController : Controller
     {
@@ -35,6 +36,7 @@ namespace GymWeb.Controllers
         private readonly ISubscriptionService _subscripionService;
         private readonly IMembershipService _membershipService;
         private IFileUploadService _fileUploadService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public TrainerController(
             ITrainerService trainerService,
@@ -45,7 +47,8 @@ namespace GymWeb.Controllers
             IWorkoutPlanService workoutPlanService,
             IDietPlanService dietPlanService,
             ISubscriptionService subscripionService,
-            IMembershipService membershipService)
+            IMembershipService membershipService,
+            IUnitOfWork unitOfWork)
         {
 
             this.trainerService = trainerService;
@@ -58,6 +61,7 @@ namespace GymWeb.Controllers
             _dietPlanService = dietPlanService;
             _subscripionService = subscripionService;
             _membershipService = membershipService;
+            _unitOfWork = unitOfWork;
 
 
         }
@@ -92,7 +96,7 @@ namespace GymWeb.Controllers
 
         // POST: /Account/Register
         [HttpPost]
-        //     [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<IActionResult> CreateOwner(RegisterUserVM model)
         {
             if (ModelState.IsValid)
@@ -136,14 +140,14 @@ namespace GymWeb.Controllers
             var membersResponse = await _memberService.GetAllMembersAsync();
             var workoutPlansResponse = await _workoutPlanService.GetActiveWorkoutPlansAsync();
             var dietPlansResponse = await _dietPlanService.GetActiveDietPlansAsync();
+            var allPayments = await _unitOfWork.Payments.GetAllAsync();
 
             var totalMembers = 0;
             var recentMembers = new List<MemberVM>();
             if (!membersResponse.ISHaveErrorOrnNot)
             {
                 totalMembers = membersResponse.Result.Count;
-                // Assuming result is sorted or just taking first 5 for now
-                recentMembers = membersResponse.Result.Take(5).ToList(); 
+                recentMembers = membersResponse.Result.OrderByDescending(m => m.JoinDate).Take(5).ToList(); 
             }
 
             var activeWorkouts = 0;
@@ -166,6 +170,28 @@ namespace GymWeb.Controllers
                 RecentMembers = recentMembers
             };
 
+            // Calculate Chart Data (Last 6 Months)
+            var last6Months = Enumerable.Range(0, 6)
+                .Select(i => DateTime.UtcNow.AddMonths(-i))
+                .OrderBy(d => d)
+                .ToList();
+
+            foreach (var month in last6Months)
+            {
+                dashboardVM.ChartLabels.Add(month.ToString("MMM yyyy"));
+
+                // Revenue
+                var monthlyRevenue = allPayments
+                    .Where(p => p.PaymentDate.Month == month.Month && p.PaymentDate.Year == month.Year && p.Status == "Completed")
+                    .Sum(p => p.Amount);
+                dashboardVM.MonthlyRevenue.Add(monthlyRevenue);
+
+                // New Members
+                var newMembers = membersResponse.Result
+                    .Count(m => m.JoinDate.Month == month.Month && m.JoinDate.Year == month.Year);
+                dashboardVM.NewMembersTrend.Add(newMembers);
+            }
+
             // Keep existing ViewBag claims for header if needed, or remove if ViewModel covers it
             ViewBag.UserId = User.GetUserId();
             ViewBag.FullName = User.GetUserFullName();
@@ -177,6 +203,37 @@ namespace GymWeb.Controllers
 
         public async Task<IActionResult> Profile()
         {
+            var membersResponse = await _memberService.GetAllMembersAsync();
+            var workoutPlansResponse = await _workoutPlanService.GetActiveWorkoutPlansAsync();
+            var dietPlansResponse = await _dietPlanService.GetActiveDietPlansAsync();
+            var totalMembers = 0;
+            
+            if (!membersResponse.ISHaveErrorOrnNot)
+            {
+                totalMembers = membersResponse.Result.Count;
+             
+            }
+
+            var activeWorkouts = 0;
+            if (!workoutPlansResponse.ISHaveErrorOrnNot)
+            {
+                activeWorkouts = workoutPlansResponse.Result.Count;
+            }
+
+            var activeDiets = 0;
+            if (!dietPlansResponse.ISHaveErrorOrnNot)
+            {
+                activeDiets = dietPlansResponse.Result.Count;
+            }
+            var trainerDashboardVM = new TrainerDashboardVM
+            {
+                TotalMembers = totalMembers,
+                ActiveWorkoutPlans = activeWorkouts,
+                ActiveDietPlans = activeDiets,
+              
+            };
+            
+            ViewBag.trainerDashboardVM= trainerDashboardVM ?? new TrainerDashboardVM();
             var userId = User.GetUserId();
                var response = await trainerService.GetTrainerByIdAsync(userId);
 
@@ -295,11 +352,14 @@ namespace GymWeb.Controllers
                 WorkoutAssignmentVM = subscriptionsResponse.Result?.WorkoutAssignmentVM
             };
 
-            if (model.DietPlanAssignmentVM != null)
-                model.DietPlanAssignmentVM.DietPlan = subscriptionsResponse.Result.DietPlanAssignmentVM?.DietPlan;
-            
-            if (model.WorkoutAssignmentVM != null)
-                model.WorkoutAssignmentVM.WorkoutPlan = subscriptionsResponse.Result.WorkoutAssignmentVM?.WorkoutPlan;
+            if (subscriptionsResponse.Result != null)
+            {
+                if (model.DietPlanAssignmentVM != null)
+                    model.DietPlanAssignmentVM.DietPlan = subscriptionsResponse.Result.DietPlanAssignmentVM?.DietPlan;
+                
+                if (model.WorkoutAssignmentVM != null)
+                    model.WorkoutAssignmentVM.WorkoutPlan = subscriptionsResponse.Result.WorkoutAssignmentVM?.WorkoutPlan;
+            }
 
             ViewBag.HasDiet = subscriptionsResponse.Result?.DietPlanAssignmentVM != null;
             ViewBag.HasWorkout = subscriptionsResponse.Result?.WorkoutAssignmentVM != null;

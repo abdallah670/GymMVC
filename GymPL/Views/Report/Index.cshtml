@@ -1,0 +1,151 @@
+@model GymBLL.ModelVM.Report.MemberReportVM
+@{
+    ViewData["Title"] = "Member Report";
+    var returnUrl = ViewBag.ReturnUrl as string;
+}
+
+@section Head {
+    <style>
+        .report-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #0dcaf0;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+        
+        @@media print {
+            body { background: white !important; color: black !important; }
+            .navbar, .btn, footer, .theme-toggle-btn { display: none !important; }
+            .report-header { background: #f8f9fa !important; color: black !important; border-bottom: 2px solid #000; }
+            .stat-card { border: 1px solid #ddd !important; background: white !important; color: black !important; }
+            .stat-value { color: black !important; }
+            .text-white, .text-muted { color: black !important; }
+        }
+    </style>
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+        <a href="javascript:history.back()" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+    </div>
+
+    <div class="report-header">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                @if (!string.IsNullOrEmpty(Model.Member.ProfilePicture))
+                {
+                    <img src="@Model.Member.ProfilePicture" class="rounded-circle border border-3 border-white" style="width: 100px; height: 100px; object-fit: cover;" />
+                }
+                else
+                {
+                    <i class="fas fa-user-circle fa-6x"></i>
+                }
+            </div>
+            <div class="col-md-7 text-center text-md-start">
+                <h1 class="mb-1">@Model.Member.FullName</h1>
+                <p class="mb-2 opacity-75"><i class="fas fa-envelope me-2"></i>@Model.Member.Email</p>
+                <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+                    <span class="badge bg-white text-primary">Member since @Model.Member.JoinDate.ToString("MMM yyyy")</span>
+                    <span class="badge bg-warning text-dark">@Model.MembershipType</span>
+                </div>
+            </div>
+            <div class="col-md-3 text-center text-md-end mt-3 mt-md-0">
+                <div class="h5 mb-0">Report Date</div>
+                <div class="h3 fw-bold">@DateTime.Now.ToString("MMM dd, yyyy")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-value">@Model.TotalWorkoutsLogged</div>
+                <div class="stat-label">Total Workouts</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-value">@Model.AverageWorkoutDuration <span class="fs-6 text-muted">min</span></div>
+                <div class="stat-label">Avg Duration</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-value">@Model.CurrentWeight <span class="fs-6 text-muted">kg</span></div>
+                <div class="stat-label">Current Weight</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-value">
+                    @(Model.LastWorkoutDate.HasValue ? (int)(DateTime.UtcNow - Model.LastWorkoutDate.Value).TotalDays + "d" : "-")
+                </div>
+                <div class="stat-label">Since Last Workout</div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-5 mb-3 text-white border-bottom border-secondary pb-2">Recent Activity</h3>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Plan</th>
+                    <th>Duration</th>
+                    <th>Exercises</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var log in Model.RecentLogs)
+                {
+                    <tr>
+                        <td>@log.Date.ToLocalTime().ToString("MMM dd, hh:mm tt")</td>
+                        <td class="fw-bold text-primary">@log.WorkoutPlanName</td>
+                        <td>@log.DurationMinutes min</td>
+                        <td>
+                            @foreach(var entry in log.Entries.Take(3))
+                            {
+                                <span class="badge bg-secondary me-1">@entry.ExerciseName</span>
+                            }
+                            @if(log.Entries.Count > 3)
+                            {
+                                <span class="badge bg-dark">+@(log.Entries.Count - 3)</span>
+                            }
+                        </td>
+                        <td class="small text-muted fst-italic">@log.Notes</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-5 p-4 border border-secondary rounded text-center d-none d-print-block">
+        <p class="mb-0">Generated by MenoPro Gym Management System</p>
+    </div>
+</div>

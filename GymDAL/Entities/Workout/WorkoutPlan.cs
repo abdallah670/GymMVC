@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using GymDAL.Entities.Core;
+
 namespace GymDAL.Entities.Workout
 {
     
@@ -23,12 +25,7 @@ namespace GymDAL.Entities.Workout
         public string Goal { get; set; } = "General Fitness"; // "Weight Loss", "Muscle Gain", "Endurance", "General Fitness"
         public virtual ICollection<WorkoutPlanItem> WorkoutPlanItems { get; set; }
         public virtual ICollection<WorkoutAssignment> WorkoutAssignments { get; set; }
-        public bool ToggleStatus()
-        {
-            this.IsActive = !this.IsActive;
-          
-            return true;
-        }
+       
        
     }
 }

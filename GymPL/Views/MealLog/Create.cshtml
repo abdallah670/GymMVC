@@ -1,0 +1,176 @@
+@model GymBLL.ModelVM.Nutrition.MealLogVM
+
+@{
+    ViewData["Title"] = "Log Meal";
+	var selectedAssignment = ViewBag.SelectedDietPlanAssignmentId as int?;
+	var DietPlanAssignment = ViewBag.DietPlanAssignment as DietPlanAssignmentVM;
+}
+
+<style>
+    .log-meal-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    .log-header {
+        background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 10px 40px rgba(67, 206, 162, 0.3);
+    }
+    .log-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .meal-log-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 1rem;
+    }
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    .form-control, .form-select {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border-color: #43cea2 !important;
+        box-shadow: 0 0 0 4px rgba(67, 206, 162, 0.1);
+    }
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    .btn-log-meal {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        color: white;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+    .btn-log-meal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(56, 239, 125, 0.3);
+    }
+</style>
+
+<div class="log-meal-wrapper">
+    <div class="mb-3">
+        <a asp-controller="DietPlanAssignment" asp-action="TodayMeal" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <div class="log-header">
+        <h1><i class="fas fa-utensils me-2"></i>Log Your Meal</h1>
+        <p class="opacity-75 mb-0">Record your nutrition to stay on track.</p>
+    </div>
+
+    <div class="meal-log-card">
+        <form id="mealLogForm" asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="DietPlanAssignmentId" class="form-label">Associate with Plan (Optional)</label>
+                    <select asp-for="DietPlanAssignmentId" class="form-select" asp-items="ViewBag.DietPlanAssignmentId">
+                        <option value="@DietPlanAssignment?.Id"> @DietPlanAssignment?.DietPlan?.Name</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Date" class="form-label">Date</label>
+                    <input asp-for="Date" type="date" class="form-control"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
+                    <span asp-validation-for="Date" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="MealsConsumed" class="form-label">What did you eat?</label>
+                <textarea asp-for="MealsConsumed" class="form-control" rows="4" placeholder="e.g. 2 Eggs, 1 Slice Whole Wheat Toast, Black Coffee..."></textarea>
+                <span asp-validation-for="MealsConsumed" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CaloriesConsumed" class="form-label">Total Calories</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-secondary text-white"><i class="fas fa-fire"></i></span>
+                        <input asp-for="CaloriesConsumed" class="form-control" placeholder="e.g. 450" />
+                    </div>
+                    <span asp-validation-for="CaloriesConsumed" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Notes" class="form-label">Notes</label>
+                <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Any extra details..."></textarea>
+                <span asp-validation-for="Notes" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-log-meal">
+                <i class="fas fa-plus-circle me-2"></i> Log Meal
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('mealLogForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            if (!$(form).valid()) return;
+
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', data.message);
+                    form.reset();
+                    // Optional: redirect to index after short delay
+                    setTimeout(() => {
+                        window.location.href = '@Url.Action("Index")';
+                    }, 1500);
+                } else {
+                    showToast('error', data.message);
+                }
+            })
+            .catch(error => {
+                showToast('error', 'An unexpected error occurred.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+}

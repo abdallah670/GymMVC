@@ -1,28 +1,28 @@
-using GymBLL.ModelVM.External;
-using GymBLL.ModelVM.User.Member;
-using GymBLL.Service.Abstract;
+using GymBLL.ModelVM.Financial;
+using GymBLL.Service.Abstract.Financial;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
+using GymBLL.Service.Abstract.Communication;
 
 namespace GymPL.Controllers
 {
-    [Authorize(Roles = "Admin,Trainer")]
+    // Adjust roles as needed
+    [Authorize(Roles = "Trainer,Admin,Manager")]
     public class SubscriptionController : Controller
     {
         private readonly ISubscriptionService _subscriptionService;
-        private readonly IMemberService _memberService;
-        private readonly IMembershipService _membershipService;
+        private readonly INotificationService _notificationService;
 
-        public SubscriptionController(ISubscriptionService subscriptionService, IMemberService memberService, IMembershipService membershipService)
+        public SubscriptionController(ISubscriptionService subscriptionService, INotificationService notificationService)
         {
             _subscriptionService = subscriptionService;
-            _memberService = memberService;
-            _membershipService = membershipService;
+            _notificationService = notificationService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string status = "All")
         {
             var response = await _subscriptionService.GetAllAsync();
             if (response.ISHaveErrorOrnNot)
@@ -30,7 +30,18 @@ namespace GymPL.Controllers
                 TempData["Error"] = response.ErrorMessage;
                 return View(new List<SubscriptionVM>());
             }
-            return View(response.Result);
+
+            var subscriptions = response.Result;
+
+            // Simple filtering
+            if (status != "All")
+            {
+                subscriptions = subscriptions.Where(s => s.Status == status).ToList();
+            }
+
+            ViewBag.CurrentFilter = status;
+
+            return View(subscriptions);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -44,69 +55,42 @@ namespace GymPL.Controllers
             return View(response.Result);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            await PopulateDropDowns();
-            return View();
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SubscriptionVM model)
+        public async Task<IActionResult> Cancel(int id)
         {
-            if (!ModelState.IsValid)
+            // Get subscription details first to know who to notify
+            var subResponse = await _subscriptionService.GetByIdAsync(id);
+            if (subResponse.ISHaveErrorOrnNot)
             {
-                await PopulateDropDowns();
-                return View(model);
-            }
-
-            var response = await _subscriptionService.CreateAsync(model);
-            if (response.ISHaveErrorOrnNot)
-            {
-                TempData["Error"] = response.ErrorMessage;
-                await PopulateDropDowns();
-                return View(model);
-            }
-
-            TempData["Success"] = "Subscription created successfully!";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var response = await _subscriptionService.GetByIdAsync(id);
-            if (response.ISHaveErrorOrnNot)
-            {
-                TempData["Error"] = response.ErrorMessage;
+                TempData["Error"] = "Subscription not found.";
                 return RedirectToAction(nameof(Index));
             }
-            await PopulateDropDowns();
-            return View(response.Result);
-        }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(SubscriptionVM model)
-        {
-            if (!ModelState.IsValid)
-            {
-                await PopulateDropDowns();
-                return View(model);
-            }
-
-            var response = await _subscriptionService.UpdateAsync(model);
+            var response = await _subscriptionService.CancelSubscriptionAsync(id);
             if (response.ISHaveErrorOrnNot)
             {
                 TempData["Error"] = response.ErrorMessage;
-                await PopulateDropDowns();
-                return View(model);
             }
+            else
+            {
+                // Send notification to member
+                var notification = new GymBLL.ModelVM.Communication.NotificationVM
+                {
+                    UserId = subResponse.Result.MemberId,
+                    Type = "Warning",
+                    Message = $"Your subscription to {subResponse.Result.MembershipType} has been cancelled by an administrator.",
+                    Status = "Unread",
+                    DeliveryMethod = "InApp",
+                    SendTime = System.DateTime.UtcNow
+                };
+                await _notificationService.CreateAsync(notification);
 
-            TempData["Success"] = "Subscription updated successfully!";
+                TempData["Success"] = "Subscription cancelled successfully.";
+            }
             return RedirectToAction(nameof(Index));
         }
+       
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -115,44 +99,13 @@ namespace GymPL.Controllers
             var response = await _subscriptionService.DeleteAsync(id);
             if (response.ISHaveErrorOrnNot)
             {
-                TempData["Error"] = response.ErrorMessage;
+                TempData["Error"] = "Failed to delete subscription.";
             }
             else
             {
-                TempData["Success"] = "Subscription deleted successfully!";
+                TempData["Success"] = "Subscription deleted successfully.";
             }
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Cancel(int id)
-        {
-            var response = await _subscriptionService.CancelSubscriptionAsync(id);
-            if (response.ISHaveErrorOrnNot)
-            {
-                return Json(new { success = false, message = response.ErrorMessage });
-            }
-            return Json(new { success = true, message = "Subscription cancelled successfully!" });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Renew(int id)
-        {
-            var response = await _subscriptionService.RenewSubscriptionAsync(id);
-            if (response.ISHaveErrorOrnNot)
-            {
-                return Json(new { success = false, message = response.ErrorMessage });
-            }
-            return Json(new { success = true, message = "Subscription renewed successfully!" });
-        }
-
-        private async Task PopulateDropDowns()
-        {
-            var members = await _memberService.GetAllMembersAsync();
-            var memberships = await _membershipService.GetActiveAsync();
-
-            ViewBag.Members = new SelectList(members.Result ?? new List<MemberVM>(), "Id", "FullName");
-            ViewBag.Memberships = new SelectList(memberships.Result ?? new List<MembershipVM>(), "Id", "MembershipType");
         }
     }
 }

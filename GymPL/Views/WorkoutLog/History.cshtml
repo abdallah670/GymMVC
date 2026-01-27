@@ -1,0 +1,146 @@
+@model List<GymBLL.ModelVM.Workout.WorkoutLogVM>
+
+@{
+    ViewData["Title"] = "Workout History";
+}
+
+@section Head {
+    <style>
+        .history-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        .history-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .history-date {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+        }
+        .accordion-button {
+            background-color: transparent !important;
+            color: white !important;
+            box-shadow: none !important;
+        }
+        .accordion-button:not(.collapsed) {
+            color: var(--bs-primary) !important;
+        }
+        .accordion-button::after {
+            filter: invert(1);
+        }
+        .accordion-item {
+            background-color: transparent;
+            border: none;
+        }
+        .table-dark-transparent {
+            --bs-table-bg: transparent;
+            --bs-table-color: rgba(255,255,255,0.8);
+            border-color: rgba(255,255,255,0.1);
+        }
+    </style>
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 fw-bold text-white mb-0">Workout <span class="text-primary">History</span></h1>
+            <p class="text-muted">Track your consistency and progress over time.</p>
+        </div>
+        <a asp-controller="Member" asp-action="Dashboard" class="btn btn-outline-light rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Dashboard
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-history fa-4x text-muted opacity-50"></i>
+            </div>
+            <h3 class="text-white">No workouts logged yet</h3>
+            <p class="text-muted">Start a workout plan and log your first session!</p>
+            <a asp-controller="Member" asp-action="Dashboard" class="btn btn-primary mt-3">
+                Go to Dashboard
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="accordion" id="historyAccordion">
+                    @foreach (var log in Model)
+                    {
+                        <div class="history-card mb-3">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-@log.Id">
+                                    <button class="accordion-button collapsed p-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@log.Id" aria-expanded="false" aria-controls="collapse-@log.Id">
+                                        <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                                            <div>
+                                                <div class="history-date mb-1">
+                                                    <i class="fas fa-calendar-alt me-2"></i>@log.Date.ToLocalTime().ToString("MMM dd, yyyy • hh:mm tt")
+                                                </div>
+                                                <h4 class="mb-0 fw-bold">@log.WorkoutPlanName</h4>
+                                            </div>
+                                            <div class="text-end d-none d-sm-block">
+                                                <span class="badge bg-dark border border-secondary p-2">
+                                                    <i class="fas fa-clock me-1"></i> @log.DurationMinutes min
+                                                </span>
+                                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary p-2 ms-2">
+                                                    @log.Entries.Count Exercises
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse-@log.Id" class="accordion-collapse collapse" aria-labelledby="heading-@log.Id" data-bs-parent="#historyAccordion">
+                                    <div class="accordion-body px-4 pb-4 pt-0">
+                                        <hr class="border-secondary opacity-25 my-3">
+                                        
+                                        @if (!string.IsNullOrEmpty(log.Notes))
+                                        {
+                                            <div class="alert alert-dark border-0 bg-opacity-50 mb-4">
+                                                <i class="fas fa-sticky-note me-2 text-warning"></i> @log.Notes
+                                            </div>
+                                        }
+
+                                        <div class="table-responsive">
+                                            <table class="table table-dark-transparent align-middle">
+                                                <thead>
+                                                    <tr class="text-uppercase small text-muted">
+                                                        <th style="width: 40%">Exercise</th>
+                                                        <th style="width: 20%">Sets</th>
+                                                        <th style="width: 20%">Reps</th>
+                                                        <th style="width: 20%">Weight</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var entry in log.Entries)
+                                                    {
+                                                        <tr>
+                                                            <td class="fw-bold">@entry.ExerciseName</td>
+                                                            <td><span class="badge bg-secondary">@entry.SetsPerformed</span></td>
+                                                            <td class="font-monospace text-info">@entry.RepsPerformed</td>
+                                                            <td class="font-monospace text-warning">@entry.WeightLifted</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

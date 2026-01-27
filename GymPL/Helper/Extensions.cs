@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace GymWeb.Extensions
+namespace GymPL.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {

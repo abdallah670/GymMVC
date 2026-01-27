@@ -2,7 +2,10 @@
 
 
 using GymDAL.Entities;
-using GymDAL.Entities.External;
+using GymDAL.Entities.Financial;
+using GymDAL.Entities.Core;
+using GymDAL.Entities.Communication;
+using GymDAL.Entities.Users;
 
 namespace TestMVC.DAL.DB
 {
@@ -13,6 +16,8 @@ namespace TestMVC.DAL.DB
         // User-related DbSets
         public DbSet<Member> Members { get; set; }
         public DbSet<Trainer> Trainers { get; set; }
+        public DbSet<TempRegistration> TempRegistrations { get; set; }
+        public DbSet<WeightLog> WeightLogs { get; set; }
      
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
        
@@ -20,9 +25,13 @@ namespace TestMVC.DAL.DB
         public DbSet<WorkoutPlan> WorkoutPlans { get; set; }
         public DbSet<WorkoutPlanItem> WorkoutPlanItems { get; set; }
         public DbSet<WorkoutAssignment> WorkoutAssignments { get; set; }
+        public DbSet<WorkoutLog> WorkoutLogs { get; set; }
+        public DbSet<WorkoutLogEntry> WorkoutLogEntries { get; set; }
        
 
         // Diet-related DbSets
+        public DbSet<FitnessGoals> FitnessGoals { get; set; }
+        public DbSet<TrainerReview> TrainerReviews { get; set; }
         public DbSet<DietPlan> DietPlans { get; set; }
         public DbSet<DietPlanItem> DietPlanItems { get; set; }
         public DbSet<DietPlanAssignment> DietPlanAssignments { get; set; }
@@ -30,13 +39,15 @@ namespace TestMVC.DAL.DB
 
     
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
     
         // Financial DbSets
         public DbSet<Payment> Payments { get; set; }
      
         public DbSet<Membership> Memberships { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<FitnessGoals> FitnessGoals { get; set; }
+
+      
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -82,8 +93,10 @@ namespace TestMVC.DAL.DB
             builder.Entity<DietPlanItem>().HasQueryFilter(dpi => dpi.IsActive);
             builder.Entity<DietPlanAssignment>().HasQueryFilter(dpa => dpa.IsActive);
             builder.Entity<MealLog>().HasQueryFilter(ml => ml.IsActive);
+            builder.Entity<WeightLog>().HasQueryFilter(wl => wl.IsActive);
           
             builder.Entity<Notification>().HasQueryFilter(n => n.IsActive);
+            builder.Entity<ChatMessage>().HasQueryFilter(cm => cm.IsActive);
            
             builder.Entity<ApplicationUser>().HasQueryFilter(m => m.IsActive);
             

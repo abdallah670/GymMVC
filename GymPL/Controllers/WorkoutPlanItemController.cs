@@ -1,7 +1,7 @@
 using GymBLL.ModelVM.Workout;
-using GymBLL.Service.Abstract;
+using GymBLL.Service.Abstract.Workout;
 using GymDAL.Entities.Workout;
-using MenoBLL.Response;
+using GymBLL.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

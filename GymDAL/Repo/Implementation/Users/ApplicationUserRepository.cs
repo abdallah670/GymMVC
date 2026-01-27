@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Users
 {
     public class ApplicationUserRepository : Repository<ApplicationUser>, IApplicationUserRepository
     {

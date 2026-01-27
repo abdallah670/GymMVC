@@ -1,6 +1,8 @@
 ﻿using GymDAL.Repo.Abstract;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using GymDAL.Entities.Core;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace GymDAL.Repo.Implementation
 {
@@ -44,6 +46,7 @@ namespace GymDAL.Repo.Implementation
             if (entity is BaseEntity baseEntity)
             {
                 baseEntity.IsActive = false;
+                baseEntity.DeletedAt = DateTime.UtcNow;
                 _dbSet.Update(entity);
             }
             else
@@ -73,11 +76,37 @@ namespace GymDAL.Repo.Implementation
                 .ToListAsync();
         }
 
-        // -------------------------------------------------------------
-        // NEW SOFT DELETE METHODS
-        // -------------------------------------------------------------
+   
 
-        public virtual async Task<bool> SoftDeleteAsync(int id)
+    public virtual IQueryable<T> Get(Expression<Func<T, bool>> filter = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+    Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+    {
+        IQueryable<T> query = _dbSet;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        if (include != null)
+        {
+            query = include(query);
+        }
+
+        if (orderBy != null)
+        {
+            return orderBy(query);
+        }
+
+        return query;
+    }
+
+    // -------------------------------------------------------------
+    // NEW SOFT DELETE METHODS
+    // -------------------------------------------------------------
+
+    public virtual async Task<bool> SoftDeleteAsync(int id)
         {
             var entity = await GetByIdAsync(id);
             if (entity is BaseEntity baseEntity)

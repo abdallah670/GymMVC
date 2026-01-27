@@ -1,0 +1,132 @@
+<li class="nav-item dropdown mx-2" id="notificationDropdownContainer">
+    <a class="nav-link position-relative p-2" href="#" id="alertsDropdown" role="button"
+       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--ink);">
+        <i class="fas fa-bell fa-lg"></i>
+        <!-- Counter - Alerts -->
+        <span class="badge bg-danger badge-counter" id="notificationBadge"
+              style="position: absolute; top: 2px; right: 2px; font-size: 0.6rem; display: none;">
+            0
+        </span>
+    </a>
+    <!-- Dropdown - Alerts -->
+    <div class="dropdown-menu dropdown-menu-end shadow p-0"
+         aria-labelledby="alertsDropdown" style="min-width: 320px;">
+        <h6 class="dropdown-header py-3">
+            <i class="fas fa-bell me-2" style="color: var(--main-color);"></i>Alerts Center
+        </h6>
+        <div id="notificationList" class="p-0" style="max-height: 400px; overflow-y: auto;">
+            <!-- Notifications injected here -->
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Syncing notifications...</p>
+            </div>
+        </div>
+        <div class="p-2 border-top">
+            <a class="dropdown-item text-center text-primary justify-content-center"
+               asp-controller="Notification" asp-action="Index">
+                <i class="fas fa-eye me-2"></i>Show All Alerts
+            </a>
+        </div>
+    </div>
+</li>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadNotifications();
+        // Refresh notifications every 30 seconds
+        setInterval(loadNotifications, 30000);
+    });
+
+    async function loadNotifications() {
+        try {
+            const response = await fetch('/Notification/GetUnread');
+            const data = await response.json();
+
+            if (data.success && data.notifications) {
+                updateNotificationUI(data.notifications);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    }
+
+    function updateNotificationUI(notifications) {
+        const badge = document.getElementById('notificationBadge');
+        const list = document.getElementById('notificationList');
+
+        // Update badge
+        if (notifications.length > 0) {
+            const count = notifications.length;
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        // Update list
+        if (notifications.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-2x text-success mb-3 opacity-50"></i>
+                    <p class="text-muted mb-0">No new notifications</p>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        notifications.slice(0, 5).forEach(n => {
+            // Handle both PascalCase and camelCase
+            const id = n.id || n.Id;
+            const message = n.message || n.Message;
+            const type = n.type || n.Type;
+            const sendTime = n.sendTime || n.SendTime;
+            
+            const date = new Date(sendTime).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const typeClass = type === 'Warning' ? 'warning' :
+                             type === 'Success' ? 'success' : 'info';
+
+            const iconClass = type === 'Warning' ? 'fa-exclamation-triangle' :
+                             type === 'Success' ? 'fa-check-circle' : 'fa-info-circle';
+
+            html += `
+                <div class="notification-item" onclick="markAsRead(${id})">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3 mt-1">
+                            <i class="fas ${iconClass} fa-lg text-${typeClass}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold" style="color: var(--ink); font-size: 0.85rem;">${type || 'Update'}</span>
+                                <small class="text-muted" style="font-size: 0.75rem;">${date}</small>
+                            </div>
+                            <p class="mb-0 text-muted" style="font-size: 0.85rem; line-height: 1.4;">${message}</p>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        list.innerHTML = html;
+    }
+
+    async function markAsRead(id) {
+        try {
+            const response = await fetch(`/Notification/MarkAsRead?id=${id}`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // Refresh list to remove the read notification (since we only show unread)
+                loadNotifications();
+            }
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    }
+</script>

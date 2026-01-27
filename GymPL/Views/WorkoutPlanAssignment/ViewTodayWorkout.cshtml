@@ -1,0 +1,217 @@
+@{
+    ViewData["Title"] = "Today's Workout";
+    var assignment = ViewBag.Assignment as GymBLL.ModelVM.Workout.WorkoutAssignmentVM;
+    var workoutPlan = ViewBag.WorkoutPlan as GymDAL.Entities.Workout.WorkoutPlan; // Use entity if that's what controller provides
+    var currentDay = (int)ViewBag.CurrentDay;
+    var maxDays = (int)ViewBag.MaxDays;
+    var exercises = ViewBag.Exercises as List<GymBLL.ModelVM.Workout.WorkoutPlanItemVM>;
+    
+    var planName = ViewBag.PlanName as string;
+}
+
+
+
+    <style>
+        .log-input {
+            background-color: rgba(0,0,0,0.05);
+            border: 1px solid #dee2e6;
+            color: #212529;
+        }
+        .log-input:focus {
+            background-color: #fff;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        .exercise-card-item {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .exercise-card-item.logged {
+            border-left: 5px solid #198754;
+        }
+    </style>
+
+
+<div class="plan-assignment-wrapper">
+    <div class="mb-3">
+        @if (User.IsInRole("Member"))
+        {
+            <a href="@Url.Action("Dashboard", "Member")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Member")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Members
+            </a>
+        }
+    </div>
+
+    <!-- Header -->
+    <div class="daily-header-gradient workout">
+        <div>
+            <h2 class="mb-2">
+                <i class="fas fa-dumbbell me-1"></i> @(planName ?? workoutPlan?.Name)
+            </h2>
+            <div class="opacity-90 mb-1">
+                <i class="fas fa-signal me-1"></i> @workoutPlan?.Difficulty | <i class="fas fa-bullseye me-1"></i> @workoutPlan?.Goal
+            </div>
+            <div class="opacity-75 small">
+                <i class="fas fa-calendar-alt me-1"></i>
+                @assignment?.StartDate.ToString("MMM dd, yyyy") - @assignment?.EndDate.ToString("MMM dd, yyyy")
+            </div>
+        </div>
+        <div class="day-indicator-box">
+            <div class="day-number">Day @currentDay</div>
+            <div class="day-total-of">of @maxDays days</div>
+        </div>
+        @if (User.IsInRole("Member") && exercises != null && exercises.Any())
+        {
+            var isLogged = ViewBag.IsLogged as bool? ?? false;
+            if (isLogged)
+            {
+                 <button class="btn btn-secondary ms-3" style="align-self: center;" disabled>
+                    <i class="fas fa-check-circle me-1"></i> Workout Logged
+                </button>
+            }
+            else
+            {
+                <a asp-controller="WorkoutLog" asp-action="LogWorkout" asp-route-day="@currentDay" 
+                   class="btn btn-success ms-3" style="align-self: center;">
+                    <i class="fas fa-clipboard-check me-1"></i> Log This Workout
+                </a>
+            }
+        }
+    </div>
+
+    <!-- Day Navigation -->
+    <div class="day-nav-bar">
+        @if (currentDay > 1)
+        {
+            <a href="@Url.Action("ViewTodayWorkout", "WorkoutPlanAssignment", new { assignmentId = assignment?.Id, day = currentDay - 1 })" class="btn btn-secondary">
+                <i class="fas fa-chevron-left me-1"></i> Previous Day
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+
+        <div class="day-selector-group">
+            <label class="text-muted mb-0">Jump to day:</label>
+            <select id="daySelector" onchange="changeDayWorkout(this.value)">
+                @for (int i = 1; i <= maxDays; i++)
+                {
+                    <option value="@i" selected="@(i == currentDay)">Day @i</option>
+                }
+            </select>
+        </div>
+
+        @if (currentDay < maxDays)
+        {
+            <a href="@Url.Action("ViewTodayWorkout", "WorkoutPlanAssignment", new { assignmentId = assignment?.Id, day = currentDay + 1 })" class="btn btn-secondary">
+                Next Day <i class="fas fa-chevron-right ms-1"></i>
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+    </div>
+
+    <!-- Exercises List -->
+    <div class="daily-content-box">
+        <h3 class="daily-content-title">
+            <i class="fas fa-list me-1"></i> Exercises for Day @currentDay
+        </h3>
+
+        @if (exercises == null || !exercises.Any())
+        {
+            <div class="no-data-placeholder">
+                <i class="fas fa-bed"></i>
+                <h4>Rest Day</h4>
+                <p>No exercises scheduled for this day. Take time to recover!</p>
+            </div>
+        }
+        else
+        {
+            <div class="daily-items-list">
+                @foreach (var exercise in exercises)
+                {
+                    <div class="exercise-card-item">
+                        <div class="exercise-card-header">
+                            <h4 class="exercise-name">
+                                <i class="fas fa-running me-1" style="color: var(--main-color);"></i> @exercise.ExerciseName
+                            </h4>
+                            @if (!string.IsNullOrEmpty(exercise.VideoUrl))
+                            {
+                                <a href="@exercise.VideoUrl" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-video me-1"></i> Watch Demo
+                                </a>
+                            }
+                        </div>
+
+                        <div class="exercise-stats-row">
+                            @if (!string.IsNullOrEmpty(exercise.Sets))
+                            {
+                                <div>
+                                    <span class="exercise-stat-label">Sets:</span>
+                                    <span class="exercise-stat-value">@exercise.Sets</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(exercise.Reps))
+                            {
+                                <div>
+                                    <span class="exercise-stat-label">Reps:</span>
+                                    <span class="exercise-stat-value">@exercise.Reps</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(exercise.RestDuration))
+                            {
+                                <div>
+                                    <span class="exercise-stat-label">Rest:</span>
+                                    <span class="exercise-stat-value">@exercise.RestDuration</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(exercise.Equipment))
+                            {
+                                <div>
+                                    <span class="exercise-stat-label">Equipment:</span>
+                                    <span class="exercise-stat-value">@exercise.Equipment</span>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(exercise.Notes))
+                        {
+                            <div class="exercise-notes-box">
+                                <div class="exercise-stat-label mb-1">
+                                    <i class="fas fa-info-circle me-1"></i> Notes:
+                                </div>
+                                <div class="text-dark small">@exercise.Notes</div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(assignment?.Notes))
+    {
+        <div class="trainer-notes-alert">
+            <h4 class="mb-2">
+                <i class="fas fa-sticky-note me-1"></i> Trainer Notes
+            </h4>
+            <p class="mb-0 text-muted">@assignment.Notes</p>
+        </div>
+    }
+</div>
+
+<script>
+    function changeDayWorkout(day) {
+        window.location.href = '@Url.Action("ViewTodayWorkout", "WorkoutPlanAssignment")?assignmentId=@assignment?.Id&day=' + day;
+    }
+</script>

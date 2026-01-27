@@ -44,8 +44,7 @@ namespace GymDAL.Configuration.Nutrition
             builder.HasIndex(ml => ml.Date);
 
             // Composite unique constraint to prevent duplicate logs
-            builder.HasIndex(ml => new { ml.DietPlanAssignmentId, ml.Date })
-                .IsUnique();
+       
 
             // Relationships
             builder.HasOne(ml => ml.DietPlanAssignment)

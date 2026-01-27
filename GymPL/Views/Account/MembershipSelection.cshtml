@@ -1,0 +1,62 @@
+@model List<GymBLL.ModelVM.Financial.MembershipVM>
+@{
+    ViewData["Title"] = "Select Membership";
+    var email = ViewBag.Email as string;
+}
+
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Choose Your Plan</h1>
+        <p class="lead text-muted">Select the membership that fits your goals.</p>
+        
+        @if (!Model.Any())
+        {
+             <div class="alert alert-warning">
+                 No membership plans are currently available. Please contact support or check back later.
+             </div>
+        }
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center g-4 justify-content-center">
+        @foreach (var plan in Model)
+        {
+            <div class="col">
+                <form asp-action="MembershipSelection" method="post" class="h-100">
+                    <input type="hidden" name="email" value="@email" />
+                    <input type="hidden" name="membershipId" value="@plan.Id" />
+                    
+                    <div class="card h-100 rounded-3 shadow-sm @(plan.MembershipType.Contains("Pro") ? "border-primary" : "")">
+                        <div class="card-header py-3 @(plan.MembershipType.Contains("Pro") ? "text-white bg-primary border-primary" : "")">
+                             <h4 class="my-0 fw-normal">
+                                 @plan.MembershipType 
+                                 @if (plan.MembershipType.Contains("Pro"))
+                                 {
+                                     <span class="badge bg-warning text-dark">Popular</span>
+                                 }
+                             </h4>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h1 class="card-title pricing-card-title">$@plan.Price<small class="text-muted fw-light">/@(plan.DurationInMonths)mo</small></h1>
+                            <ul class="list-unstyled mt-3 mb-4 flex-grow-1 text-start ps-3">
+                                <li><i class="fas fa-clock text-success me-2"></i>Duration: @plan.DurationInMonths Months</li>
+                                @if (plan.HasDietPlan) { <li><i class="fas fa-utensils text-success me-2"></i>Diet Plan Included</li> }
+                                @if (plan.HasWorkoutPlan) { <li><i class="fas fa-dumbbell text-success me-2"></i>Workout Plan Included</li> }
+                                @if (plan.IsFollowedByTrainer) { <li><i class="fas fa-user-friends text-success me-2"></i>Trainer Follow-up</li> }
+                                <li><i class="fas fa-check text-success me-2"></i>Full Gym Access</li>
+                            </ul>
+                            
+                            @if (plan.MembershipType.Contains("Pro"))
+                            {
+                                <button type="submit" class="w-100 btn btn-lg btn-primary mt-auto">Get @plan.MembershipType</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="w-100 btn btn-lg btn-outline-primary mt-auto">Select @plan.MembershipType</button>
+                            }
+                        </div>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
+</div>

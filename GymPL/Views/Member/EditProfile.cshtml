@@ -1,0 +1,119 @@
+@model GymBLL.ModelVM.Member.MemberVM
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container py-4">
+    <div class="card shadow border-0 mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Edit My Profile</h6>
+            <a asp-action="Profile" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left fa-sm"></i> Back to Profile
+            </a>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditProfile" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ProfilePicture" />
+
+                <div class="row">
+                    <!-- Left Column: Profile Picture -->
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="mb-3" id="imagePreviewContainer">
+                            @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                            {
+                                <img src="@Model.ProfilePicture" class="img-fluid rounded-circle shadow" style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Picture" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow" style="width: 150px; height: 150px;">
+                                    <i class="fas fa-user fa-3x text-secondary"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label for="ProfileImageFile" class="btn btn-outline-primary btn-sm btn-file cursor-pointer">
+                                <i class="fas fa-camera me-1"></i> Change Photo
+                                <input asp-for="ProfileImageFile" type="file" accept="image/*" style="display: none;" onchange="previewImage(this)" />
+                            </label>
+                            <span asp-validation-for="ProfileImageFile" class="text-danger d-block mt-1"></span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Personal Details -->
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="FullName" class="control-label fw-bold small text-uppercase text-muted mb-1"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label fw-bold small text-uppercase text-muted mb-1"></label>
+                            <input asp-for="Email" class="form-control bg-light" readonly />
+                            <small class="text-muted">Email address cannot be changed.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Phone" class="control-label fw-bold small text-uppercase text-muted mb-1"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label asp-for="CurrentWeight" class="control-label fw-bold small text-uppercase text-muted mb-1"></label>
+                                <div class="input-group">
+                                    <input asp-for="CurrentWeight" class="form-control" />
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                                <span asp-validation-for="CurrentWeight" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label asp-for="Height" class="control-label fw-bold small text-uppercase text-muted mb-1"></label>
+                                <div class="input-group">
+                                    <input asp-for="Height" class="form-control" />
+                                    <span class="input-group-text">cm</span>
+                                </div>
+                                <span asp-validation-for="Height" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="FitnessGoal.GoalName" class="control-label fw-bold small text-uppercase text-muted mb-1"></label>
+                            <textarea asp-for="FitnessGoal.GoalName" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="FitnessGoal.GoalName" class="text-danger"></span>
+                        </div>
+                        
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Profile" class="btn btn-light me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var container = document.getElementById('imagePreviewContainer');
+                    container.innerHTML = '<img src="' + e.target.result + '" class="img-fluid rounded-circle shadow" style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Preview" />';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

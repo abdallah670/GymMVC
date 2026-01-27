@@ -23,5 +23,7 @@ namespace GymBLL.ModelVM.Nutrition
         public int? CaloriesConsumed { get; set; }
 
         public bool IsActive { get; set; } = true;
+        public DietPlanAssignmentVM? DietPlanAssignment { get; set; }
+     
     }
 }

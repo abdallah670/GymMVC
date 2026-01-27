@@ -1,0 +1,80 @@
+@model GymBLL.ModelVM.Workout.WorkoutAssignmentVM
+
+@{
+    ViewData["Title"] = "My Workout Plan";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-white fw-bold"><i class="fas fa-dumbbell text-primary me-2"></i>My Assigned Workout</h1>
+        <a asp-action="Dashboard" class="btn btn-outline-light"><i class="fas fa-arrow-left me-2"></i>Dashboard</a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card bg-dark text-white border-secondary shadow-lg mb-4">
+                <div class="card-body p-4">
+                    <h3 class="text-primary fw-bold mb-3">@Model.WorkoutPlan?.Name</h3>
+                    <p class="text-muted mb-4">@Model.WorkoutPlan?.Description</p>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-secondary bg-opacity-10 rounded border border-secondary border-opacity-25">
+                                <small class="text-muted d-block text-uppercase mb-1">Start Date</small>
+                                <span class="h5 mb-0">@Model.StartDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-secondary bg-opacity-10 rounded border border-secondary border-opacity-25">
+                                <small class="text-muted d-block text-uppercase mb-1">End Date</small>
+                                <span class="h5 mb-0">@Model.EndDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-2">Trainer's Notes</h5>
+                            <div class="bg-light bg-opacity-10 p-3 rounded italic">
+                                "@Model.Notes"
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-grid gap-2">
+                        <a asp-controller="WorkoutPlanAssignment" asp-action="ViewTodayWorkout" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play-circle me-2"></i>Start Today's Workout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card bg-dark text-white border-secondary shadow-lg">
+                <div class="card-header border-secondary bg-transparent">
+                    <h5 class="mb-0">Plan Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <span class="text-muted">Status</span>
+                        </div>
+                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary")">@(Model.IsActive ? "Active" : "Inactive")</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <span class="text-muted">Assigned By</span>
+                        </div>
+                        <span>Trainer</span>
+                    </div>
+                    <hr class="border-secondary">
+                    <p class="small text-muted mb-0">
+                        This plan has been specifically tailored to your fitness goals. If you have questions, please contact your trainer.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

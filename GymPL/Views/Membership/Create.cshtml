@@ -1,96 +1,103 @@
-@model GymBLL.ModelVM.External.MembershipVM
+@using GymBLL.ModelVM.Financial
+@model MembershipVM
 
-@{
-    ViewData["Title"] = "Create Membership";
-}
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Create Membership</h1>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Membership Details</h6>
+<div class="container py-4" style="max-width: 800px;">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-light rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 mb-0" style="color: var(--ink); font-weight: 700;">Create Membership</h1>
+            <p class="text-muted mb-0">Define a new membership plan</p>
         </div>
-        <div class="card-body">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
-                <div class="form-group">
-                    <label asp-for="MembershipType" class="control-label"></label>
-                    <input asp-for="MembershipType" class="form-control" />
-                    <span asp-validation-for="MembershipType" class="text-danger"></span>
-                </div>
+    </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label asp-for="Price" class="control-label"></label>
-                        <input asp-for="Price" class="form-control" />
-                        <span asp-validation-for="Price" class="text-danger"></span>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label asp-for="DurationInMonths" class="control-label"></label>
-                        <input asp-for="DurationInMonths" class="form-control" />
-                        <span asp-validation-for="DurationInMonths" class="text-danger"></span>
-                    </div>
-                </div>
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius); background: var(--tile);">
+        <div class="card-body p-4 p-md-5">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-3">
-                        <div class="form-check">
-                            <input class="form-check-input" asp-for="HasDietPlan" />
-                            <label class="form-check-label" asp-for="HasDietPlan"></label>
-                        </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <label asp-for="MembershipType" class="form-label fw-bold small text-uppercase text-muted">Plan Name</label>
+                        <input asp-for="MembershipType" class="form-control form-control-lg" placeholder="e.g. Gold Premium" />
+                        <span asp-validation-for="MembershipType" class="text-danger small"></span>
                     </div>
-                    <div class="form-group col-md-3">
-                        <div class="form-check">
-                            <input class="form-check-input" asp-for="HasWorkoutPlan" />
-                            <label class="form-check-label" asp-for="HasWorkoutPlan"></label>
+
+                    <div class="col-md-6">
+                        <label asp-for="Price" class="form-label fw-bold small text-uppercase text-muted">Price ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">$</span>
+                            <input asp-for="Price" class="form-control border-start-0" type="number" step="0.01" />
                         </div>
+                        <span asp-validation-for="Price" class="text-danger small"></span>
                     </div>
-                    <div class="form-group col-md-3">
-                        <div class="form-check">
-                            <input class="form-check-input" asp-for="HasNotification" />
-                            <label class="form-check-label" asp-for="HasNotification"></label>
+
+                    <div class="col-md-6">
+                        <label asp-for="DurationInMonths" class="form-label fw-bold small text-uppercase text-muted">Duration (Months)</label>
+                        <div class="input-group">
+                            <input asp-for="DurationInMonths" class="form-control border-end-0" type="number" />
+                            <span class="input-group-text bg-light border-start-0">Months</span>
                         </div>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <div class="form-check">
-                            <input class="form-check-input" asp-for="IsFollowedByTrainer" />
-                            <label class="form-check-label" asp-for="IsFollowedByTrainer"></label>
-                        </div>
+                        <span asp-validation-for="DurationInMonths" class="text-danger small"></span>
                     </div>
                 </div>
 
-                @* <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label asp-for="DietPlanId" class="control-label">Default Diet Plan (Optional)</label>
-                        <select asp-for="DietPlanId" class="form-control" asp-items="ViewBag.DietPlans">
-                            <option value="">-- Select Diet Plan --</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label asp-for="WorkoutPlanId" class="control-label">Default Workout Plan (Optional)</label>
-                        <select asp-for="WorkoutPlanId" class="form-control" asp-items="ViewBag.WorkoutPlans">
-                            <option value="">-- Select Workout Plan --</option>
-                        </select>
-                    </div>
-                </div> *@
+                <hr class="my-4 text-muted opacity-25" />
 
-                <div class="form-group form-check">
-                    <label class="form-check-label">
-                        <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                    </label>
+                <h5 class="mb-3 fw-bold" style="color: var(--ink);">Included Features</h5>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-check p-3 border rounded h-100" style="background-color: var(--bg-secondary);">
+                            <input class="form-check-input" type="checkbox" asp-for="HasWorkoutPlan" id="checkWorkout">
+                            <label class="form-check-label d-block" for="checkWorkout">
+                                <span class="fw-bold d-block">Workout Plan</span>
+                                <small class="text-muted">Includes customized workout routines</small>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check p-3 border rounded h-100" style="background-color: var(--bg-secondary);">
+                            <input class="form-check-input" type="checkbox" asp-for="HasDietPlan" id="checkDiet">
+                            <label class="form-check-label d-block" for="checkDiet">
+                                <span class="fw-bold d-block">Diet Plan</span>
+                                <small class="text-muted">Includes personalized nutrition guides</small>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check p-3 border rounded h-100" style="background-color: var(--bg-secondary);">
+                            <input class="form-check-input" type="checkbox" asp-for="IsFollowedByTrainer" id="checkTrainer">
+                            <label class="form-check-label d-block" for="checkTrainer">
+                                <span class="fw-bold d-block">Trainer Follow-up</span>
+                                <small class="text-muted">Dedicated trainer monitoring</small>
+                            </label>
+                        </div>
+                    </div>
+                     <div class="col-md-6">
+                        <div class="form-check p-3 border rounded h-100" style="background-color: var(--bg-secondary);">
+                            <input class="form-check-input" type="checkbox" asp-for="HasNotification" id="checkNotif">
+                            <label class="form-check-label d-block" for="checkNotif">
+                                <span class="fw-bold d-block">Notifications</span>
+                                <small class="text-muted">SMS/Email alerts</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="mb-4">
+                    <label asp-for="Features" class="form-label fw-bold small text-uppercase text-muted">Additional Description (Optional)</label>
+                    <textarea asp-for="Features" class="form-control" rows="3" placeholder="Describe other benefits..."></textarea>
+                    <span asp-validation-for="Features" class="text-danger small"></span>
                 </div>
 
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a asp-action="Index" class="btn btn-light px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">Create Membership</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

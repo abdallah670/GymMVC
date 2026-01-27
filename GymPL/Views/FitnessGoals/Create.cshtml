@@ -1,0 +1,41 @@
+@model GymBLL.ModelVM.Member.FitnessGoalsVM
+
+@{
+    ViewData["Title"] = "Create Fitness Goal";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create Fitness Goal</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="GoalName" class="control-label">Goal Name</label>
+                            <input asp-for="GoalName" class="form-control" />
+                            <span asp-validation-for="GoalName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="GoalDescription" class="control-label">Description</label>
+                            <textarea asp-for="GoalDescription" class="form-control"></textarea>
+                            <span asp-validation-for="GoalDescription" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

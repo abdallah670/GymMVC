@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 text-center" style="border-radius: 15px; overflow: hidden;">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h1 class="mb-3">Payment Successful!</h1>
+                    <p class="lead text-muted mb-4">
+                        Thank you for joining MenoPro! Your membership is now active.
+                    </p>
+                    <p class="text-muted">
+                        We've sent you an email with your login details. You can now sign in and start your fitness journey!
+                    </p>
+                    <hr class="my-4" />
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

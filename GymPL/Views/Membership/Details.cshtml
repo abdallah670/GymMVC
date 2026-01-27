@@ -1,11 +1,16 @@
-@model GymBLL.ModelVM.External.MembershipVM
+@model GymBLL.ModelVM.Financial.MembershipVM
 
 @{
     ViewData["Title"] = "Membership Details";
 }
 
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Membership Details</h1>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Membership Details</h1>
+        <a asp-action="Index" class="btn btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
+        </a>
+    </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -13,35 +18,26 @@
         </div>
         <div class="card-body">
             <dl class="row">
-                <dt class="col-sm-3">Type</dt>
-                <dd class="col-sm-9">@Model.MembershipType</dd>
-
                 <dt class="col-sm-3">Price</dt>
-                <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+                <dd class="col-sm-9">@Model.Price</dd>
 
-                <dt class="col-sm-3">Duration</dt>
-                <dd class="col-sm-9">@Model.DurationInMonths months</dd>
+                <dt class="col-sm-3">Duration (Months)</dt>
+                <dd class="col-sm-9">@Model.DurationInMonths</dd>
 
-                <dt class="col-sm-3">Features</dt>
-                <dd class="col-sm-9">
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-@(Model.HasDietPlan ? "check text-success" : "times text-danger")"></i> Diet Plan</li>
-                        <li><i class="fas fa-@(Model.HasWorkoutPlan ? "check text-success" : "times text-danger")"></i> Workout Plan</li>
-                        <li><i class="fas fa-@(Model.HasNotification == true ? "check text-success" : "times text-danger")"></i> Notifications</li>
-                        <li><i class="fas fa-@(Model.IsFollowedByTrainer == true ? "check text-success" : "times text-danger")"></i> Trainer Support</li>
-                    </ul>
-                </dd>
+                <dt class="col-sm-3">Includes Workout Plan</dt>
+                <dd class="col-sm-9">@(Model.HasWorkoutPlan ? "Yes" : "No")</dd>
+
+                <dt class="col-sm-3">Includes Diet Plan</dt>
+                <dd class="col-sm-9">@(Model.HasDietPlan ? "Yes" : "No")</dd>
+
+                 <dt class="col-sm-3">Trainer Follow-up</dt>
+                <dd class="col-sm-9">@(Model.IsFollowedByTrainer == true ? "Yes" : "No")</dd>
 
                 <dt class="col-sm-3">Status</dt>
-                <dd class="col-sm-9">
-                    <span class="badge badge-@(Model.IsActive ? "success" : "secondary")">
-                        @(Model.IsActive ? "Active" : "Inactive")
-                    </span>
-                </dd>
+                <dd class="col-sm-9">@(Model.IsActive ? "Active" : "Inactive")</dd>
             </dl>
             <div>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
             </div>
         </div>
     </div>

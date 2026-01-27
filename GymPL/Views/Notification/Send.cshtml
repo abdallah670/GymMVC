@@ -1,0 +1,62 @@
+@model GymBLL.ModelVM.Communication.NotificationVM
+
+@{
+    ViewData["Title"] = "Send Notification";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Send Notification</h1>
+        <a href="@(ViewBag.ReturnUrl ?? Url.Action("Index", "Member"))" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Notification Details</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Send">
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                        <input type="hidden" asp-for="DeliveryMethod" value="InApp" />
+
+                        <div class="form-group mb-3">
+                            <select asp-for="Type" class="form-control">
+                                <option value="">-- Select Notification Type --</option>
+                                <option value="WorkoutReminder">?????? Workout Reminder</option>
+                                <option value="MealReminder">?? Meal Reminder</option>
+                                <option value="ProgressAlert">?? Progress Alert</option>
+                                <option value="SystemAlert">?? System Alert</option>
+                                <option value="AssignmentAlert">?? Assignment Alert</option>
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Message" class="control-label">Message</label>
+                            <textarea asp-for="Message" class="form-control" rows="5" placeholder="Type your message here..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-icon-split">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-paper-plane"></i>
+                                </span>
+                                <span class="text">Send Notification</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

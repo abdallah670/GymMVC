@@ -1,4 +1,4 @@
-﻿@model GymPL.ViewModels.TrainerDashboardVM
+@model GymPL.ViewModels.TrainerDashboardVM
 
 @{
     ViewData["Title"] = "Trainer Dashboard";
@@ -12,7 +12,7 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="row g-4 mb-5">
+        <div class="row g-4 mb-4">
             <!-- Members Card -->
             <div class="col-xl-3 col-md-6">
                 <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
@@ -64,20 +64,46 @@
                 </div>
             </div>
 
-            <!-- Rating/Other Card -->
+            <!-- Total Revenue Card (Estimated) -->
             <div class="col-xl-3 col-md-6">
                 <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                              <div>
-                                <h6 class="text-muted text-uppercase mb-2">Quick Access</h6>
-                                <div class="d-flex gap-2 mt-2">
-                                    <a asp-action="Index" asp-controller="Member" class="btn btn-sm btn-outline-primary">View Members</a>
-                                </div>
+                                <h6 class="text-muted text-uppercase mb-2">Revenue (L6M)</h6>
+                                <h2 class="mb-0 display-6 fw-bold text-warning">$@Model.MonthlyRevenue.Sum().ToString("N0")</h2>
                             </div>
                             <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-3 p-3">
-                                <i class="fas fa-star fa-2x"></i>
+                                <i class="fas fa-dollar-sign fa-2x"></i>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: var(--tile); border: 1px solid var(--frame) !important;">
+                    <div class="card-header border-secondary bg-transparent py-3">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Revenue Trend (Last 6 Months)</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="height: 250px;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: var(--tile); border: 1px solid var(--frame) !important;">
+                    <div class="card-header border-secondary bg-transparent py-3">
+                        <h5 class="mb-0"><i class="fas fa-user-plus me-2 text-success"></i>Membership Growth</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="height: 250px;">
+                            <canvas id="membersTrendChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -88,7 +114,7 @@
         <div class="row g-4">
             <!-- Recent Activity -->
             <div class="col-lg-8">
-                <div class="card bg-dark text-white border-0 shadow-lg">
+                <div class="card bg-dark text-white border-0 shadow-lg h-100">
                     <div class="card-header border-secondary bg-transparent py-3">
                         <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Members</h5>
                     </div>
@@ -150,6 +176,9 @@
                     }
                 </div>
             </div>
+                 
+                </div>
+            </div>
 
             <!-- Quick Actions -->
             <div class="col-lg-4">
@@ -159,15 +188,12 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-3">
-                            <a asp-action="CreateOwner" class="btn btn-primary d-flex align-items-center justify-content-between p-3">
-                                <span><i class="fas fa-user-plus me-2"></i>Add New Member</span>
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                            <a asp-action="Create" asp-controller="WorkoutPlan" class="btn btn-outline-light d-flex align-items-center justify-content-between p-3">
+                           
+                            <a asp-action="Create" asp-controller="WorkoutPlan" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-light d-flex align-items-center justify-content-between p-3">
                                 <span><i class="fas fa-dumbbell me-2"></i>Create Workout Plan</span>
                                 <i class="fas fa-chevron-right"></i>
                             </a>
-                            <a asp-action="Create" asp-controller="DietPlan" class="btn btn-outline-light d-flex align-items-center justify-content-between p-3">
+                            <a asp-action="Create" asp-controller="DietPlan" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-light d-flex align-items-center justify-content-between p-3">
                                 <span><i class="fas fa-utensils me-2"></i>Create Diet Plan</span>
                                 <i class="fas fa-chevron-right"></i>
                             </a>
@@ -179,6 +205,103 @@
                     </div>
                 </div>
             </div>
+    
+        <!-- Management Section (Admin Only) -->
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <h4 class="text-white mb-3">Administration</h4>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #334155 0%, #1e293b 100%);">
+                            <a asp-action="Index" asp-controller="Membership" class="text-decoration-none text-white h-100">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center text-center p-4">
+                                    <div class="icon-shape bg-primary bg-opacity-25 text-primary rounded-circle p-3 mb-3">
+                                        <i class="fas fa-id-card fa-2x"></i>
+                                    </div>
+                                    <h6 class="card-title fw-bold">Manage Memberships</h6>
+                                    <p class="card-text small text-muted">Create & Edit Plans</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card bg-dark text-white border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #334155 0%, #1e293b 100%);">
+                            <a asp-action="Index" asp-controller="Subscription" class="text-decoration-none text-white h-100">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center text-center p-4">
+                                    <div class="icon-shape bg-success bg-opacity-25 text-success rounded-circle p-3 mb-3">
+                                        <i class="fas fa-file-invoice-dollar fa-2x"></i>
+                                    </div>
+                                    <h6 class="card-title fw-bold">Manage Subscriptions</h6>
+                                    <p class="card-text small text-muted">View Member Subs</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    
 </section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const labels = @Html.Raw(Json.Serialize(Model.ChartLabels));
+            
+            // Revenue Chart
+            const rCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(rCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: @Html.Raw(Json.Serialize(Model.MonthlyRevenue)),
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } },
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } }
+                    }
+                }
+            });
+
+            // Membership Growth Chart
+            const mCtx = document.getElementById('membersTrendChart').getContext('2d');
+            new Chart(mCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New Members',
+                        data: @Html.Raw(Json.Serialize(Model.NewMembersTrend)),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)', stepSize: 1 } },
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } }
+                    }
+                }
+            });
+        });
+    </script>
+}

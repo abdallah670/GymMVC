@@ -1,0 +1,61 @@
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
+using System.IO;
+using System.Threading.Tasks;
+using GymBLL.Service.Abstract.Communication;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace GymPL.Services
+{
+    public class RazorViewRenderer : IRazorViewRenderer
+    {
+        private readonly IRazorViewEngine _viewEngine;
+        private readonly ITempDataProvider _tempDataProvider;
+        private readonly IServiceProvider _serviceProvider;
+
+        public RazorViewRenderer(
+            IRazorViewEngine viewEngine,
+            ITempDataProvider tempDataProvider,
+            IServiceProvider serviceProvider)
+        {
+            _viewEngine = viewEngine;
+            _tempDataProvider = tempDataProvider;
+            _serviceProvider = serviceProvider;
+        }
+
+        public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model)
+        {
+            var httpContext = new DefaultHttpContext { RequestServices = _serviceProvider };
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+
+            using (var sw = new StringWriter())
+            {
+                var viewResult = _viewEngine.FindView(actionContext, viewName, false);
+
+                if (viewResult.View == null)
+                {
+                    throw new FileNotFoundException($"The view {viewName} could not be found.");
+                }
+
+                var viewDictionary = new ViewDataDictionary<TModel>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                {
+                    Model = model
+                };
+
+                var viewContext = new ViewContext(
+                    actionContext,
+                    viewResult.View,
+                    viewDictionary,
+                    new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
+                    sw,
+                    new HtmlHelperOptions()
+                );
+
+                await viewResult.View.RenderAsync(viewContext);
+                return sw.ToString();
+            }
+        }
+    }
+}

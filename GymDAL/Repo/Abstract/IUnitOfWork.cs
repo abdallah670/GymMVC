@@ -1,8 +1,8 @@
 
 
-using GymDAL.Interfaces.External;
-using GymDAL.Repo.Abstract.Extra;
-
+using GymDAL.Repo.Abstract.Financial;
+using GymDAL.Repo.Abstract.Core;
+using GymDAL.Repo.Abstract.Communication;
 using GymDAL.Repo.Abstract.Nutrition;
 using GymDAL.Repo.Abstract.Users;
 using GymDAL.Repo.Abstract.Workout;
@@ -19,6 +19,8 @@ namespace GymDAL.Repo.Abstract
           
             IMemberRepository Members { get; }
             ITrainerRepository Trainers { get; }
+            ITempRegistrationRepository TempRegistrationRepository { get; }
+            ITrainerReviewRepository TrainerReviews { get; }
 
             // Plan-related
             IWorkoutPlanRepository WorkoutPlans { get; }
@@ -29,6 +31,7 @@ namespace GymDAL.Repo.Abstract
         IWorkoutAssignmentRepository WorkoutAssignments { get; }
             IDietPlanAssignmentRepository DietPlanAssignments { get; }
              IWorkoutPlanItemRepository WorkoutPlanItems { get; }
+             IWorkoutLogRepository WorkoutLogs { get; }
         // Payment-related
         IPaymentRepository Payments { get; }
             IMembershipRepository Memberships { get; }
@@ -42,9 +45,10 @@ namespace GymDAL.Repo.Abstract
 
         // System-related
         INotificationRepository Notifications { get; }
-          
+        IChatMessageRepository ChatMessages { get; }
+        IWeightLogRepository WeightLogs { get; }
 
-            Task<int> SaveAsync();
+        Task<int> SaveAsync();
             void BeginTransaction();
             Task CommitTransactionAsync();
             void RollbackTransaction();

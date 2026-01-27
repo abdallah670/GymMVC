@@ -1,5 +1,7 @@
 
 
+using GymDAL.Entities.Communication;
+
 namespace GymDAL.Entities.Users
 {
     public class ApplicationUser : IdentityUser

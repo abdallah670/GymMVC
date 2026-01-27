@@ -1,0 +1,123 @@
+@model TrainerReviewVM
+@{
+    var memberid = ViewBag.MemberId as string;
+
+    var picture = ViewBag.MemberPicture as string;
+    Console.WriteLine("picture");
+
+}
+<div class="modal-header border-0 pb-0">
+    <h5 class="modal-title font-weight-bolder text-white">Rate Your Trainer</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<form id="reviewForm" asp-action="Create" asp-controller="Review" method="post">
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        <input hidden asp-for="MemberId" value="@memberid"/>
+        <input hidden asp-for="MemberPicture" value="@picture"/>
+
+        <div class="form-group mb-4">
+            <label asp-for="TrainerId" class="form-label text-white-50">Select Trainer</label>
+            <select asp-for="TrainerId" asp-items="ViewBag.Trainers" class="form-select bg-dark text-white border-secondary">
+                <option value="">-- Choose a Trainer --</option>
+            </select>
+            <span asp-validation-for="TrainerId" class="text-danger"></span>
+        </div>
+        
+        <div class="text-center mb-4">
+            <div class="rating-stars mb-3">
+                @for (int i = 5; i >= 1; i--)
+                {
+                    <input type="radio" asp-for="Rating" value="@i" id="star-@i" class="d-none" />
+                    <label for="star-@i" class="star-label cursor-pointer text-2xl mx-1 transition-all">
+                        <i class="far fa-star text-warning"></i>
+                    </label>
+                }
+            </div>
+            <span asp-validation-for="Rating" class="text-danger text-xs d-block"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Comment" class="form-label text-white-50">Share your experience (Optional)</label>
+            <textarea asp-for="Comment" class="form-control bg-dark border-white-10 text-white" rows="4" placeholder="How has this trainer helped you?"></textarea>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn bg-gradient-warning text-dark">Submit Review</button>
+    </div>
+</form>
+
+<style>
+    .rating-stars {
+        direction: rtl; /* Allows CSS hover to select previous stars */
+        display: inline-flex;
+    }
+    .rating-stars input:checked ~ label i,
+    .rating-stars label:hover ~ label i,
+    .rating-stars label:hover i {
+        font-weight: 900 !important; /* fa-solid */
+        transform: scale(1.2);
+    }
+    .star-label:hover {
+        transform: scale(1.2);
+    }
+</style>
+
+<script>
+    // Simple script to handle dynamic star updates if needed beyond CSS
+    document.querySelectorAll('.rating-stars input').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Reset all
+            document.querySelectorAll('.rating-stars i').forEach(i => i.classList.replace('fas', 'far'));
+            // Fill current and previous (which are next in DOM due to RTL)
+           // Actually pure CSS handled it visually usually but let's trust the CSS above first.
+           // The CSS :checked ~ label selects all SUBSEQUENT siblings. 
+           // Since we use RTL direction, the logic matches (5 4 3 2 1). 
+           // If 4 is checked, 3 2 1 are siblings.
+        });
+    });
+    
+    // Wire up form submission via AJAX
+    $('#reviewForm').submit(function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    $('#reviewModal').modal('hide');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thank You!',
+                        text: response.message,
+                        background: '#1a1a1a',
+                         color: '#fff'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Submission Failed',
+                        text: response.message || 'Please check your input and try again.',
+                        background: '#1a1a1a',
+                        color: '#fff'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Review submission error:', error);
+                console.log('Response:', xhr.responseText);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'System Error', 
+                    text: 'Status: ' + xhr.status + ' - ' + (xhr.statusText || 'Unknown Error'),
+                    background: '#1a1a1a',
+                    color: '#fff'
+                });
+            }
+        });
+    });
+</script>

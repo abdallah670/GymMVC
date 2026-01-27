@@ -1,4 +1,4 @@
-@model GymBLL.ModelVM.User.Member.MemberDietWorkoutPlansVM
+@model GymBLL.ModelVM.Member.MemberDietWorkoutPlansVM
 
 
 @{
@@ -12,108 +12,136 @@
     var currentUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
 
-<div class="container" style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
+<div class="member-details-wrapper">
     <!-- Back Button -->
-    <div style="margin-bottom: 1.5rem;">
-        <a asp-action="Index" asp-route-page="@returnPage" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Members
-        </a>
+    <div class="assignment-header">
+        @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+        {
+            <a href="@ViewBag.ReturnUrl" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Members
+            </a>
+        }
+        else
+        {
+            <a asp-action="Index" asp-route-page="@returnPage" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Members
+            </a>
+        }
     </div>
 
     <!-- Member Profile Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 8px; margin-bottom: 2rem; color: white;">
-        <div style="display: flex; align-items: center; gap: 1.5rem;">
-            <div style="width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; flex-shrink: 0;">
-                @Model.FullName?.Substring(0, 1).ToUpper()
-            </div>
+    <div class="member-header-gradient">
+        <div class="d-flex align-items-center gap-3">
+
+            @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+            {
+                <img src="@Model.ProfilePicture" alt="@Model.FullName"
+                     class="member-avatar-md rounded-circle">
+            }
+            else
+            {
+
+                <img src="~/uploads/profiles/default-profile.png" class="member-avatar-md rounded-circle" />
+            }
             <div>
-                <h2 style="margin-bottom: 0.5rem; color: white;">@Model.FullName</h2>
-                <div style="opacity: 0.9; margin-bottom: 0.25rem;">
-                    <i class="fas fa-envelope"></i> @Model.Email
+                <h2 class="mb-2 text-white">@Model.FullName</h2>
+                <div class="opacity-75 mb-1">
+                    <i class="fas fa-envelope me-1"></i> @Model.Email
                 </div>
                 @if (!string.IsNullOrEmpty(Model.Phone))
                 {
-                    <div style="opacity: 0.9;">
-                        <i class="fas fa-phone"></i> @Model.Phone
+                    <div class="opacity-75">
+                        <i class="fas fa-phone me-1"></i> @Model.Phone
                     </div>
                 }
             </div>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <div class="details-grid">
         <!-- Left Column -->
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="d-flex flex-column gap-4">
 
             <!-- Member Information -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);">
-                <h3 style="color: #5a5c69; margin-bottom: 1rem; border-bottom: 1px solid #e3e6f0; padding-bottom: 0.5rem;">
+            <div class="details-card">
+                <h3 class="details-card-title">
                     <i class="fas fa-info-circle text-primary"></i> Member Information
                 </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="inline-grid-2">
                     <div>
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Join Date</div>
-                        <div style="color: #5a5c69; font-weight: 600;">@Model.JoinDate.ToString("MMMM dd, yyyy")</div>
+                        <div class="label-muted">Join Date</div>
+                        <div class="value-dark">@Model.JoinDate.ToString("MMMM dd, yyyy")</div>
                     </div>
                     @if (Model.FitnessGoal != null && !string.IsNullOrEmpty(Model.FitnessGoal.GoalName))
                     {
                         <div>
-                            <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Fitness Goal</div>
-                            <div style="color: #5a5c69; font-weight: 600;">@Model.FitnessGoal.GoalName</div>
+                            <div class="label-muted">Fitness Goal</div>
+                            <div class="value-dark">@Model.FitnessGoal.GoalName</div>
                         </div>
                     }
                     <div>
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Current Weight</div>
-                        <div style="color: #5a5c69; font-weight: 600;">@Model.CurrentWeight kg</div>
+                        <div class="label-muted">Current Weight</div>
+                        <div class="value-dark">@Model.CurrentWeight kg</div>
                     </div>
                     <div>
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Height</div>
-                        <div style="color: #5a5c69; font-weight: 600;">@Model.Height cm</div>
+                        <div class="label-muted">Height</div>
+                        <div class="value-dark">@Model.Height cm</div>
                     </div>
+                     <div>
+                        <div class="label-muted">Age</div>
+                        <div class="value-dark">@Model.Age </div>
+                    </div>
+                    <div>
+                        <div class="label-muted">Gender</div>
+                        <div class="value-dark">@Model.Gender</div>
+                    </div>
+                    <div>
+                        <div class="label-muted">Activity Level</div>
+                        <div class="value-dark">@Model.ActivityLevel</div>
+                    </div>
+
+
                 </div>
 
                 @if (Model.FitnessGoal != null && !string.IsNullOrEmpty(Model.FitnessGoal.GoalDescription))
                 {
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e3e6f0;">
-                        <div style="color: #858796; font-size: 0.9rem; margin-bottom: 0.25rem; font-weight: 600;">Goal Description</div>
-                        <div style="color: #5a5c69; font-size: 0.95rem; line-height: 1.5;">@Model.FitnessGoal.GoalDescription</div>
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="label-muted">Goal Description</div>
+                        <div class="text-secondary small">@Model.FitnessGoal.GoalDescription</div>
                     </div>
                 }
             </div>
 
             <!-- Assigned Workout Plans -->
-            <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="color: var(--ink); margin: 0;">
+            <div class="details-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="details-card-title mb-0">
                         <i class="fas fa-dumbbell"></i> Workout Plans
                     </h3>
                     @if (!hasWorkout || Model.WorkoutAssignmentVM == null)
                     {
-                        <a href="@Url.Action("CreateWorkoutPlan", "WorkoutPlan", new { memberId = Model.Id })"
-                           class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                            <i class="fas fa-plus"></i> Assign Plan
+                        <a asp-controller="WorkoutPlanAssignment"
+                           asp-action="Assign"
+                           asp-route-memberId="@Model.Id"
+                           asp-route-returnUrl="@currentUrl"
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> Assign Plan
                         </a>
                     }
                     else
                     {
-                        <div style="display: flex; gap: 0.5rem;">
-                            @if (Model.WorkoutAssignmentVM?.WorkoutPlanId != null)
+                        <div class="d-flex gap-2">
+                            @if (Model.WorkoutAssignmentVM?.Id != null)
                             {
-                                <a asp-controller="WorkoutPlan"
+                                <a asp-controller="WorkoutPlanAssignment"
                                    asp-action="Details"
-                                   asp-route-id="@Model.WorkoutAssignmentVM?.WorkoutPlanId"
+                                   asp-route-id="@Model.WorkoutAssignmentVM.Id"
                                    asp-route-returnUrl="@currentUrl"
-                                   class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                                    <i class="fas fa-eye"></i> View Details
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i> Details
                                 </a>
                             }
-                            <a asp-controller="WorkoutPlan"
-                               asp-action="Edit"
-                               asp-route-id="@Model.WorkoutAssignmentVM?.WorkoutPlanId"
-                               asp-route-returnUrl="@currentUrl"
-                               class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
+                           
                         </div>
                     }
                 </div>
@@ -121,50 +149,47 @@
                 <div id="workoutPlansContainer">
                     @if (!hasWorkout || Model.WorkoutAssignmentVM == null)
                     {
-                        <div style="text-align: center; padding: 2rem; color: var(--muted);">
-                            <i class="fas fa-dumbbell" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <p style="margin-top: 0.5rem;">No workout plan assigned</p>
-                            <p style="font-size: 0.9rem; opacity: 0.7;">Click "Assign Plan" to get started</p>
+                        <div class="text-center py-5 text-muted" style="background: rgba(0,0,0,0.2); border-radius: var(--radius); border: 1px dashed var(--rule);">
+                            <i class="fas fa-dumbbell fa-3x opacity-25 mb-3" style="color: var(--main-color);"></i>
+                            <p class="mb-1 h5">No workout plan assigned</p>
+                            <small>Click "Assign Plan" to get started</small>
                         </div>
                     }
                     else
                     {
-                        <div style="padding: 1rem; background: var(--frame); border-radius: var(--radius);">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div class="p-4" style="background: rgba(0,0,0,0.3); border-radius: var(--radius); border: 1px solid var(--rule);">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--ink); font-size: 1.1rem;">
+                                    <div class="value-dark h4 mb-1" style="color: var(--main-color);">
                                         @Model.WorkoutAssignmentVM?.WorkoutPlan?.Name
                                     </div>
-                                    <div style="color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem;">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        @Model.WorkoutAssignmentVM?.StartDate.ToString("MMM dd, yyyy") -
-                                        @Model.WorkoutAssignmentVM?.EndDate.ToString("MMM dd, yyyy")
+                                    <div class="label-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        @Model.WorkoutAssignmentVM?.StartDate.ToString("MMMM dd") -
+                                        @Model.WorkoutAssignmentVM?.EndDate.ToString("MMMM dd, yyyy")
                                     </div>
                                 </div>
-                                @if (Model.WorkoutAssignmentVM?.WorkoutPlan?.DurationWeeks != null)
-                                {
-                                    <span style="background: var(--success); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
-                                        @Model.WorkoutAssignmentVM.WorkoutPlan.DurationWeeks weeks
-                                    </span>
-                                }
+                                <span class="badge" style="background: var(--main-color); color: var(--accent-ink);">
+                                    @Model.WorkoutAssignmentVM.WorkoutPlan.DurationWeeks Weeks
+                                </span>
                             </div>
 
                             @if (!string.IsNullOrEmpty(Model.WorkoutAssignmentVM?.Notes))
                             {
-                                <div style="background: var(--tile); padding: 0.75rem; border-radius: var(--radius); margin-top: 1rem; border-left: 3px solid var(--main-color);">
-                                    <div style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.25rem;">
-                                        <i class="fas fa-sticky-note"></i> Trainer Notes:
+                                <div class="trainer-notes-box">
+                                    <div class="label-muted mb-2">
+                                        <i class="fas fa-sticky-note me-1"></i> Trainer Notes:
                                     </div>
-                                    <div style="color: var(--ink); font-size: 0.9rem;">
+                                    <div style="color: var(--ink); line-height: 1.6;">
                                         @Model.WorkoutAssignmentVM.Notes
                                     </div>
                                 </div>
                             }
 
-                            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                <a href="@Url.Action("ViewTodayWorkout", "WorkoutPlan", new { memberId = Model.Id })"
-                                   class="btn btn-success btn-sm" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                                    <i class="fas fa-play"></i> View Today's Workout
+                            <div class="mt-4 d-flex justify-content-end gap-2">
+                                <a href="@Url.Action("ViewTodayWorkout", "WorkoutPlanAssignment", new { assignmentId = Model.WorkoutAssignmentVM?.Id })"
+                                   class="btn btn-primary btn-sm px-4">
+                                    <i class="fas fa-play me-1"></i> Today's Workout
                                 </a>
                             </div>
                         </div>
@@ -173,37 +198,40 @@
             </div>
 
             <!-- Assigned Diet Plans -->
-            <div style="background: var(--tile); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--frame);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="color: var(--ink); margin: 0;">
+            <div class="details-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="details-card-title mb-0">
                         <i class="fas fa-utensils"></i> Diet Plans
                     </h3>
                     @if (!hasDiet || Model.DietPlanAssignmentVM == null)
                     {
-                        <a href="@Url.Action("CreateDietPlan", "DietPlan", new { memberId = Model.Id })"
-                           class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                            <i class="fas fa-plus"></i> Assign Plan
+                        <a asp-controller="DietPlanAssignment"
+                           asp-action="Assign"
+                           asp-route-memberId="@Model.Id"
+                           asp-route-returnUrl="@currentUrl"
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> Assign Plan
                         </a>
                     }
                     else
                     {
-                        <div style="display: flex; gap: 0.5rem;">
-                            @if (Model.DietPlanAssignmentVM?.DietPlanId != null)
+                        <div class="d-flex gap-2">
+                            @if (Model.DietPlanAssignmentVM?.Id != null)
                             {
-                                <a asp-controller="DietPlan"
+                                <a asp-controller="DietPlanAssignment"
                                    asp-action="Details"
-                                   asp-route-id="@Model.DietPlanAssignmentVM?.DietPlanId"
+                                   asp-route-id="@Model.DietPlanAssignmentVM.Id"
                                    asp-route-returnUrl="@currentUrl" 
-                                   class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                                    <i class="fas fa-eye"></i> View Details
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i> Details
                                 </a>
                             }
-                            <a asp-controller="DietPlan"
+                            <a asp-controller="DietPlanAssignment"
                                asp-action="Edit"
-                               asp-route-id="@Model.DietPlanAssignmentVM?.DietPlanId"
+                               asp-route-id="@Model.DietPlanAssignmentVM?.Id"
                                asp-route-returnUrl="@currentUrl"
-                               class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                                <i class="fas fa-edit"></i> Edit
+                               class="btn btn-secondary btn-sm">
+                                <i class="fas fa-edit me-1"></i> Edit
                             </a>
                         </div>
                     }
@@ -212,46 +240,41 @@
                 <div id="dietPlansContainer">
                     @if (!hasDiet || Model.DietPlanAssignmentVM == null)
                     {
-                        <div style="text-align: center; padding: 2rem; color: var(--muted);">
-                            <i class="fas fa-utensils" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <p style="margin-top: 0.5rem;">No diet plan assigned</p>
-                            <p style="font-size: 0.9rem; opacity: 0.7;">Click "Assign Plan" to get started</p>
+                        <div class="text-center py-5 text-muted" style="background: rgba(0,0,0,0.2); border-radius: var(--radius); border: 1px dashed var(--rule);">
+                            <i class="fas fa-utensils fa-3x opacity-25 mb-3" style="color: var(--main-color);"></i>
+                            <p class="mb-1 h5">No diet plan assigned</p>
+                            <small>Click "Assign Plan" to get started</small>
                         </div>
                     }
                     else
                     {
-                        <div style="padding: 1rem; background: var(--frame); border-radius: var(--radius);">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div class="p-4" style="background: rgba(0,0,0,0.3); border-radius: var(--radius); border: 1px solid var(--rule);">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--ink); font-size: 1.1rem;">
+                                    <div class="value-dark h4 mb-1" style="color: var(--main-color);">
                                         @Model.DietPlanAssignmentVM?.DietPlan?.Name
                                     </div>
-                                    <div style="color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem;">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        @Model.DietPlanAssignmentVM?.StartDate.ToString("MMM dd, yyyy") -
-                                        @Model.DietPlanAssignmentVM?.EndDate.ToString("MMM dd, yyyy")
+                                    <div class="label-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        @Model.DietPlanAssignmentVM?.StartDate.ToString("MMMM dd") -
+                                        @Model.DietPlanAssignmentVM?.EndDate.ToString("MMMM dd, yyyy")
                                     </div>
                                     @if (Model.DietPlanAssignmentVM?.DietPlan?.TotalCalories > 0)
                                     {
-                                        <div style="color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem;">
-                                            <i class="fas fa-fire"></i> @Model.DietPlanAssignmentVM.DietPlan.TotalCalories calories/day
+                                        <div class="mt-2" style="color: var(--ink); font-weight: 500;">
+                                            <i class="fas fa-fire me-1 text-warning"></i> @Model.DietPlanAssignmentVM.DietPlan.TotalCalories Calories/Day
                                         </div>
                                     }
                                 </div>
-                                @if (!string.IsNullOrEmpty(Model.DietPlanAssignmentVM?.DietPlan?.DietType))
-                                {
-                                    <span style="background: var(--info); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
-                                        @Model.DietPlanAssignmentVM.DietPlan.DietType
-                                    </span>
-                                }
+                                <span class="badge" style="background: var(--info); color: white;">
+                                    @Model.DietPlanAssignmentVM.DietPlan.DietType
+                                </span>
                             </div>
 
-
-
-                            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                <a href="@Url.Action("TodayMeal", "DietPlan", new { memberId = Model.Id })"
-                                   class="btn btn-success btn-sm" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                                    <i class="fas fa-utensil-spoon"></i> View Today's Meals
+                            <div class="mt-4 d-flex justify-content-end gap-2">
+                                <a href="@Url.Action("TodayMeal", "DietPlanAssignment", new { assignmentId = Model.DietPlanAssignmentVM?.Id })"
+                                   class="btn btn-primary btn-sm px-4">
+                                    <i class="fas fa-utensil-spoon me-1"></i> Today's Meals
                                 </a>
                             </div>
                         </div>
@@ -261,86 +284,97 @@
         </div>
 
         <!-- Right Column - Quick Actions & Stats -->
-        <div>
+        <div class="d-flex flex-column gap-4">
             <!-- Quick Actions -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); margin-bottom: 1.5rem;">
-                <h3 style="color: #5a5c69; margin-bottom: 1rem; border-bottom: 1px solid #e3e6f0; padding-bottom: 0.5rem;">
+            <div class="details-card">
+                <h3 class="details-card-title">
                     <i class="fas fa-bolt text-warning"></i> Quick Actions
                 </h3>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div class="d-grid gap-2">
                     @if (!hasWorkout)
                     {
-                        <a href="@Url.Action("CreateWorkoutPlan", "WorkoutPlan", new { memberId = Model.Id })"
-                           class="btn btn-outline-primary btn-block text-left" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-                            <i class="fas fa-dumbbell mr-2"></i> Assign Workout Plan
+                        <a asp-controller="WorkoutPlanAssignment"
+                           asp-action="Assign"
+                           asp-route-memberId="@Model.Id"
+                           asp-route-returnUrl="@currentUrl"
+                           class="btn btn-outline-primary text-start">
+                            <i class="fas fa-dumbbell me-2"></i> Assign Workout Plan
                         </a>
                     }
                     else
                     {
-                        <a asp-controller="DietPlan"
-                           asp-action="Details"
-                           asp-route-id="@Model.DietPlanAssignmentVM?.DietPlanId"
+                        <a asp-controller="WorkoutPlanAssignment"
+                           asp-action="Edit"
+                           asp-route-id="@Model.WorkoutAssignmentVM?.Id"
                            asp-route-returnUrl="@currentUrl"
-                           class="btn btn-outline-primary btn-block text-left" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-                            <i class="fas fa-edit mr-2"></i> Edit Workout Plan
+                           class="btn btn-outline-primary text-start">
+                            <i class="fas fa-edit me-2"></i> Edit Workout Plan
                         </a>
                     }
 
                     @if (!hasDiet)
                     {
-                        <a href="@Url.Action("CreateDietPlan", "DietPlan", new { memberId = Model.Id })"
-                           class="btn btn-outline-primary btn-block text-left" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-                            <i class="fas fa-utensils mr-2"></i> Assign Diet Plan
+                        <a asp-controller="DietPlanAssignment"
+                           asp-action="Assign"
+                           asp-route-memberId="@Model.Id"
+                           asp-route-returnUrl="@currentUrl"
+                           class="btn btn-outline-primary text-start">
+                            <i class="fas fa-utensils me-2"></i> Assign Diet Plan
                         </a>
                     }
                     else
                     {
-                        <a asp-controller="DietPlan"
-                           asp-action="Details"
-                           asp-route-id="@Model.DietPlanAssignmentVM?.DietPlanId"
+                        <a asp-controller="DietPlanAssignment"
+                           asp-action="Edit"
+                           asp-route-id="@Model.DietPlanAssignmentVM?.Id"
                            asp-route-returnUrl="@currentUrl" 
-                           class="btn btn-outline-primary btn-block text-left" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-                            <i class="fas fa-edit mr-2"></i> Edit Diet Plan
+                           class="btn btn-outline-primary text-start">
+                            <i class="fas fa-edit me-2"></i> Edit Diet Plan
                         </a>
                     }
-
-                    <a href="@Url.Action("Edit", new { id = Model.Id })"
-                       class="btn btn-outline-secondary btn-block text-left" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
-                        <i class="fas fa-edit mr-2"></i> Edit Member Info
+                    <!-- REPORT BUTTON -->
+                    <a asp-controller="Report" asp-action="Index"
+                       asp-route-memberId="@Model.Id"
+                       asp-route-returnUrl="@currentUrl"
+                       class="btn btn-outline-primary text-start">
+                     
+                        <i class="fas fa-chart-bar"></i>
+                        View Report
                     </a>
+                  
                 </div>
             </div>
 
             <!-- Member Stats -->
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e3e6f0; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);">
-                <h3 style="color: #5a5c69; margin-bottom: 1rem; border-bottom: 1px solid #e3e6f0; padding-bottom: 0.5rem;">
+            <div class="details-card">
+                <h3 class="details-card-title">
                     <i class="fas fa-chart-bar text-info"></i> Member Stats
                 </h3>
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f8f9fc;">
-                        <span style="color: #858796; font-size: 0.9rem;">Workout Plan</span>
-                        <span class="badge @(hasWorkout ? "badge-success" : "badge-secondary")">
+                <div class="d-flex flex-column gap-3">
+                    <div class="status-row">
+                        <span class="label-muted mb-0">Workout Plan</span>
+                        <span class="badge" style="background: @(hasWorkout ? "var(--success)" : "var(--frame)"); color: @(hasWorkout ? "var(--accent-ink)" : "var(--muted)");">
                             @(hasWorkout ? "Active" : "None")
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f8f9fc;">
-                        <span style="color: #858796; font-size: 0.9rem;">Diet Plan</span>
-                        <span class="badge @(hasDiet ? "badge-success" : "badge-secondary")">
+                    <div class="status-row">
+                        <span class="label-muted mb-0">Diet Plan</span>
+                        <span class="badge" style="background: @(hasDiet ? "var(--success)" : "var(--frame)"); color: @(hasDiet ? "var(--accent-ink)" : "var(--muted)");">
                             @(hasDiet ? "Active" : "None")
                         </span>
                     </div>
                     @if (hasWorkout)
                     {
-                        <div style="padding: 0.5rem 0; border-bottom: 1px solid #f8f9fc;">
-                            <div style="color: #858796; font-size: 0.85rem; margin-bottom: 0.25rem;">Current Workout</div>
-                            <div style="color: #5a5c69; font-size: 0.9rem; font-weight: 600;"> @Model.WorkoutAssignmentVM?.WorkoutPlan?.Name</div>
+                        <div class="py-3 border-bottom" style="border-color: var(--rule) !important;">
+                            <div class="label-muted mb-1">Current Workout</div>
+                            <div class="value-dark small text-truncate" style="color: var(--main-color);">@Model.WorkoutAssignmentVM?.WorkoutPlan?.Name</div>
                         </div>
                     }
                     @if (hasDiet)
                     {
-                        <div style="padding: 0.5rem 0;">
-                            <div style="color: #858796; font-size: 0.85rem; margin-bottom: 0.25rem;">Current Diet</div>
-                            <div style="color: #5a5c69; font-size: 0.9rem; font-weight: 600;"> @Model.DietPlanAssignmentVM?.DietPlan?.Name</div>
+                        <div class="py-3">
+                            <div class="label-muted mb-1">Current Diet</div>
+                            <div class="value-dark small text-truncate" style="color: var(--main-color);">@Model.DietPlanAssignmentVM?.DietPlan?.Name</div>
                         </div>
                     }
                 </div>
@@ -348,52 +382,3 @@
         </div>
     </div>
 </div>
-
-
-
-<style>
-    .btn-outline-primary, .btn-outline-secondary, .btn-outline-success {
-        transition: all 0.3s ease;
-    }
-
-        .btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.65rem;
-    }
-
-    .badge-success {
-        background-color: #1cc88a;
-        color: white;
-    }
-
-    .badge-secondary {
-        background-color: #858796;
-        color: white;
-    }
-
-    .badge-info {
-        background-color: #36b9cc;
-        color: white;
-    }
-
-    .text-primary {
-        color: #4e73df !important;
-    }
-
-    .text-success {
-        color: #1cc88a !important;
-    }
-
-    .text-warning {
-        color: #f6c23e !important;
-    }
-
-    .text-info {
-        color: #36b9cc !important;
-    }
-</style>

@@ -3,7 +3,7 @@
 
 using GymDAL.Repo.Abstract.Users;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Users
 {
     public class TrainerRepository : Repository<Trainer>, ITrainerRepository
     {

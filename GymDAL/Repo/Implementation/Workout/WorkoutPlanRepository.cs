@@ -1,8 +1,9 @@
 using AutoMapper;
-using GymDAL.Entities.External;
+using GymDAL.Entities.Workout;
+using GymDAL.Entities.Financial;
 using GymDAL.Repo.Abstract.Workout;
 
-namespace GymDAL.Repo.Implementation
+namespace GymDAL.Repo.Implementation.Workout
 {
     public class WorkoutPlanRepository : Repository<WorkoutPlan>, IWorkoutPlanRepository
     {
