@@ -11,10 +11,10 @@
 }
 
 .assignment-card {
-  background: white;
+  background: var(--tile);
   border-radius: 8px;
-  border: 1px solid #e3e6f0;
-  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: 1px solid var(--frame);
+  box-shadow: var(--shadow-rest);
   padding: 2rem;
 }
 
@@ -24,12 +24,13 @@
 }
 
 .assignment-title-section h2 {
-  color: #5a5c69;
+  color: var(--ink);
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 .assignment-subtitle {
-  color: #858796;
+  color: var(--muted);
 }
 
 .assignment-grid {
@@ -39,23 +40,25 @@
 
 .assignment-info-block {
   padding: 1rem;
-  background: #f8f9fc;
+  background: var(--bg);
   border-radius: 8px;
+  border: 1px solid var(--frame);
 }
 
 .assignment-info-label {
   font-weight: 600;
-  color: #5a5c69;
+  color: var(--muted);
   margin-bottom: 0.5rem;
 }
 
 .assignment-info-value {
-  color: #858796;
+  color: var(--ink);
   font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .assignment-info-subtext {
-  color: #858796;
+  color: var(--muted);
   font-size: 0.9rem;
   margin-top: 0.25rem;
 }

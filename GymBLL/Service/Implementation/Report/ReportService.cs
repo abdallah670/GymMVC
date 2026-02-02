@@ -3,6 +3,7 @@ using GymBLL.Common;
 using GymBLL.ModelVM.Member;
 using GymBLL.ModelVM.Report;
 using GymBLL.ModelVM.Workout;
+using GymBLL.ModelVM.Nutrition; // Add this
 using GymBLL.Service.Abstract.Report;
 using GymDAL.Repo.Abstract;
 using Microsoft.EntityFrameworkCore;
@@ -72,6 +73,44 @@ namespace GymBLL.Service.Implementation.Report
                     }).ToList()
                 }).ToList();
 
+                // 6. Get Weight Logs
+                var weightLogs = await _unitOfWork.WeightLogs
+                    .Get(w => w.MemberId == memberId)
+                    .OrderBy(w => w.DateRecorded)
+                    .ToListAsync();
+                
+                var startWeight = weightLogs.Any() ? weightLogs.First().Weight : member.CurrentWeight; // Fallback to current/profile weight if no logs
+
+                var weightHistory = weightLogs.Select(w => new GymBLL.ModelVM.Member.WeightLogVM
+                {
+                    Id = w.Id,
+                    DateRecorded = w.DateRecorded,
+                    Weight = w.Weight,
+                    Notes = w.Notes
+                }).ToList();
+
+                // 7. Get Recent Meal Logs
+                // DietPlanAssignment is linked via Subscription
+                var assignmentIds = await _unitOfWork.Subscriptions
+                    .Get(s => s.MemberId == memberId && s.DietPlanAssignmentId.HasValue)
+                    .Select(s => s.DietPlanAssignmentId.Value)
+                    .ToListAsync();
+
+                var mealLogs = await _unitOfWork.MealLogs
+                   .Get(m => assignmentIds.Contains(m.DietPlanAssignmentId))
+                   .Include(m => m.DietPlanAssignment)
+                   .OrderByDescending(m => m.Date)
+                   .Take(10)
+                   .ToListAsync();
+
+                var recentMeals = mealLogs.Select(m => new GymBLL.ModelVM.Nutrition.MealLogVM
+                {
+                    Id = m.Id,
+                    Date = m.Date,
+                    CaloriesConsumed = m.CaloriesConsumed,
+                    Notes = m.Notes
+                }).ToList();
+
                 var report = new MemberReportVM
                 {
                     Member = memberVM,
@@ -80,9 +119,11 @@ namespace GymBLL.Service.Implementation.Report
                     TotalWorkoutsLogged = totalWorkouts,
                     LastWorkoutDate = lastWorkout,
                     AverageWorkoutDuration = Math.Round(avgDuration, 1),
-                    StartWeight = 0, // Need to implement weight history properly if we want start weight specifically
+                    StartWeight = startWeight,
                     CurrentWeight = member.CurrentWeight,
-                    RecentLogs = recentLogs
+                    RecentLogs = recentLogs,
+                    WeightHistory = weightHistory,
+                    RecentMeals = recentMeals
                 };
 
                 return new Response<MemberReportVM>(report, null, false);

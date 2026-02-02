@@ -144,6 +144,17 @@ namespace GymBLL.Service.Implementation.Member
                 {
                     return new Response<bool>(false, "Member not found.", true);
                 }
+
+                // [NEW] Cancel active subscription if exists
+                var subscriptions = await UnitOfWork.Subscriptions.FindAsync(s => s.MemberId == memberId && s.Status == GymDAL.Enums.SubscriptionStatus.Active);
+                var activeSubscription = subscriptions.OrderByDescending(s => s.EndDate).FirstOrDefault();
+                if (activeSubscription != null)
+                {
+                    activeSubscription.Status = GymDAL.Enums.SubscriptionStatus.Cancelled;
+                    activeSubscription.EndDate = DateTime.UtcNow; // Terminate effective immediately
+                    UnitOfWork.Subscriptions.Update(activeSubscription);
+                }
+
                 member.IsActive = false;
                 UnitOfWork.Members.Update(member);
                 var result = await UnitOfWork.SaveAsync();

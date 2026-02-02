@@ -28,7 +28,6 @@ namespace GymBLL.ModelVM.Financial
 
         public decimal PriceDifference { get; set; }
 
-        [Required(ErrorMessage = "Payment method is required")]
         [StringLength(20)]
         public string PaymentMethod { get; set; }
 

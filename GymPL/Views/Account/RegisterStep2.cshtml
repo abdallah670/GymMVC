@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Complete Registration";
+    var FitnessGoalOptions = ViewBag.FitnessGoals as List<FitnessGoalsVM>;
 }
 
 <div class="container mt-5 mb-5">
@@ -76,10 +77,10 @@
                                 <label asp-for="FitnessGoal" class="form-label">Fitness Goal</label>
                                 <select asp-for="FitnessGoal" class="form-select">
                                     <option value="">Select Goal</option>
-                                    <option value="Weight Loss">Weight Loss</option>
-                                    <option value="Muscle Gain">Muscle Gain</option>
-                                    <option value="Maintenance">Maintenance</option>
-                                    <option value="Improve Endurance">Improve Endurance</option>
+                                    @foreach (var goal in FitnessGoalOptions)
+                                    {
+                                        <option value="@goal.Id">@goal.GoalName</option>
+                                    }
                                 </select>
                             </div>
                         </div>

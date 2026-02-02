@@ -1,30 +1,30 @@
-<li class="nav-item dropdown mx-2" id="notificationDropdownContainer">
-    <a class="nav-link position-relative p-2" href="#" id="alertsDropdown" role="button"
-       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--ink);">
-        <i class="fas fa-bell fa-lg"></i>
+<li class="nav-item dropdown mx-1" id="notificationDropdownContainer">
+    <a class="nav-link position-relative p-2 text-reset" href="#" id="alertsDropdown" role="button"
+       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-bell fa-lg text-secondary"></i>
         <!-- Counter - Alerts -->
-        <span class="badge bg-danger badge-counter" id="notificationBadge"
-              style="position: absolute; top: 2px; right: 2px; font-size: 0.6rem; display: none;">
+        <span class="badge bg-danger rounded-pill badge-counter position-absolute top-0 start-100 translate-middle p-1 border border-dark" id="notificationBadge"
+              style="display: none; font-size: 0.6rem;">
             0
         </span>
     </a>
     <!-- Dropdown - Alerts -->
-    <div class="dropdown-menu dropdown-menu-end shadow p-0"
-         aria-labelledby="alertsDropdown" style="min-width: 320px;">
-        <h6 class="dropdown-header py-3">
-            <i class="fas fa-bell me-2" style="color: var(--main-color);"></i>Alerts Center
+    <div class="dropdown-menu dropdown-menu-end shadow-lg p-0"
+         aria-labelledby="alertsDropdown" style="width: 320px; max-width: 90vw; background: var(--tile); border: 1px solid var(--frame) !important; color: var(--ink);">
+        <h6 class="dropdown-header py-3 border-bottom" style="background: var(--tile); color: var(--ink); border-color: var(--frame) !important;">
+            <i class="fas fa-bell me-2 text-warning"></i>Alerts Center
         </h6>
         <div id="notificationList" class="p-0" style="max-height: 400px; overflow-y: auto;">
             <!-- Notifications injected here -->
-            <div class="text-center py-5">
-                <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
-                <p class="text-muted mb-0">Syncing notifications...</p>
+            <div class="text-center py-5 opacity-50">
+                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                <p class="small mb-0">Syncing notifications...</p>
             </div>
         </div>
-        <div class="p-2 border-top">
-            <a class="dropdown-item text-center text-primary justify-content-center"
+        <div class="p-2 border-top" style="border-color: var(--frame) !important;">
+            <a class="dropdown-item text-center text-primary justify-content-center fw-bold small"
                asp-controller="Notification" asp-action="Index">
-                <i class="fas fa-eye me-2"></i>Show All Alerts
+                Show All Alerts
             </a>
         </div>
     </div>
@@ -95,7 +95,7 @@
                              type === 'Success' ? 'fa-check-circle' : 'fa-info-circle';
 
             html += `
-                <div class="notification-item" onclick="markAsRead(${id})">
+                <div class="notification-item p-3 border-bottom" style="border-color: var(--frame) !important; cursor: pointer;" onclick="markAsRead(${id})">
                     <div class="d-flex align-items-start">
                         <div class="me-3 mt-1">
                             <i class="fas ${iconClass} fa-lg text-${typeClass}"></i>

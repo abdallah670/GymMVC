@@ -1,4 +1,5 @@
 using GymBLL.ModelVM.Member;
+using GymBLL.ModelVM.Nutrition; // Add this
 using GymBLL.ModelVM.Workout;
 using System;
 using System.Collections.Generic;
@@ -20,5 +21,7 @@ namespace GymBLL.ModelVM.Report
         public double WeightChange => CurrentWeight - StartWeight;
         
         public List<WorkoutLogVM> RecentLogs { get; set; } = new List<WorkoutLogVM>();
+        public List<WeightLogVM> WeightHistory { get; set; } = new List<WeightLogVM>();
+        public List<MealLogVM> RecentMeals { get; set; } = new List<MealLogVM>();
     }
 }

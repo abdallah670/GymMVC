@@ -12,6 +12,7 @@ namespace GymBLL.ModelVM.Financial
 {
     public class SubscriptionDetailsVM : SubscriptionVM
     {
+      
         public DietPlanAssignmentVM? DietPlanAssignmentVM { set; get; }
         public WorkoutAssignmentVM? WorkoutAssignmentVM { set; get; }
         public MembershipVM? MembershipVM { set; get; }

@@ -7,33 +7,34 @@
 @section Head {
     <style>
         .history-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--tile);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--frame);
             border-radius: 1rem;
             transition: all 0.3s ease;
         }
         .history-card:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--tile);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-hover);
         }
         .history-date {
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: rgba(255,255,255,0.6);
+            color: var(--muted);
         }
         .accordion-button {
             background-color: transparent !important;
-            color: white !important;
+            color: var(--ink) !important;
             box-shadow: none !important;
         }
         .accordion-button:not(.collapsed) {
-            color: var(--bs-primary) !important;
+            color: var(--accent) !important;
         }
         .accordion-button::after {
-            filter: invert(1);
+            filter: var(--toggler-filter);
         }
         .accordion-item {
             background-color: transparent;
@@ -41,8 +42,8 @@
         }
         .table-dark-transparent {
             --bs-table-bg: transparent;
-            --bs-table-color: rgba(255,255,255,0.8);
-            border-color: rgba(255,255,255,0.1);
+            --bs-table-color: var(--ink);
+            border-color: var(--frame);
         }
     </style>
 }
@@ -50,10 +51,10 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="display-5 fw-bold text-white mb-0">Workout <span class="text-primary">History</span></h1>
+            <h1 class="display-5 fw-bold mb-0">Workout <span class="text-primary">History</span></h1>
             <p class="text-muted">Track your consistency and progress over time.</p>
         </div>
-        <a asp-controller="Member" asp-action="Dashboard" class="btn btn-outline-light rounded-pill px-4">
+        <a asp-controller="Member" asp-action="Dashboard" class="btn btn-outline-primary rounded-pill px-4">
             <i class="fas fa-arrow-left me-2"></i>Dashboard
         </a>
     </div>
@@ -64,7 +65,7 @@
             <div class="mb-4">
                 <i class="fas fa-history fa-4x text-muted opacity-50"></i>
             </div>
-            <h3 class="text-white">No workouts logged yet</h3>
+            <h4>No workouts logged yet</h4>
             <p class="text-muted">Start a workout plan and log your first session!</p>
             <a asp-controller="Member" asp-action="Dashboard" class="btn btn-primary mt-3">
                 Go to Dashboard
@@ -90,10 +91,10 @@
                                                 <h4 class="mb-0 fw-bold">@log.WorkoutPlanName</h4>
                                             </div>
                                             <div class="text-end d-none d-sm-block">
-                                                <span class="badge bg-dark border border-secondary p-2">
-                                                    <i class="fas fa-clock me-1"></i> @log.DurationMinutes min
+                                                <span class="badge" style="background: var(--bg); color: var(--ink); border: 1px solid var(--frame);">
+                                                    <i class="fas fa-clock me-1 text-primary"></i> @log.DurationMinutes min
                                                 </span>
-                                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary p-2 ms-2">
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-2 ms-2">
                                                     @log.Entries.Count Exercises
                                                 </span>
                                             </div>
@@ -112,23 +113,23 @@
                                         }
 
                                         <div class="table-responsive">
-                                            <table class="table table-dark-transparent align-middle">
-                                                <thead>
-                                                    <tr class="text-uppercase small text-muted">
-                                                        <th style="width: 40%">Exercise</th>
-                                                        <th style="width: 20%">Sets</th>
-                                                        <th style="width: 20%">Reps</th>
-                                                        <th style="width: 20%">Weight</th>
+                                            <table class="table table-hover align-middle mb-0" style="color: var(--ink); background: transparent; border-color: var(--rule);">
+                                                <thead style="background: var(--frame);">
+                                                    <tr style="border-bottom: 1px solid var(--rule);">
+                                                        <th class="ps-3 py-2 border-0 small fw-bold text-uppercase opacity-75">Exercise</th>
+                                                        <th class="py-2 border-0 small fw-bold text-uppercase opacity-75">Sets</th>
+                                                        <th class="py-2 border-0 small fw-bold text-uppercase opacity-75">Reps</th>
+                                                        <th class="pe-3 py-2 border-0 small fw-bold text-uppercase opacity-75">Weight</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody style="background: transparent;">
                                                     @foreach (var entry in log.Entries)
                                                     {
-                                                        <tr>
-                                                            <td class="fw-bold">@entry.ExerciseName</td>
-                                                            <td><span class="badge bg-secondary">@entry.SetsPerformed</span></td>
-                                                            <td class="font-monospace text-info">@entry.RepsPerformed</td>
-                                                            <td class="font-monospace text-warning">@entry.WeightLifted</td>
+                                                        <tr style="background: transparent; border-bottom: 1px solid var(--rule);">
+                                                            <td class="ps-3 fw-bold">@entry.ExerciseName</td>
+                                                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2">@entry.SetsPerformed</span></td>
+                                                            <td class="font-monospace fw-bold" style="color: var(--info);">@entry.RepsPerformed</td>
+                                                            <td class="pe-3 font-monospace fw-bold" style="color: var(--warning);">@entry.WeightLifted</td>
                                                         </tr>
                                                     }
                                                 </tbody>

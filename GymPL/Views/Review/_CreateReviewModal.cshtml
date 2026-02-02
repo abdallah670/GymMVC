@@ -7,8 +7,8 @@
 
 }
 <div class="modal-header border-0 pb-0">
-    <h5 class="modal-title font-weight-bolder text-white">Rate Your Trainer</h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <h5 class="modal-title font-weight-bolder">Rate Your Trainer</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <form id="reviewForm" asp-action="Create" asp-controller="Review" method="post">
     <div class="modal-body">
@@ -17,8 +17,8 @@
         <input hidden asp-for="MemberPicture" value="@picture"/>
 
         <div class="form-group mb-4">
-            <label asp-for="TrainerId" class="form-label text-white-50">Select Trainer</label>
-            <select asp-for="TrainerId" asp-items="ViewBag.Trainers" class="form-select bg-dark text-white border-secondary">
+            <label asp-for="TrainerId" class="form-label text-muted">Select Trainer</label>
+            <select asp-for="TrainerId" asp-items="ViewBag.Trainers" class="form-select" style="background: var(--bg); color: var(--ink); border-color: var(--frame);">
                 <option value="">-- Choose a Trainer --</option>
             </select>
             <span asp-validation-for="TrainerId" class="text-danger"></span>
@@ -38,13 +38,13 @@
         </div>
 
         <div class="form-group">
-            <label asp-for="Comment" class="form-label text-white-50">Share your experience (Optional)</label>
-            <textarea asp-for="Comment" class="form-control bg-dark border-white-10 text-white" rows="4" placeholder="How has this trainer helped you?"></textarea>
+            <label asp-for="Comment" class="form-label text-muted">Share your experience (Optional)</label>
+            <textarea asp-for="Comment" class="form-control" style="background: var(--bg); color: var(--ink); border-color: var(--frame);" rows="4" placeholder="How has this trainer helped you?"></textarea>
             <span asp-validation-for="Comment" class="text-danger"></span>
         </div>
     </div>
     <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" class="btn bg-gradient-warning text-dark">Submit Review</button>
     </div>
 </form>
@@ -94,16 +94,16 @@
                         icon: 'success',
                         title: 'Thank You!',
                         text: response.message,
-                        background: '#1a1a1a',
-                         color: '#fff'
+                        background: getComputedStyle(document.documentElement).getPropertyValue('--tile').trim(),
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()
                     });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Submission Failed',
                         text: response.message || 'Please check your input and try again.',
-                        background: '#1a1a1a',
-                        color: '#fff'
+                        background: getComputedStyle(document.documentElement).getPropertyValue('--tile').trim(),
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()
                     });
                 }
             },
@@ -114,8 +114,8 @@
                     icon: 'error',
                     title: 'System Error', 
                     text: 'Status: ' + xhr.status + ' - ' + (xhr.statusText || 'Unknown Error'),
-                    background: '#1a1a1a',
-                    color: '#fff'
+                    background: getComputedStyle(document.documentElement).getPropertyValue('--tile').trim(),
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()
                 });
             }
         });

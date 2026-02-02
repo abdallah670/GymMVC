@@ -1,30 +1,30 @@
 @using GymPL.Extensions
 @using System.Security.Claims
-<li class="nav-item dropdown mx-2" id="chatDropdownContainer">
-    <a class="nav-link position-relative p-2" href="#" id="chatDropdown" role="button"
-       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--ink);">
-        <i class="fas fa-comment-dots fa-lg"></i>
+<li class="nav-item dropdown mx-1" id="chatDropdownContainer">
+    <a class="nav-link position-relative p-2 text-reset" href="#" id="chatDropdown" role="button"
+       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-comment-dots fa-lg text-secondary"></i>
         <!-- Counter - Messages -->
-        <span class="badge bg-primary badge-counter" id="chatBadge"
-              style="position: absolute; top: 2px; right: 2px; font-size: 0.6rem; display: none;">
+        <span class="badge bg-primary rounded-pill badge-counter position-absolute top-0 start-100 translate-middle p-1 border border-dark" id="chatBadge"
+              style="display: none; font-size: 0.6rem;">
             0
         </span>
     </a>
     <!-- Dropdown - Chat -->
-    <div class="dropdown-menu dropdown-menu-end shadow p-0"
-         aria-labelledby="chatDropdown" style="min-width: 320px;">
-        <h6 class="dropdown-header py-3 bg-primary text-white">
-            <i class="fas fa-comments me-2"></i>Messages
+    <div class="dropdown-menu dropdown-menu-end shadow-lg p-0"
+         aria-labelledby="chatDropdown" style="width: 320px; max-width: 90vw; background: var(--tile); border: 1px solid var(--frame) !important; color: var(--ink);">
+        <h6 class="dropdown-header py-3 border-bottom" style="background: var(--tile); color: var(--ink); border-color: var(--frame) !important;">
+            <i class="fas fa-comments me-2 text-primary"></i>Messages
         </h6>
         <div id="chatMessageList" class="p-0" style="max-height: 400px; overflow-y: auto;">
             <!-- Chat previews injected here -->
-            <div class="text-center py-5">
-                <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
-                <p class="text-muted mb-0">Checking messages...</p>
+            <div class="text-center py-5 opacity-50">
+                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                <p class="small mb-0">Checking messages...</p>
             </div>
         </div>
-        <div class="p-2 border-top bg-light">
-            <a class="btn btn-sm btn-primary w-100" href="/Chat/Index">
+        <div class="p-2 border-top" style="border-color: var(--frame) !important;">
+            <a class="btn btn-sm btn-outline-primary w-100" href="/Chat/Index">
                 <i class="fas fa-paper-plane me-2"></i>Open Chat
             </a>
         </div>
@@ -122,7 +122,7 @@
             const messagePreview = m.attachmentType ? `<i class="fas fa-paperclip"></i> ${m.attachmentType}` : m.message;
             
             html += `
-                <a class="dropdown-item d-flex align-items-center py-3 border-bottom border-light" href="/Chat/Index?otherUserId=${m.senderId}">
+                <a class="dropdown-item d-flex align-items-center py-3 border-bottom" style="border-color: var(--frame) !important;" href="/Chat/Index?otherUserId=${m.senderId}">
                     <div class="dropdown-list-image me-3">
                         ${m.senderPicture 
                             ? `<img class="rounded-circle" src="${m.senderPicture}" style="width: 40px; height: 40px; object-fit: cover;">`
@@ -131,7 +131,7 @@
                     </div>
                     <div class="w-100 overflow-hidden">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-dark font-size-sm">${m.senderName}</span>
+                            <span class="fw-bold" style="color: var(--ink); font-size: 0.85rem;">${m.senderName}</span>
                             <span class="text-muted small">${time}</span>
                         </div>
                         <div class="text-muted text-truncate small">${messagePreview}</div>

@@ -5,29 +5,35 @@
 }
 
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Create Fitness Goal</h1>
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-light rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 mb-0" style="color: var(--ink); font-weight: 700;">Create Fitness Goal</h1>
+            <p style="color: var(--muted); opacity: 0.9; margin-bottom: 0;">Define a new objective for gym members</p>
+        </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-body">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-radius: var(--radius); background: var(--tile);">
+                <div class="card-body p-4 p-md-5">
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <div class="form-group">
-                            <label asp-for="GoalName" class="control-label">Goal Name</label>
-                            <input asp-for="GoalName" class="form-control" />
-                            <span asp-validation-for="GoalName" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label asp-for="GoalName" class="form-label fw-bold small text-uppercase" style="color: var(--muted); opacity: 0.8;">Goal Name</label>
+                            <input asp-for="GoalName" class="form-control form-control-lg" style="background: var(--bg); color: var(--ink); border-color: var(--rule);" />
+                            <span asp-validation-for="GoalName" class="text-danger small"></span>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="GoalDescription" class="control-label">Description</label>
-                            <textarea asp-for="GoalDescription" class="form-control"></textarea>
-                            <span asp-validation-for="GoalDescription" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label asp-for="GoalDescription" class="form-label fw-bold small text-uppercase" style="color: var(--muted); opacity: 0.8;">Description</label>
+                            <textarea asp-for="GoalDescription" class="form-control" rows="4" style="background: var(--bg); color: var(--ink); border-color: var(--rule);"></textarea>
+                            <span asp-validation-for="GoalDescription" class="text-danger small"></span>
                         </div>
-                        <div class="form-group">
-                            <input type="submit" value="Create" class="btn btn-primary" />
-                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                            <a asp-action="Index" class="btn btn-light px-4 rounded-pill">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm">Create Goal</button>
                         </div>
                     </form>
                 </div>

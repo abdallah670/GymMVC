@@ -9,8 +9,8 @@ namespace GymDAL.Repo.Abstract.Financial
 {
     public interface ISubscriptionRepository: IRepository<Subscription>
     {
-    
-        Task <Subscription> GetMembershipByIdAsync(int Id);
+        Task<Subscription> GetActiveSubscriptionByMemberIdAsync(string userId);
+        Task<Subscription> GetMembershipByIdAsync(int Id);
 
     }
 }

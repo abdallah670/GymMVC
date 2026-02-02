@@ -147,9 +147,9 @@
                             </h4>
                             @if (!string.IsNullOrEmpty(exercise.VideoUrl))
                             {
-                                <a href="@exercise.VideoUrl" target="_blank" class="btn btn-sm btn-primary">
+                                <button onclick="openVideoModal('@exercise.VideoUrl', '@exercise.ExerciseName')" class="btn btn-sm btn-primary">
                                     <i class="fas fa-video me-1"></i> Watch Demo
-                                </a>
+                                </button>
                             }
                         </div>
 
@@ -190,7 +190,7 @@
                                 <div class="exercise-stat-label mb-1">
                                     <i class="fas fa-info-circle me-1"></i> Notes:
                                 </div>
-                                <div class="text-dark small">@exercise.Notes</div>
+                                <div style="color: var(--ink);" class="small">@exercise.Notes</div>
                             </div>
                         }
                     </div>
@@ -210,8 +210,55 @@
     }
 </div>
 
+<!-- Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background: var(--tile); border: 1px solid var(--frame); color: var(--ink);">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="videoModalLabel">Exercise Demo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="videoFrame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function changeDayWorkout(day) {
         window.location.href = '@Url.Action("ViewTodayWorkout", "WorkoutPlanAssignment")?assignmentId=@assignment?.Id&day=' + day;
     }
+
+    function openVideoModal(url, title) {
+        var embedUrl = getEmbedUrl(url);
+        document.getElementById('videoModalLabel').innerText = title;
+        document.getElementById('videoFrame').src = embedUrl;
+        var myModal = new bootstrap.Modal(document.getElementById('videoModal'));
+        myModal.show();
+    }
+
+    function getEmbedUrl(url) {
+        var videoId = "";
+        // Handle various YouTube formats
+        if (url.includes("youtube.com/watch?v=")) {
+            videoId = url.split("v=")[1].split("&")[0];
+        } else if (url.includes("youtu.be/")) {
+            videoId = url.split("youtu.be/")[1];
+        } else if (url.includes("youtube.com/embed/")) {
+            return url; // Already an embed URL
+        }
+        
+        if (videoId) {
+            return "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0";
+        }
+        return url; // Fallback for non-YouTube links (might fail in iframe due to X-Frame-Options)
+    }
+
+    // Stop video when modal is closed
+    document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('videoFrame').src = "";
+    });
 </script>

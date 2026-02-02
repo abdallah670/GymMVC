@@ -1,0 +1,220 @@
+@{
+    ViewData["Title"] = "AI Workout Generator";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-0 shadow-lg bg-dark text-white overflow-hidden">
+                <div class="card-header bg-primary bg-opacity-10 py-3 border-bottom border-secondary">
+                    <h3 class="mb-0"><i class="fas fa-magic me-2 text-primary"></i>AI Workout Generator</h3>
+                    <p class="text-white-50 mb-0 small">Create a personalized workout plan in seconds using Gemini AI.</p>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Input Form -->
+                    <form id="generatorForm">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-warning small text-uppercase ls-1">Goal</label>
+                                <select id="goal" class="form-select bg-dark text-white border-secondary">
+                                    <option value="Weight Loss">Weight Loss</option>
+                                    <option value="Muscle Gain">Muscle Gain / Hypertrophy</option>
+                                    <option value="Strength">Strength & Power</option>
+                                    <option value="Endurance">Cardiovascular Endurance</option>
+                                    <option value="General Fitness">General Fitness & Health</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-warning small text-uppercase ls-1">Experience Level</label>
+                                <select id="level" class="form-select bg-dark text-white border-secondary">
+                                    <option value="Beginner">Beginner (0-6 months)</option>
+                                    <option value="Intermediate">Intermediate (6+ months)</option>
+                                    <option value="Advanced">Advanced (2+ years)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-warning small text-uppercase ls-1">Days Per Week</label>
+                                <select id="days" class="form-select bg-dark text-white border-secondary">
+                                    <option value="3">3 Days</option>
+                                    <option value="4">4 Days</option>
+                                    <option value="5">5 Days</option>
+                                    <option value="6">6 Days</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-warning small text-uppercase ls-1">Session Duration</label>
+                                <select id="duration" class="form-select bg-dark text-white border-secondary">
+                                    <option value="30 mins">30 Minutes</option>
+                                    <option value="45 mins">45 Minutes</option>
+                                    <option value="60 mins">60 Minutes</option>
+                                    <option value="90 mins">90 Minutes</option>
+                                </select>
+                            </div>
+                             <div class="col-md-4">
+                                <label class="form-label text-warning small text-uppercase ls-1">Equipment</label>
+                                <select id="equipment" class="form-select bg-dark text-white border-secondary">
+                                    <option value="Full Gym">Full Gym Access</option>
+                                    <option value="Dumbbells Only">Dumbbells Only</option>
+                                    <option value="Bodyweight">Bodyweight Only</option>
+                                    <option value="Home Gym">Home Gym (Barbell + Rack)</option>
+                                </select>
+                            </div>
+                             <div class="col-12">
+                                <label class="form-label text-warning small text-uppercase ls-1">Additional Notes</label>
+                                <textarea id="notes" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Any injuries? Specific focus areas (e.g., glutes, biceps)?"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-end">
+                            <button type="button" onclick="generatePlan()" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-bolt me-2"></i>Generate Plan
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading State -->
+                    <div id="loader" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <h5 class="text-white">Designing your perfect plan...</h5>
+                        <p class="text-muted">This AI magic takes about 5-10 seconds.</p>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="results" class="mt-5 d-none border-top border-secondary pt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h3 class="text-white mb-1" id="planName">Plan Name</h3>
+                                <div class="badge bg-success" id="planLevel">Level</div>
+                                <div class="badge bg-info" id="planDuration">4 Weeks</div>
+                            </div>
+                            <button id="saveBtn" class="btn btn-success" onclick="savePlan()">
+                                <i class="fas fa-save me-2"></i>Save to Profile
+                            </button>
+                        </div>
+                        
+                        <p class="text-white-50 lead" id="planDesc">Description goes here...</p>
+                        
+                        <div id="scheduleContainer" class="row g-4 mt-2">
+                            <!-- Days will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPlan = null;
+
+        async function generatePlan() {
+            // UI Update
+            document.getElementById('generatorForm').classList.add('d-none');
+            document.getElementById('loader').classList.remove('d-none');
+            document.getElementById('results').classList.add('d-none');
+
+            // Gather Data
+            const data = {
+                Goal: document.getElementById('goal').value,
+                ExperienceLevel: document.getElementById('level').value,
+                DaysPerWeek: parseInt(document.getElementById('days').value),
+                DurationPerSession: document.getElementById('duration').value,
+                Equipment: document.getElementById('equipment').value,
+                AdditionalNotes: document.getElementById('notes').value
+            };
+
+            try {
+                const response = await fetch('/AI/GenerateWorkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('API Error');
+
+                const plan = await response.json();
+                currentPlan = plan; // Store for saving
+                renderPlan(plan);
+
+            } catch (error) {
+                alert('Failed to generate plan. Please try again.');
+                document.getElementById('generatorForm').classList.remove('d-none');
+            } finally {
+                document.getElementById('loader').classList.add('d-none');
+            }
+        }
+
+        function renderPlan(plan) {
+            document.getElementById('planName').innerText = plan.name;
+            document.getElementById('planLevel').innerText = plan.level;
+            document.getElementById('planDesc').innerText = plan.description;
+            
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '';
+
+            plan.schedule.forEach(day => {
+                let exercisesHtml = '';
+                day.exercises.forEach(ex => {
+                    exercisesHtml += `
+                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary py-2">
+                            <div>
+                                <div class="fw-bold text-white">${ex.name}</div>
+                                <div class="small text-muted">${ex.note || ''}</div>
+                            </div>
+                            <div class="text-end text-primary font-monospace">
+                                ${ex.sets} x ${ex.reps}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const dayHtml = `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card bg-black bg-opacity-25 border border-secondary h-100">
+                            <div class="card-header border-secondary text-center">
+                                <h5 class="mb-0 text-white">Day ${day.dayNumber}</h5>
+                                <small class="text-warning">${day.dayName}</small>
+                            </div>
+                            <div class="card-body">
+                                ${exercisesHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += dayHtml;
+            });
+
+            document.getElementById('results').classList.remove('d-none');
+        }
+
+        async function savePlan() {
+            if (!currentPlan) return;
+
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/AI/SavePlan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentPlan)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = `/WorkoutPlan/Index`;
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                alert('Failed to save plan: ' + error.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+}

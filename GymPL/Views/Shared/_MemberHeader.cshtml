@@ -1,86 +1,94 @@
 @using System.Security.Claims
 @if (User.Identity.IsAuthenticated)
 {
-    <header class="member-header">
-        <div class="bar">
-            <div class="brand">
-                <h1 class="logo">Meno<span>Pro</span></h1>
-            </div>
+    <header class="member-header fixed-top">
+        <nav class="navbar navbar-expand-lg shadow-sm">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand fw-bold fs-3" href="#">
+                    Meno<span class="text-primary">Pro</span>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#memberNavbar" aria-controls="memberNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <nav>
-                <ul>
-                    <li><a asp-controller="Member" asp-action="Dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a asp-controller="Member" asp-action="GetAssignedWorkoutPlan"><i class="fas fa-dumbbell"></i> My Workout</a></li>
-                    <li><a asp-controller="Member" asp-action="GetAssignedDietPlan"><i class="fas fa-apple-alt"></i> My Diet</a></li>
-                    <li><a asp-controller="MealLog" asp-action="Index"><i class="fas fa-utensils"></i> Meal Logs</a></li>
-                    <li><a asp-controller="WorkoutLog" asp-action="History"><i class="fas fa-history"></i> Workout History</a></li>
-                    
-                    <!-- Notification Bell -->
-                    <partial name="_NotificationsPartial" />
-                    <partial name="_ChatPartial" />
+                <div class="collapse navbar-collapse" id="memberNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Member" asp-action="Dashboard"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Member" asp-action="GetAssignedWorkoutPlan"><i class="fas fa-dumbbell me-1"></i> My Workout</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Member" asp-action="GetAssignedDietPlan"><i class="fas fa-apple-alt me-1"></i> My Diet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="MealLog" asp-action="Index"><i class="fas fa-utensils me-1"></i> Meal Logs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="WorkoutLog" asp-action="History"><i class="fas fa-history me-1"></i> Workout History</a>
+                        </li>
+                    </ul>
 
-                    <li>
-                        <button class="theme-toggle-btn theme-btn" title="Toggle Light/Dark Mode">
-                            <i class="fas fa-moon"></i>
-                        </button>
-                    </li>
+                    <ul class="navbar-nav ms-auto align-items-center auth-nav">
+                        <!-- Notification & Chat -->
+                        <partial name="_NotificationsPartial" />
+                        <partial name="_ChatPartial" />
 
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <!-- Show profile picture if available -->
-                            @if (User.HasClaim(c => c.Type == "ProfilePicture"))
-                            {
-                                <img src="@User.FindFirst("ProfilePicture").Value" class="profile-img-sm rounded-circle" style="width: 30px; height: 30px; object-fit: cover;" alt="@User.Identity.Name" />
-                            }
-                          else{
-                                        
-                                <img src="~/uploads/profiles/default-profile.png" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
-                            }
-                            <span class="user-name ms-2">@User.Identity.Name</span>
-                        </a>
-                        
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                             <li>
-                                <div class="px-3 py-2">
-                                     <div class="d-flex align-items-center">
-                                       @if (User.HasClaim(c => c.Type == "ProfilePicture"))
-                                        {
-                                            <img src="@User.FindFirst("ProfilePicture").Value" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
-                                        }
-                                       else{
-                                        
-                                            <img src="~/uploads/profiles/default-profile.png" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
-                                        }
-                                        <div>
-                                            <div class="fw-bold">@User.Identity.Name</div>
-                                            <div class="small text-muted">@User.FindFirst(ClaimTypes.Email)?.Value</div>
+                        <li class="nav-item mx-2">
+                            <button class="theme-toggle-btn theme-btn nav-link bg-transparent border-0" title="Toggle Light/Dark Mode">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
+
+                        <!-- User Profile Dropdown -->
+                        <li class="nav-item dropdown ms-2">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @if (User.HasClaim(c => c.Type == "ProfilePicture"))
+                                {
+                                    <img src="@User.FindFirst("ProfilePicture").Value" class="rounded-circle border border-secondary" style="width: 35px; height: 35px; object-fit: cover;" alt="Profile" />
+                                }
+                                else
+                                {
+                                    <img src="~/uploads/profiles/default-profile.png" class="rounded-circle border border-secondary" style="width: 35px; height: 35px; object-fit: cover;" />
+                                }
+                                <span class="ms-2 d-none d-lg-inline">@User.Identity.Name</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                                <li>
+                                    <div class="px-3 py-2 border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            @if (User.HasClaim(c => c.Type == "ProfilePicture"))
+                                            {
+                                                <img src="@User.FindFirst("ProfilePicture").Value" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <img src="~/uploads/profiles/default-profile.png" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            }
+                                            <div class="overflow-hidden">
+                                                <div class="fw-bold text-truncate">@User.Identity.Name</div>
+                                                <div class="small text-muted text-truncate">@User.FindFirst(ClaimTypes.Email)?.Value</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Member" asp-action="Profile">
-                                    <i class="fas fa-user me-2 text-primary"></i>My Profile
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
-                                    <i class="fas fa-key me-2 text-warning"></i>Change Password
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </div>
+                                </li>
+                                <li><a class="dropdown-item" asp-controller="Member" asp-action="Profile"><i class="fas fa-user me-2 text-primary"></i>My Profile</a></li>
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="fas fa-key me-2 text-warning"></i>Change Password</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                                        <button type="submit" class="dropdown-item text-danger w-100 text-start">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </header>
 }

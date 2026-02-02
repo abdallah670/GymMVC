@@ -16,7 +16,6 @@ namespace GymBLL.ModelVM.Financial
 
         public string MembershipType { get; set; }
 
-        [Required(ErrorMessage = "Payment method is required")]
         [StringLength(20)]
         public string PaymentMethod { get; set; } // "CreditCard", "DebitCard", "Cash"
 

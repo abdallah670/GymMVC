@@ -9,5 +9,6 @@ namespace GymBLL.Service.Abstract.Financial
         /// Returns the Stripe Checkout URL.
         /// </summary>
         Task<string> CreateCheckoutSessionAsync(string email, int membershipId, int tempRegistrationId, string successUrl, string cancelUrl);
+        Task<string> CreateSubscriptionCheckoutSessionAsync(string email, int membershipId, string memberId, string actionType, string successUrl, string cancelUrl);
     }
 }

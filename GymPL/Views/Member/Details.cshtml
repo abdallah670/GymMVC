@@ -6,8 +6,8 @@
    
 
     // Check if member has workout and diet plans
-    bool hasWorkout = ViewBag.hasWorkout != null && (bool)ViewBag.hasWorkout;
-    bool hasDiet = ViewBag.hasDiet != null && (bool)ViewBag.hasDiet;
+    bool hasWorkout = ViewBag.HasWorkout != null && (bool)ViewBag.HasWorkout;
+    bool hasDiet = ViewBag.HasDiet != null && (bool)ViewBag.HasDiet;
     var returnPage = Context.Request.Query["page"].FirstOrDefault() ?? "1";
     var currentUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
@@ -15,7 +15,7 @@
 <div class="member-details-wrapper">
     <!-- Back Button -->
     <div class="assignment-header">
-        @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl))
+        @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl?.ToString()))
         {
             <a href="@ViewBag.ReturnUrl" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Back to Members
@@ -23,7 +23,7 @@
         }
         else
         {
-            <a asp-action="Index" asp-route-page="@returnPage" class="btn btn-secondary">
+            <a asp-action="Index" asp-route-page="@ViewBag.ReturnPage" asp-route-view="@ViewBag.ReturnView" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Back to Members
             </a>
         }
@@ -120,17 +120,44 @@
                     </h3>
                     @if (!hasWorkout || Model.WorkoutAssignmentVM == null)
                     {
-                        <a asp-controller="WorkoutPlanAssignment"
-                           asp-action="Assign"
-                           asp-route-memberId="@Model.Id"
-                           asp-route-returnUrl="@currentUrl"
-                           class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i> Assign Plan
-                        </a>
+                        @if (User.IsInRole("Trainer"))
+                        {
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="getAISuggestion('Workout')">
+                                    <i class="fas fa-robot"></i> AI Suggest
+                                </button>
+                                <a asp-controller="WorkoutPlanAssignment"
+                                   asp-action="Assign"
+                                   asp-route-memberId="@Model.Id"
+                                   asp-route-returnUrl="@currentUrl"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i> Assign Plan
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="WorkoutPlanAssignment"
+                               asp-action="Assign"
+                               asp-route-memberId="@Model.Id"
+                               asp-route-returnUrl="@currentUrl"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i> Assign Plan
+                            </a>
+                        }
                     }
                     else
                     {
                         <div class="d-flex gap-2">
+                            @if (User.IsInRole("Trainer"))
+                            {
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="getAISuggestion('Workout')">
+                                    <i class="fas fa-robot"></i> AI Suggest
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="openReassignModal('Workout')">
+                                    <i class="fas fa-exchange-alt"></i> Reassign
+                                </button>
+                            }
                             @if (Model.WorkoutAssignmentVM?.Id != null)
                             {
                                 <a asp-controller="WorkoutPlanAssignment"
@@ -141,7 +168,6 @@
                                     <i class="fas fa-eye me-1"></i> Details
                                 </a>
                             }
-                           
                         </div>
                     }
                 </div>
@@ -205,17 +231,44 @@
                     </h3>
                     @if (!hasDiet || Model.DietPlanAssignmentVM == null)
                     {
-                        <a asp-controller="DietPlanAssignment"
-                           asp-action="Assign"
-                           asp-route-memberId="@Model.Id"
-                           asp-route-returnUrl="@currentUrl"
-                           class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i> Assign Plan
-                        </a>
+                        @if (User.IsInRole("Trainer"))
+                        {
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="getAISuggestion('Diet')">
+                                    <i class="fas fa-robot"></i> AI Suggest
+                                </button>
+                                <a asp-controller="DietPlanAssignment"
+                                   asp-action="Assign"
+                                   asp-route-memberId="@Model.Id"
+                                   asp-route-returnUrl="@currentUrl"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i> Assign Plan
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="DietPlanAssignment"
+                               asp-action="Assign"
+                               asp-route-memberId="@Model.Id"
+                               asp-route-returnUrl="@currentUrl"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i> Assign Plan
+                            </a>
+                        }
                     }
                     else
                     {
                         <div class="d-flex gap-2">
+                            @if (User.IsInRole("Trainer"))
+                            {
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="getAISuggestion('Diet')">
+                                    <i class="fas fa-robot"></i> AI Suggest
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="openReassignModal('Diet')">
+                                    <i class="fas fa-exchange-alt"></i> Reassign
+                                </button>
+                            }
                             @if (Model.DietPlanAssignmentVM?.Id != null)
                             {
                                 <a asp-controller="DietPlanAssignment"
@@ -382,3 +435,228 @@
         </div>
     </div>
 </div>
+<partial name="_AIChatbot" />
+
+@if (User.IsInRole("Trainer"))
+{
+    <!-- AI Suggestion Modal -->
+    <div class="modal fade" id="aiSuggestionModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 1.2rem; border: none; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: var(--primary-gradient, linear-gradient(135deg, #4e73df 0%, #224abe 100%)); color: white; border: none;">
+                    <h5 class="modal-title" id="aiModalLabel">
+                        <i class="fas fa-robot mr-2"></i> AI Plan Suggestion
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="aiModalBody" style="padding: 2rem; background: #f8f9fc;">
+                    <div id="aiLoading" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-3 text-muted">MenoPro AI is crafting a tailored plan...</p>
+                    </div>
+                    <div id="aiContent" style="display: none;">
+                        <div class="suggestion-card">
+                            <h4 id="suggestedPlanName" class="text-primary mb-3"></h4>
+                            <p id="suggestedDescription" class="text-muted"></p>
+                            <div id="suggestedStats" class="row mb-4"></div>
+                            
+                            <div class="suggestion-items-container">
+                                <h6 class="text-dark font-weight-bold mb-3">Planned Items:</h6>
+                                <ul id="suggestedItems" class="list-group list-group-flush"></ul>
+                            </div>
+
+                            <div class="mt-4 p-3 bg-light rounded shadow-sm border-left-primary">
+                                <h6 class="text-primary font-weight-bold small text-uppercase">AI Reasoning:</h6>
+                                <p id="suggestedReasoning" class="mb-0 small italic"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #f8f9fc; border: none; padding: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="applyAISuggestion" class="btn btn-primary px-4">
+                        <i class="fas fa-check mr-2"></i> Apply & Assign to Member
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reassign Plan Modal -->
+    <div class="modal fade" id="reassignModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="background: var(--tile); border: 1px solid var(--frame);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--rule);">
+                    <h5 class="modal-title" style="color: var(--ink);">Reassign <span id="reassignType"></span> Plan</h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color: var(--ink); opacity: 0.8;">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label style="color: var(--muted);">Select New Plan</label>
+                        <select id="newPlanSelect" class="form-control" style="background: var(--frame); border: 1px solid var(--rule); color: var(--ink);"></select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--rule);">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmReassign" class="btn btn-warning">Reassign Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .suggestion-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            color: #333;
+        }
+        .border-left-primary {
+            border-left: 4px solid #4e73df;
+        }
+        .value-dark { color: var(--ink); font-weight: 600; }
+        .label-muted { color: var(--muted); font-size: 0.85rem; }
+    </style>
+
+    <script>
+        let currentSuggestion = null;
+        const memberId = "@Model.Id";
+
+        async function getAISuggestion(type) {
+            $('#aiSuggestionModal').modal('show');
+            $('#aiLoading').show();
+            $('#aiContent').hide();
+            $('#applyAISuggestion').hide();
+
+            try {
+                const response = await fetch(`/Trainer/GetAISuggestion?memberId=${memberId}&type=${type}`);
+                const data = await response.json();
+                
+                if (data.isError) {
+                    alert(data.errorMessage);
+                    $('#aiSuggestionModal').modal('hide');
+                    return;
+                }
+
+                currentSuggestion = data;
+                currentSuggestion.type = type; 
+
+                document.getElementById('suggestedPlanName').innerText = data.planName;
+                document.getElementById('suggestedDescription').innerText = data.description;
+                document.getElementById('suggestedReasoning').innerText = data.reasoning;
+
+                let statsHtml = '';
+                let itemsHtml = '';
+
+                if (type === 'Diet') {
+                    statsHtml = `
+                        <div class="col-6"><div class="small text-muted">Calories</div><strong>${data.totalCalories} kcal</strong></div>
+                        <div class="col-6"><div class="small text-muted">Type</div><strong>${data.recommendedDietType}</strong></div>
+                    `;
+                    data.suggestedMeals.forEach(meal => {
+                        itemsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center" style="background: #fff; color: #333;">
+                            <div><strong>${meal.mealName}</strong><br><small>${meal.notes || ''}</small></div>
+                        </li>`;
+                    });
+                } else {
+                    statsHtml = `
+                        <div class="col-6"><div class="small text-muted">Difficulty</div><strong>${data.difficultyLevel}</strong></div>
+                    `;
+                    data.suggestedExercises.forEach(ex => {
+                        itemsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center" style="background: #fff; color: #333;">
+                            <div><strong>${ex.exerciseName}</strong><br><small>${ex.notes || ''}</small></div>
+                            <span class="badge badge-primary badge-pill">${ex.sets}x${ex.reps}</span>
+                        </li>`;
+                    });
+                }
+
+                document.getElementById('suggestedStats').innerHTML = statsHtml;
+                document.getElementById('suggestedItems').innerHTML = itemsHtml;
+
+                $('#aiLoading').hide();
+                $('#aiContent').fadeIn();
+                $('#applyAISuggestion').show();
+
+            } catch (error) {
+                console.error('Error fetching AI suggestion:', error);
+                alert('Failed to get AI suggestion. Please try again.');
+                $('#aiSuggestionModal').modal('hide');
+            }
+        }
+
+        document.getElementById('applyAISuggestion').onclick = async () => {
+            const btn = document.getElementById('applyAISuggestion');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Applying...';
+
+            try {
+                const response = await fetch(`/Trainer/ApplyAISuggestion?memberId=${memberId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentSuggestion)
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    const error = await response.text();
+                    alert('Apply failed: ' + error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check mr-2"></i> Apply & Assign to Member';
+                }
+            } catch (error) {
+                console.error('Apply Error:', error);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i> Apply & Assign to Member';
+            }
+        };
+
+        async function openReassignModal(type) {
+            document.getElementById('reassignType').innerText = type;
+            $('#reassignModal').modal('show');
+            
+            const select = document.getElementById('newPlanSelect');
+            select.innerHTML = '<option>Loading plans...</option>';
+
+            try {
+                const response = await fetch(`/Trainer/GetActivePlans?type=${type}`);
+                const plans = await response.json();
+                
+                select.innerHTML = plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            } catch (error) {
+                alert('Failed to load plans');
+            }
+        }
+
+        document.getElementById('confirmReassign').onclick = async () => {
+            const type = document.getElementById('reassignType').innerText;
+            const planId = document.getElementById('newPlanSelect').value;
+            const btn = document.getElementById('confirmReassign');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reassigning...';
+
+            try {
+                const response = await fetch(`/Trainer/ReassignPlan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `memberId=${memberId}&planId=${planId}&type=${type}`
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Reassign failed');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Reassign Now';
+                }
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerHTML = 'Reassign Now';
+            }
+        };
+    </script>
+}

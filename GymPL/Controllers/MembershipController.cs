@@ -1,6 +1,5 @@
 using GymBLL.ModelVM.Financial;
 using GymBLL.Service.Abstract.Financial;
-using GymPL.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;

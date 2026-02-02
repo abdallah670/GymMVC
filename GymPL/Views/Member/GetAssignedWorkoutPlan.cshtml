@@ -6,13 +6,13 @@
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="text-white fw-bold"><i class="fas fa-dumbbell text-primary me-2"></i>My Assigned Workout</h1>
-        <a asp-action="Dashboard" class="btn btn-outline-light"><i class="fas fa-arrow-left me-2"></i>Dashboard</a>
+        <h1 class="fw-bold"><i class="fas fa-dumbbell text-primary me-2"></i>My Assigned Workout</h1>
+        <a asp-action="Dashboard" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Dashboard</a>
     </div>
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="card bg-dark text-white border-secondary shadow-lg mb-4">
+            <div class="card shadow-lg mb-4" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
                 <div class="card-body p-4">
                     <h3 class="text-primary fw-bold mb-3">@Model.WorkoutPlan?.Name</h3>
                     <p class="text-muted mb-4">@Model.WorkoutPlan?.Description</p>
@@ -36,7 +36,7 @@
                     {
                         <div class="mb-4">
                             <h5 class="fw-bold mb-2">Trainer's Notes</h5>
-                            <div class="bg-light bg-opacity-10 p-3 rounded italic">
+                            <div class="p-3 rounded italic" style="background: var(--bg); border: 1px solid var(--frame);">
                                 "@Model.Notes"
                             </div>
                         </div>
@@ -52,8 +52,8 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card bg-dark text-white border-secondary shadow-lg">
-                <div class="card-header border-secondary bg-transparent">
+            <div class="card shadow-lg" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
+                <div class="card-header bg-transparent" style="border-bottom: 1px solid var(--frame) !important;">
                     <h5 class="mb-0">Plan Status</h5>
                 </div>
                 <div class="card-body">
@@ -69,7 +69,7 @@
                         </div>
                         <span>Trainer</span>
                     </div>
-                    <hr class="border-secondary">
+                    <hr style="border-color: var(--frame) !important; opacity: 1;">
                     <p class="small text-muted mb-0">
                         This plan has been specifically tailored to your fitness goals. If you have questions, please contact your trainer.
                     </p>

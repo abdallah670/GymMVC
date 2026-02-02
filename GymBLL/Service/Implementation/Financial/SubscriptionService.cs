@@ -81,7 +81,7 @@ namespace GymBLL.Service.Implementation.Financial
                 // Usage example
                 var subscriptions = await UnitOfWork.Subscriptions
                     .Get(
-                        filter: s => s.MemberId == id && s.Status == GymDAL.Enums.SubscriptionStatus.Active,
+                        filter: s => s.MemberId == id && s.Status == GymDAL.Enums.SubscriptionStatus.Active && s.EndDate >= DateTime.UtcNow,
                         include: query => query
                             .Include(s => s.WorkoutAssignment)
                                 .ThenInclude(wa => wa.WorkoutPlan)
@@ -195,6 +195,11 @@ namespace GymBLL.Service.Implementation.Financial
                 subscription.StartDate = model.StartDate;
                 subscription.EndDate = model.EndDate;
                 subscription.Status = Enum.Parse<SubscriptionStatus>(model.Status);
+                // Update assignment IDs if provided
+                if (model.WorkoutAssignmentId.HasValue)
+                    subscription.WorkoutAssignmentId = model.WorkoutAssignmentId;
+                if (model.DietPlanAssignmentId.HasValue)
+                    subscription.DietPlanAssignmentId = model.DietPlanAssignmentId;
                 UnitOfWork.Subscriptions.Update(subscription);
                 var result = await UnitOfWork.SaveAsync();
                 if (result > 0) return new Response<SubscriptionVM>(model, null, false);
@@ -244,26 +249,60 @@ namespace GymBLL.Service.Implementation.Financial
                 return new Response<bool>(false, $"Error: {ex.Message}", true);
             }
         }
-        public async Task<Response<bool>> RenewSubscriptionAsync(int id)
+        public async Task<Response<bool>> RenewSubscriptionAsync(int id, PaymentVM? payment = null)
         {
             try
             {
+                UnitOfWork.BeginTransaction();
+
                 var subscription = await UnitOfWork.Subscriptions.GetByIdAsync(id);
-                if (subscription == null) return new Response<bool>(false, "Subscription not found.", true);
-                var membership = await UnitOfWork.Memberships.GetByIdAsync(subscription.MembershipId);
-                if (membership != null)
+                if (subscription == null)
                 {
-                    subscription.EndDate = subscription.EndDate.AddMonths(membership.DurationInMonths);
-                    subscription.Status = SubscriptionStatus.Active;
-                    UnitOfWork.Subscriptions.Update(subscription);
-                    var result = await UnitOfWork.SaveAsync();
-                    if (result > 0) return new Response<bool>(true, null, false);
+                    UnitOfWork.RollbackTransaction();
+                    return new Response<bool>(false, "Subscription not found.", true);
                 }
-                return new Response<bool>(false, "Failed to renew subscription.", true);
+
+                var membership = await UnitOfWork.Memberships.GetByIdAsync(subscription.MembershipId);
+                if (membership == null)
+                {
+                    UnitOfWork.RollbackTransaction();
+                    return new Response<bool>(false, "Membership plan not found for this subscription.", true);
+                }
+
+                // If renewing, record the payment if provided
+                if (payment != null)
+                {
+                    var paymentEntity = Mapper.Map<Payment>(payment);
+                    paymentEntity.Status = "Completed";
+                    paymentEntity.ProcessedDate = DateTime.UtcNow;
+                    await UnitOfWork.Payments.AddAsync(paymentEntity);
+                    await UnitOfWork.SaveAsync();
+                    subscription.PaymentId = paymentEntity.Id;
+                }
+
+                // IMPORTANT: Calculate EndDate properly: 
+                // If current subscription is still active (EndDate > Now), add months to current EndDate.
+                // If it's already expired, add months to Now.
+                var baseDate = subscription.EndDate > DateTime.UtcNow ? subscription.EndDate : DateTime.UtcNow;
+                subscription.EndDate = baseDate.AddMonths(membership.DurationInMonths);
+                subscription.Status = SubscriptionStatus.Active;
+
+                UnitOfWork.Subscriptions.Update(subscription);
+                var result = await UnitOfWork.SaveAsync();
+                
+                if (result > 0)
+                {
+                    await UnitOfWork.CommitTransactionAsync();
+                    return new Response<bool>(true, null, false);
+                }
+
+                UnitOfWork.RollbackTransaction();
+                return new Response<bool>(false, "Failed to update subscription data.", true);
             }
             catch (Exception ex)
             {
-                return new Response<bool>(false, $"Error: {ex.Message}", true);
+                UnitOfWork.RollbackTransaction();
+                return new Response<bool>(false, $"Error during renewal: {ex.Message}", true);
             }
         }
         public async Task<Response<bool>> DeleteAsync(int id)
@@ -313,11 +352,18 @@ namespace GymBLL.Service.Implementation.Financial
         {
             try
             {
-                var subscriptions = await UnitOfWork.Subscriptions.FindAsync(s => s.MemberId == memberId);
+                // Filter for Active status and valid EndDate to match GetByMemeberIdAsync behavior
+                var subscriptions = await UnitOfWork.Subscriptions.FindAsync(
+                    s => s.MemberId == memberId && 
+                         s.Status == GymDAL.Enums.SubscriptionStatus.Active && 
+                         s.EndDate >= DateTime.UtcNow);
                 var activeSubscription = subscriptions.OrderByDescending(s => s.EndDate).FirstOrDefault();
                 if (activeSubscription != null)
                 {
                     var vm = Mapper.Map<SubscriptionVM>(activeSubscription);
+                    // Ensure assignment IDs are mapped (they should be by convention, but be explicit)
+                    vm.WorkoutAssignmentId = activeSubscription.WorkoutAssignmentId;
+                    vm.DietPlanAssignmentId = activeSubscription.DietPlanAssignmentId;
                     return new Response<SubscriptionVM>(vm, null, false);
                 }
                 return new Response<SubscriptionVM>(null, "No active subscription found.", true);
@@ -331,59 +377,68 @@ namespace GymBLL.Service.Implementation.Financial
         {
             try
             {
+                UnitOfWork.BeginTransaction();
 
-                // Get current subscription
-                var currentSubscription = await UnitOfWork.Subscriptions.GetByIdAsync(currentSubscriptionId);
-
-
-                if (currentSubscription == null) return new Response<SubscriptionVM>(null, "Current subscription not found.", true);
-
-                // Get new membership
+                // Verify new membership exists
                 var newMembership = await UnitOfWork.Memberships.GetByIdAsync(newMembershipId);
+                if (newMembership == null) 
+                {
+                    UnitOfWork.RollbackTransaction();
+                    return new Response<SubscriptionVM>(null, "New membership plan not found.", true);
+                }
 
-
-                if (newMembership == null) return new Response<SubscriptionVM>(null, "New membership plan not found.", true);
-
-                // Cancel current subscription
-                currentSubscription.Status = SubscriptionStatus.Cancelled;
-
-
-                UnitOfWork.Subscriptions.Update(currentSubscription);
+                // Verify current subscription exists
+                var currentSubscription = await UnitOfWork.Subscriptions.GetByIdAsync(currentSubscriptionId);
+                if (currentSubscription == null)
+                {
+                    UnitOfWork.RollbackTransaction();
+                    return new Response<SubscriptionVM>(null, "Current subscription not found.", true);
+                }
 
                 // Create payment record
                 var paymentEntity = Mapper.Map<Payment>(payment);
-
-
                 paymentEntity.Status = "Completed";
                 paymentEntity.ProcessedDate = DateTime.UtcNow;
+                
                 await UnitOfWork.Payments.AddAsync(paymentEntity);
                 await UnitOfWork.SaveAsync();
 
-                // Create new subscription
+                // Create new subscription and TRANSFER EXISTING ASSIGNMENTS
                 var newSubscription = new Subscription
                 {
-
-
                     MemberId = currentSubscription.MemberId,
                     MembershipId = newMembershipId,
                     StartDate = DateTime.UtcNow,
                     EndDate = DateTime.UtcNow.AddMonths(newMembership.DurationInMonths),
                     Status = SubscriptionStatus.Active,
                     PaymentId = paymentEntity.Id,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    // Transfer assignments so the user doesn't lose their data
+                    WorkoutAssignmentId = currentSubscription.WorkoutAssignmentId,
+                    DietPlanAssignmentId = currentSubscription.DietPlanAssignmentId
                 };
+
+                // Cancel current subscription
+                currentSubscription.Status = SubscriptionStatus.Cancelled;
+                UnitOfWork.Subscriptions.Update(currentSubscription);
+
                 await UnitOfWork.Subscriptions.AddAsync(newSubscription);
                 var result = await UnitOfWork.SaveAsync();
+
                 if (result > 0)
                 {
+                    await UnitOfWork.CommitTransactionAsync();
                     var vm = Mapper.Map<SubscriptionVM>(newSubscription);
                     return new Response<SubscriptionVM>(vm, null, false);
                 }
-                return new Response<SubscriptionVM>(null, "Failed to upgrade subscription.", true);
+                
+                UnitOfWork.RollbackTransaction();
+                return new Response<SubscriptionVM>(null, "Failed to upgrade subscription data.", true);
             }
             catch (Exception ex)
             {
-                return new Response<SubscriptionVM>(null, $"Error: {ex.Message}", true);
+                UnitOfWork.RollbackTransaction();
+                return new Response<SubscriptionVM>(null, $"Error during upgrade: {ex.Message}", true);
             }
         }
         public async Task<Response<SubscriptionVM>> GetMembershipAsync(int id)
@@ -407,8 +462,11 @@ namespace GymBLL.Service.Implementation.Financial
         {
             try
             {
-                // Find subscription by MemberId, not GetByIdAsync which uses primary key
-                var subscriptions = await UnitOfWork.Subscriptions.FindAsync(s => s.MemberId == memberId && s.Status == GymDAL.Enums.SubscriptionStatus.Active);
+                // Find subscription by MemberId with consistent filtering (matching GetByMemeberIdAsync)
+                var subscriptions = await UnitOfWork.Subscriptions.FindAsync(
+                    s => s.MemberId == memberId && 
+                         s.Status == GymDAL.Enums.SubscriptionStatus.Active && 
+                         s.EndDate >= DateTime.UtcNow);
                 var result = subscriptions.OrderByDescending(s => s.EndDate).FirstOrDefault();
                 
                 if (result == null)
@@ -435,7 +493,7 @@ namespace GymBLL.Service.Implementation.Financial
                 // Usage example
                 var subscriptions = await UnitOfWork.Subscriptions
                     .Get(
-                        filter: s => s.MemberId == memberId && s.Status == GymDAL.Enums.SubscriptionStatus.Active,
+                        filter: s => s.MemberId == memberId && s.Status == GymDAL.Enums.SubscriptionStatus.Active && s.EndDate >= DateTime.UtcNow,
                         include: query => query.Include(s => s.DietPlanAssignment)
                                 .ThenInclude(dpa => dpa.DietPlan).ThenInclude(d => d.DietPlanItems)
                     )
@@ -473,7 +531,7 @@ namespace GymBLL.Service.Implementation.Financial
                 // Usage example
                 var subscriptions = await UnitOfWork.Subscriptions
                     .Get(
-                        filter: s => s.MemberId == memberId && s.Status == GymDAL.Enums.SubscriptionStatus.Active,
+                        filter: s => s.MemberId == memberId && s.Status == GymDAL.Enums.SubscriptionStatus.Active && s.EndDate >= DateTime.UtcNow,
                         include: query => query.AsNoTracking()
                             .Include(s => s.WorkoutAssignment)
                                 .ThenInclude(wa => wa.WorkoutPlan).ThenInclude(w=>w.WorkoutPlanItems)

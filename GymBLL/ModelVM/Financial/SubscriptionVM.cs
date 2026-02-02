@@ -30,5 +30,7 @@ namespace GymBLL.ModelVM.Financial
         public int PaymentId { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public int? DietPlanAssignmentId { set; get; }
+        public int? WorkoutAssignmentId { set; get; }
     }
 }

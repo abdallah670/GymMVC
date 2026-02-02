@@ -19,7 +19,7 @@ namespace GymBLL.Service.Abstract.Financial {
         Task<Response<SubscriptionVM>> UpdateAsync(SubscriptionVM model); 
         Task<Response<SubscriptionDetailsVM>> UpdateAsync(SubscriptionDetailsVM model);
         Task<Response<bool>> CancelSubscriptionAsync(int id);
-        Task<Response<bool>> RenewSubscriptionAsync(int id);
+        Task<Response<bool>> RenewSubscriptionAsync(int id, PaymentVM? payment = null);
         Task<Response<bool>> DeleteAsync(int id); Task<Response<List<SubscriptionVM>>> GetExpiringSubscriptionsAsync(int daysUntilExpiry);
         Task<Response<List<SubscriptionVM>>> GetExpiredSubscriptionsAsync(); 
         Task<Response<SubscriptionVM>> GetActiveSubscriptionByMemberIdAsync(string memberId);

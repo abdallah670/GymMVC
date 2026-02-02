@@ -15,7 +15,6 @@ using GymBLL.Service.Abstract.Communication;
 using GymDAL.Entities.Users;
 using GymDAL.Repo.Abstract;
 using GymPL.Services;
-using GymPL.ViewModels;
 using GymPL.Extensions;
 using GymBLL.ModelVM.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -49,6 +48,8 @@ namespace GymPL.Controllers
         private readonly IWeightLogService _weightLogService;
         private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnvironment;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWorkoutLogService _workoutLogService;
+        private readonly IStripePaymentService _stripePaymentService;
         private const int DEFAULT_PAGE_SIZE = 6;
         public MemberController(IMemberService memberService,
             ISubscriptionService SubscriptionService, 
@@ -63,7 +64,9 @@ namespace GymPL.Controllers
             IWeightLogService weightLogService,
             IUnitOfWork unitOfWork, IWorkoutPlanService _workoutPlanService, IDietPlanService _dietPlanService,
             Microsoft.AspNetCore.Hosting.IWebHostEnvironment webHostEnvironment,  IFileUploadService _fileUploadService,
-            UserManager<ApplicationUser> userManager
+            UserManager<ApplicationUser> userManager,
+            IWorkoutLogService workoutLogService,
+            IStripePaymentService stripePaymentService
             )
         {
             _memberService = memberService;
@@ -83,6 +86,8 @@ namespace GymPL.Controllers
             _webHostEnvironment = webHostEnvironment;
             this._fileUploadService=_fileUploadService;
             _userManager = userManager;
+            _workoutLogService = workoutLogService;
+            _stripePaymentService = stripePaymentService;
         }
         #region Member CRUD
         public async Task<IActionResult> Index(string view = "grid", int page = 1, int pageSize = DEFAULT_PAGE_SIZE)
@@ -196,9 +201,10 @@ namespace GymPL.Controllers
 
             // Get Subscription Status
             var subscriptionResponse = await _SubscriptionService.GetByMemeberIdAsync(memberId);
-            if (!subscriptionResponse.ISHaveErrorOrnNot)
+            var sub = subscriptionResponse?.Result;
+
+            if (sub != null)
             {
-                var sub = subscriptionResponse.Result;
                 var membershipResponse = await _membershipService.GetByIdAsync(sub.MembershipId);
                 
                 var daysRemaining = (sub.EndDate - DateTime.UtcNow).Days;
@@ -206,9 +212,9 @@ namespace GymPL.Controllers
 
                 model.SubscriptionStatus = new MemberDashboardSubscriptionVM
                 {
-                    SubscriptionId = sub.Id.ToString(), // Converted to string to match VM
+                    SubscriptionId = sub.Id.ToString(),
                     MemberId = sub.MemberId,
-                    MembershipType = membershipResponse.Result?.MembershipType ?? "Unknown",
+                    MembershipType = membershipResponse.Result?.MembershipType ?? "Plan",
                     Status = sub.Status,
                     EndDate = sub.EndDate,
                     DaysRemaining = Math.Max(0, daysRemaining),
@@ -217,29 +223,80 @@ namespace GymPL.Controllers
                     StatusBadgeClass = isExpired ? "badge-danger" : (daysRemaining <= 7 ? "badge-warning" : "badge-success")
                 };
 
-                 // Check Workout Plan
-                 if (sub.WorkoutAssignmentVM != null && sub.WorkoutAssignmentVM.IsActive)
-                 {
-                     model.HasWorkoutPlan = true;
-                     model.TodayWorkoutName = sub.WorkoutAssignmentVM.WorkoutPlan?.Name ?? "Assigned Plan";
-                 }
-                 
-                 if (sub.DietPlanAssignmentVM != null && sub.DietPlanAssignmentVM.IsActive)
-                 {
-                     model.HasDietPlan = true;
-                     model.TodayDietName = sub.DietPlanAssignmentVM.DietPlan?.Name ?? "Assigned Plan";
-                 }
+                // Check Workout Plan
+                if (sub.WorkoutAssignmentVM != null && sub.WorkoutAssignmentVM.IsActive)
+                {
+                    model.HasWorkoutPlan = true;
+                    model.TodayWorkoutName = sub.WorkoutAssignmentVM.WorkoutPlan?.Name ?? "Assigned Plan";
+                }
+                
+                if (sub.DietPlanAssignmentVM != null && sub.DietPlanAssignmentVM.IsActive)
+                {
+                    model.HasDietPlan = true;
+                    model.TodayDietName = sub.DietPlanAssignmentVM.DietPlan?.Name ?? "Assigned Plan";
+                }
+            }
+            else
+            {
+                // If no active/unexpired sub found, try to get the latest one (even if expired) for the dashboard card
+                var latestSubs = await _SubscriptionService.GetByMemberIdAsync(memberId);
+                var latestSub = latestSubs.Result?.OrderByDescending(s => s.EndDate).FirstOrDefault();
+                
+                if (latestSub != null)
+                {
+                    var daysRemaining = (latestSub.EndDate - DateTime.UtcNow).Days;
+                    bool isExpired = daysRemaining < 0 || latestSub.Status == "Expired" || latestSub.Status == "Cancelled";
+
+                    model.SubscriptionStatus = new MemberDashboardSubscriptionVM
+                    {
+                        SubscriptionId = latestSub.Id.ToString(),
+                        MemberId = latestSub.MemberId,
+                        MembershipType = latestSub.MembershipType ?? "Plan",
+                        Status = latestSub.Status,
+                        EndDate = latestSub.EndDate,
+                        DaysRemaining = Math.Max(0, daysRemaining),
+                        IsExpiringSoon = false,
+                        IsExpired = isExpired,
+                        StatusBadgeClass = isExpired ? "badge-danger" : "badge-success"
+                    };
+                }
             }
 
-            // Get Weight History
+            // Get Weight History - Ensure sorted by date for chart
             var weightHistoryResponse = await _weightLogService.GetHistoryAsync(memberId);
             if (!weightHistoryResponse.ISHaveErrorOrnNot)
             {
-                model.WeightHistory = weightHistoryResponse.Result.ToList();
+                model.WeightHistory = weightHistoryResponse.Result.OrderBy(w => w.DateRecorded).ToList();
             }
             else
             {
                 model.WeightHistory = new List<WeightLogVM>();
+            }
+
+            // Get Total Workouts and Consistency
+            var workoutHistoryResponse = await _workoutLogService.GetMemberHistoryAsync(memberId);
+            model.TotalWorkouts = workoutHistoryResponse.Result?.Count() ?? 0;
+
+            if (!workoutHistoryResponse.ISHaveErrorOrnNot && workoutHistoryResponse.Result != null)
+            {
+                var logs = workoutHistoryResponse.Result;
+                var today = DateTime.UtcNow.Date;
+                
+                // Fix for Sunday (0) to treat Monday (1) as start of week
+                int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                var currentWeekStart = today.AddDays(-1 * diff).Date;
+
+                for (int i = 3; i >= 0; i--)
+                {
+                    var weekStart = currentWeekStart.AddDays(-7 * i);
+                    var weekEnd = weekStart.AddDays(6);
+                    
+                    // Count unique days with workouts or total workouts? Usually total workouts.
+                    var count = logs.Count(l => l.Date.Date >= weekStart && l.Date.Date <= weekEnd);
+                    
+                    model.ConsistencyLabels.Add(i == 0 ? "This Week" : (i == 1 ? "Last Week" : $"{i} Weeks Ago"));
+                    model.ConsistencyData.Add(count);
+                }
             }
 
             return View(model);
@@ -267,26 +324,23 @@ namespace GymPL.Controllers
                 JoinDate = memberResponse.Result.JoinDate,
                 CurrentWeight = memberResponse.Result.CurrentWeight,
                 Height = memberResponse.Result.Height,
-                FitnessGoal = subscriptionsResponse.Result.MemberVM?.FitnessGoal
-
-                ,
+                FitnessGoal = subscriptionsResponse.Result?.MemberVM?.FitnessGoal,
+                
                 // Initialize empty collections if needed
-                DietPlanAssignmentVM = subscriptionsResponse.Result.DietPlanAssignmentVM,
-                WorkoutAssignmentVM = subscriptionsResponse.Result.WorkoutAssignmentVM,
-                Age=memberResponse.Result.Age,
+                DietPlanAssignmentVM = subscriptionsResponse.Result?.DietPlanAssignmentVM,
+                WorkoutAssignmentVM = subscriptionsResponse.Result?.WorkoutAssignmentVM,
+                Age = memberResponse.Result.Age,
                 ActivityLevel = memberResponse.Result.ActivityLevel,
-                Gender=memberResponse.Result.Gender,
+                Gender = memberResponse.Result.Gender,
                 Phone = memberResponse.Result.Phone,
-
-
             };
             if (Member.DietPlanAssignmentVM != null)
-                Member.DietPlanAssignmentVM.DietPlan = subscriptionsResponse.Result.DietPlanAssignmentVM?.DietPlan;
+                Member.DietPlanAssignmentVM.DietPlan = subscriptionsResponse.Result?.DietPlanAssignmentVM?.DietPlan;
             if (Member.WorkoutAssignmentVM != null)
-                Member.WorkoutAssignmentVM.WorkoutPlan = subscriptionsResponse.Result.WorkoutAssignmentVM?.WorkoutPlan;
+                Member.WorkoutAssignmentVM.WorkoutPlan = subscriptionsResponse.Result?.WorkoutAssignmentVM?.WorkoutPlan;
 
-            ViewBag.hasDiet = subscriptionsResponse.Result.DietPlanAssignmentVM != null ? true : false;
-            ViewBag.hasWorkout = subscriptionsResponse.Result.WorkoutAssignmentVM != null ? true : false;
+            ViewBag.HasDiet = subscriptionsResponse.Result?.DietPlanAssignmentVM != null;
+            ViewBag.HasWorkout = subscriptionsResponse.Result?.WorkoutAssignmentVM != null;
 
             // Store return URL for navigation
             if (string.IsNullOrEmpty(returnUrl))
@@ -387,8 +441,18 @@ namespace GymPL.Controllers
             else
             {
                 TempData["Success"] = "Member deleted successfully!";
+                
+                // Check if the current page is now empty
+                if (page > 1)
+                {
+                    var itemsOnPage = await _memberService.GetPagedMembersAsync(page, pageSize);
+                    if (itemsOnPage.Result.Items.Count == 0)
+                    {
+                        page--; // Redirect to previous page
+                    }
+                }
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { page, view, pageSize });
         }
         #endregion
         #region Member Plans
@@ -402,6 +466,16 @@ namespace GymPL.Controllers
                 subscriptionResponse.Result == null || 
                 subscriptionResponse.Result.WorkoutAssignmentVM == null)
             {
+                // Check for expired subscription
+                var allSubs = await _SubscriptionService.GetByMemberIdAsync(memberId);
+                var latestSub = allSubs.Result?.OrderByDescending(s => s.EndDate).FirstOrDefault();
+                
+                if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
+                {
+                    TempData["Error"] = "Your subscription has expired. Please renew your subscription to access your workout plan.";
+                    return RedirectToAction("RenewSubscription");
+                }
+
                 TempData["Error"] = "No active workout plan found.";
                 return RedirectToAction("Dashboard");
             }
@@ -428,6 +502,16 @@ namespace GymPL.Controllers
                 subscriptionResponse.Result == null || 
                 subscriptionResponse.Result.DietPlanAssignmentVM == null)
             {
+                // Check for expired subscription
+                var allSubs = await _SubscriptionService.GetByMemberIdAsync(memberId);
+                var latestSub = allSubs.Result?.OrderByDescending(s => s.EndDate).FirstOrDefault();
+                
+                if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
+                {
+                    TempData["Error"] = "Your subscription has expired. Please renew your subscription to access your diet plan.";
+                    return RedirectToAction("RenewSubscription");
+                }
+
                 TempData["Error"] = "No active diet plan found.";
                 return RedirectToAction("Dashboard");
             }
@@ -539,61 +623,25 @@ namespace GymPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RenewSubscription(RenewSubscriptionVM model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
             try
             {
-                // Create payment
-                var paymentModel = new PaymentVM
-                {
-                    MemberId = model.MemberId,
-                    Amount = model.Amount,
-                    PaymentMethod = model.PaymentMethod,
-                    PaymentType = "Subscription Renewal",
-                    Description = $"Renewal of {model.MembershipType} subscription",
-                    Status = "Completed",
-                    ProcessedDate = DateTime.UtcNow,
-                    BillingName = model.BillingName,
-                    BillingAddress = model.BillingAddress,
-                    BillingEmail = model.BillingEmail,
-                    Notes = model.Notes
-                };
+                var successUrl = Url.Action("Dashboard", "Member", null, Request.Scheme);
+                var cancelUrl = Url.Action("RenewSubscription", "Member", new { id = model.SubscriptionId }, Request.Scheme);
 
-                var paymentResponse = await _paymentService.CreateAsync(paymentModel);
-                if (paymentResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = paymentResponse.ErrorMessage;
-                    return View(model);
-                }
+                var checkoutUrl = await _stripePaymentService.CreateSubscriptionCheckoutSessionAsync(
+                    User.FindFirst(ClaimTypes.Email)?.Value,
+                    model.MembershipId,
+                    model.MemberId,
+                    "Renew",
+                    successUrl,
+                    cancelUrl
+                );
 
-                // Renew subscription
-                var renewResponse = await _SubscriptionService.RenewSubscriptionAsync(model.SubscriptionId);
-                if (renewResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = renewResponse.ErrorMessage;
-                    return View(model);
-                }
-
-                // Send notification
-                var notification = new NotificationVM
-                {
-                    UserId = model.MemberId,
-                    Type = "SubscriptionRenewal",
-                    Message = $"Your {model.MembershipType} subscription has been renewed successfully! New expiry date: {model.NewEndDate:MMM dd, yyyy}",
-                    Status = "Unread",
-                    DeliveryMethod = "InApp"
-                };
-                await _notificationService.CreateAsync(notification);
-
-                TempData["Success"] = "Subscription renewed successfully!";
-                return RedirectToAction("Dashboard");
+                return Redirect(checkoutUrl);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"An error occurred: {ex.Message}";
+                TempData["Error"] = $"An error occurred while initiating payment: {ex.Message}";
                 return View(model);
             }
         }
@@ -648,74 +696,31 @@ namespace GymPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpgradeSubscription(UpgradeSubscriptionVM model)
         {
-            if (!ModelState.IsValid)
+            try
             {
+                var successUrl = Url.Action("Dashboard", "Member", null, Request.Scheme);
+                var cancelUrl = Url.Action("UpgradeSubscription", "Member", null, Request.Scheme);
+
+                var checkoutUrl = await _stripePaymentService.CreateSubscriptionCheckoutSessionAsync(
+                    User.FindFirst(ClaimTypes.Email)?.Value ,
+                    model.NewMembershipId,
+                    model.MemberId,
+                    "Upgrade",
+                    successUrl,
+                    cancelUrl
+                );
+
+                return Redirect(checkoutUrl);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"An error occurred while initiating payment: {ex.Message}";
+                
                 // Reload available upgrades
                 var allMembershipsResponse = await _membershipService.GetActiveAsync();
                 model.AvailableUpgrades = allMembershipsResponse.Result
                     .Where(m => m.Price > model.CurrentPrice && m.Id != model.CurrentMembershipId)
                     .ToList();
-                return View(model);
-            }
-
-            try
-            {
-                // Get new membership details
-                var newMembershipResponse = await _membershipService.GetByIdAsync(model.NewMembershipId);
-                if (newMembershipResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = "Selected membership plan not found.";
-                    return View(model);
-                }
-
-                var newMembership = newMembershipResponse.Result;
-                model.PriceDifference = newMembership.Price - model.CurrentPrice;
-
-                // Create payment for upgrade
-                var paymentModel = new PaymentVM
-                {
-                    MemberId = model.MemberId,
-                    Amount = model.PriceDifference,
-                    PaymentMethod = model.PaymentMethod,
-                    PaymentType = "Subscription Upgrade",
-                    Description = $"Upgrade from {model.CurrentMembershipType} to {newMembership.MembershipType}",
-                    Status = "Completed",
-                    ProcessedDate = DateTime.UtcNow,
-                    BillingName = model.BillingName,
-                    BillingAddress = model.BillingAddress,
-                    BillingEmail = model.BillingEmail,
-                    Notes = model.Notes
-                };
-
-                // Upgrade subscription
-                var upgradeResponse = await _SubscriptionService.UpgradeSubscriptionAsync(
-                    model.CurrentSubscriptionId, 
-                    model.NewMembershipId, 
-                    paymentModel);
-                
-                if (upgradeResponse.ISHaveErrorOrnNot)
-                {
-                    TempData["Error"] = upgradeResponse.ErrorMessage;
-                    return View(model);
-                }
-
-                // Send notification
-                var notification = new NotificationVM
-                {
-                    UserId = model.MemberId,
-                    Type = "SubscriptionUpgrade",
-                    Message = $"Congratulations! Your subscription has been upgraded to {newMembership.MembershipType}. Enjoy your enhanced benefits!",
-                    Status = "Unread",
-                    DeliveryMethod = "InApp"
-                };
-                await _notificationService.CreateAsync(notification);
-
-                TempData["Success"] = "Subscription upgraded successfully!";
-                return RedirectToAction("Dashboard");
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"An error occurred: {ex.Message}";
                 return View(model);
             }
         }
@@ -817,7 +822,7 @@ namespace GymPL.Controllers
                 var sub = subscriptionResponse.Result;
                 var membershipResponse = await _membershipService.GetByIdAsync(sub.MembershipId);
                 
-                model.SubscriptionStatus = new MemberDashboardSubscriptionVM
+                model.SubscriptionStatus = new GymBLL.ModelVM.Member.MemberDashboardSubscriptionVM
                 {
                     SubscriptionId = sub.Id.ToString(),
                     MembershipType = membershipResponse.Result?.MembershipType ?? "Unknown",

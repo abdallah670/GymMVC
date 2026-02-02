@@ -1,4 +1,5 @@
 using GymDAL.Entities.Financial;
+using GymDAL.Enums;
 using GymDAL.Repo.Abstract.Financial;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -76,6 +77,21 @@ namespace GymDAL.Repo.Implementation.Financial
             }
             catch (Exception ex) {
                 throw; 
+            }
+        }
+
+        public Task<Subscription> GetActiveSubscriptionByMemberIdAsync(string userId)
+        {
+            try
+            {
+                var subscription = _context.Subscriptions
+                  
+                    .FirstOrDefaultAsync(s => s.MemberId == userId && s.Status == SubscriptionStatus.Active);
+                return subscription;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving active subscription for Member ID {userId}: {ex.Message}", ex);
             }
         }
     }

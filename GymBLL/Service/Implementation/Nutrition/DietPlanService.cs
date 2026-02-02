@@ -149,6 +149,25 @@ namespace GymBLL.Service.Implementation.Nutrition
                 {
                     return new Response<bool>(false, "Diet plan not found.", true);
                 }
+
+                // [NEW] Manual Cascade: Delete associated assignments first
+                var assignments = await UnitOfWork.DietPlanAssignments.FindAsync(dpa => dpa.DietPlanId == dietPlanId);
+                if (assignments != null && assignments.Any())
+                {
+                    // Clean up subscriptions referencing these assignments to avoid orphaned IDs
+                    foreach (var assignment in assignments)
+                    {
+                        var subscriptions = await UnitOfWork.Subscriptions.FindAsync(s => s.DietPlanAssignmentId == assignment.Id);
+                        foreach (var sub in subscriptions)
+                        {
+                            sub.DietPlanAssignmentId = null;
+                            UnitOfWork.Subscriptions.Update(sub);
+                        }
+                    }
+
+                    UnitOfWork.DietPlanAssignments.RemoveRange(assignments);
+                }
+
                 UnitOfWork.DietPlans.Remove(dietPlan);
                 var result = await UnitOfWork.SaveAsync();
                 if (result > 0)

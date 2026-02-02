@@ -7,15 +7,15 @@
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient-dark shadow">
+            <div class="card shadow-lg" style="background: var(--tile); border: 1px solid var(--frame) !important;">
                 <div class="card-body p-4">
                     <div class="row align-items-center">
                         <div class="col-md-6">
-                            <h3 class="text-white mb-1">My Reviews</h3>
-                            <p class="text-white-50 mb-0">See what your trainees are saying</p>
+                            <h3 class="fw-bold mb-1" style="color: var(--ink);">My Reviews</h3>
+                            <p class="mb-0" style="color: var(--muted); font-size: 0.95rem;">See what your trainees are saying</p>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <div class="d-inline-block text-center bg-dark rounded-pill px-4 py-3">
+                            <div class="d-inline-block text-center rounded-pill px-4 py-3" style="background: var(--bg); border: 1px solid var(--frame);">
                                 <h2 class="text-warning mb-0 display-5 fw-bold">@averageRating.ToString("0.0")</h2>
                                 <div class="text-warning mb-1">
                                     @for (int i = 1; i <= 5; i++)
@@ -24,7 +24,7 @@
                                            style="@(i <= Math.Round(averageRating) ? "color: #FFD700;" : "color: #6c757d; opacity: 0.5;")"></i>
                                     }
                                 </div>
-                                <small class="text-white-50">Based on @Model.Count reviews</small>
+                                <small style="color: var(--muted); font-weight: 500;">Based on @Model.Count reviews</small>
                             </div>
                         </div>
                     </div>
@@ -37,11 +37,11 @@
         @if (!Model.Any())
         {
             <div class="col-12">
-                <div class="card bg-gradient-dark shadow">
+                <div class="card shadow-lg" style="background: var(--tile); border: 1px solid var(--frame) !important;">
                     <div class="card-body text-center py-5">
-                        <i class="far fa-comment-dots text-secondary fa-4x mb-3"></i>
-                        <h4 class="text-white">No reviews yet</h4>
-                        <p class="text-white-50 mb-0">Encourage your trainees to leave feedback!</p>
+                        <i class="far fa-comment-dots fa-4x mb-3" style="color: var(--muted); opacity: 0.5;"></i>
+                        <h4 style="color: var(--ink);">No reviews yet</h4>
+                        <p class="mb-0" style="color: var(--muted);">Encourage your trainees to leave feedback!</p>
                     </div>
                 </div>
             </div>
@@ -51,7 +51,7 @@
             @foreach (var review in Model)
             {
                 <div class="col-md-6 col-xl-4 mb-4">
-                    <div class="card bg-gradient-dark shadow-sm h-100 border border-gray-700 hover-shadow">
+                    <div class="card shadow-sm h-100 hover-shadow" style="background: var(--tile); border: 1px solid var(--frame) !important; color: var(--ink);">
                         <div class="card-body p-3">
                             <!-- Header with avatar and rating -->
                             <div class="d-flex align-items-start mb-3">
@@ -60,38 +60,35 @@
                                     @if (!string.IsNullOrEmpty(review.MemberPicture))
                                     {
                                         <img src="@review.MemberPicture"
-                                             class="rounded-circle w-100 h-100 object-fit-cover border border-gray-600"
-                                             style="min-width: 45px; min-height: 45px;"
+                                             class="rounded-circle w-100 h-100 object-fit-cover border"
+                                             style="min-width: 45px; min-height: 45px; border-color: var(--frame) !important;"
                                              alt="@review.MemberName">
                                     }
                                     else
                                     {
-                                        <div class="rounded-circle w-100 h-100 d-flex align-items-center justify-content-center bg-gradient-primary text-white border border-gray-600"
-                                             style="min-width: 45px; min-height: 45px;">
+                                        <div class="rounded-circle w-100 h-100 d-flex align-items-center justify-content-center bg-gradient-primary text-white border"
+                                             style="min-width: 45px; min-height: 45px; border-color: var(--frame) !important;">
                                             <span class="fw-bold">@review.MemberName[0]</span>
                                         </div>
                                     }
                                 </div>
-
                                 <!-- Member info -->
                                 <div class="flex-grow-1">
-                                    <h6 class="text-white mb-0">@review.MemberName</h6>
-                                    <small class="text-white-50">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                    <h6 class="mb-0 fw-bold" style="color: var(--ink);">@review.MemberName</h6>
+                                    <small style="color: var(--muted); font-size: 0.85rem;">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
                                 </div>
-
                                 <!-- Stars rating -->
                                 <div class="text-warning ms-2">
                                     @for (int i = 1; i <= 5; i++)
                                     {
-                                        <i class="fas fa-star @(i <= review.Rating ? "" : "text-secondary")"
-                                           style="font-size: 0.8rem;"></i>
+                                        <i class="fas fa-star @(i <= review.Rating ? "" : "opacity-25")"
+                                           style="font-size: 0.8rem; @(i > review.Rating ? "color: var(--muted);" : "")"></i>
                                     }
                                 </div>
                             </div>
-
                             <!-- Review comment -->
-                            <div class="bg-gray-800 rounded p-3">
-                                <p class="text-white-80 mb-0 fst-italic">
+                            <div class="rounded p-3 shadow-sm" style="background: var(--frame); border: 1px solid var(--rule);">
+                                <p class="mb-0 fst-italic" style="color: var(--ink); opacity: 0.95;">
                                     "@review.Comment"
                                 </p>
                             </div>

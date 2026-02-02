@@ -18,9 +18,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using GymBLL.ModelVM;
 using GymPL.Services;
-using GymPL.ViewModels;
 using GymPL.Extensions;
 using GymDAL.Repo.Abstract;
+using GymBLL.Service.Abstract.AI;
+using GymBLL.ModelVM.AI;
 
 namespace GymPL.Controllers
 {
@@ -37,6 +38,7 @@ namespace GymPL.Controllers
         private readonly IMembershipService _membershipService;
         private IFileUploadService _fileUploadService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAIService _aiService;
 
         public TrainerController(
             ITrainerService trainerService,
@@ -48,7 +50,8 @@ namespace GymPL.Controllers
             IDietPlanService dietPlanService,
             ISubscriptionService subscripionService,
             IMembershipService membershipService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IAIService aiService)
         {
 
             this.trainerService = trainerService;
@@ -62,6 +65,7 @@ namespace GymPL.Controllers
             _subscripionService = subscripionService;
             _membershipService = membershipService;
             _unitOfWork = unitOfWork;
+            _aiService = aiService;
 
 
         }
@@ -325,9 +329,12 @@ namespace GymPL.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MemberDetails(string id)
+        public async Task<IActionResult> MemberDetails(string id, string returnUrl = null)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
+            
+            // Set returnUrl for the back button - default to Trainer Dashboard if not provided
+            ViewBag.ReturnUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : Url.Action("Dashboard", "Trainer");
 
             var memberResponse = await _memberService.GetMemberByIdAsync(id);
 
@@ -349,7 +356,11 @@ namespace GymPL.Controllers
                 Height = memberResponse.Result.Height,
                 FitnessGoal = subscriptionsResponse.Result?.MemberVM?.FitnessGoal,
                 DietPlanAssignmentVM = subscriptionsResponse.Result?.DietPlanAssignmentVM,
-                WorkoutAssignmentVM = subscriptionsResponse.Result?.WorkoutAssignmentVM
+                WorkoutAssignmentVM = subscriptionsResponse.Result?.WorkoutAssignmentVM,
+                Age = memberResponse.Result.Age,
+                ActivityLevel = memberResponse.Result.ActivityLevel,
+                Gender = memberResponse.Result.Gender,
+                Phone = memberResponse.Result.Phone,
             };
 
             if (subscriptionsResponse.Result != null)
@@ -363,6 +374,7 @@ namespace GymPL.Controllers
 
             ViewBag.HasDiet = subscriptionsResponse.Result?.DietPlanAssignmentVM != null;
             ViewBag.HasWorkout = subscriptionsResponse.Result?.WorkoutAssignmentVM != null;
+            ViewBag.HasActiveSubscription = subscriptionsResponse.Result != null;
 
             return View(model);
         }
@@ -388,6 +400,187 @@ namespace GymPL.Controllers
 
 
 
-      
+        [HttpGet]
+        public async Task<IActionResult> GetAISuggestion(string memberId, string type)
+        {
+            if (string.IsNullOrEmpty(memberId)) return BadRequest("Member ID is required");
+
+            if (type.ToLower() == "diet")
+            {
+                var suggestion = await _aiService.SuggestDietPlanAsync(memberId);
+                return Json(suggestion);
+            }
+            else
+            {
+                var suggestion = await _aiService.SuggestWorkoutPlanAsync(memberId);
+                return Json(suggestion);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyAISuggestion([FromBody] PlanSuggestionVM suggestion, string memberId)
+        {
+            if (suggestion == null || string.IsNullOrEmpty(memberId)) return BadRequest("Invalid data");
+
+            try
+            {
+                if (suggestion.Type == "Diet")
+                {
+                    // Create partial diet plan
+                    var dietPlanVm = new DietPlanVM
+                    {
+                        Name = suggestion.PlanName,
+                        Description = suggestion.Description,
+                        TotalCalories = (int)(suggestion.TotalCalories ?? 2000),
+                        DietType = suggestion.RecommendedDietType,
+                        IsActive = true,
+                        DietPlanItemsVM = suggestion.SuggestedMeals?.Select(m => new DietPlanItemVM
+                        {
+                            MealName = m.MealName,
+                            MealType = m.MealType ?? "Lunch",
+                            Notes = m.Notes,
+                            Calories = m.Calories,
+                            DayNumber = 1 
+                        }).ToList()
+                    };
+
+                    var createResult = await _dietPlanService.CreateDietPlanAsync(dietPlanVm);
+                    if (!createResult.ISHaveErrorOrnNot)
+                    {
+                        // Assign it
+                        var assignment = new DietPlanAssignmentVM
+                        {
+                         
+                            DietPlanId = createResult.Result.Id,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(1)
+                        };
+                       var result=  await _dietPlanAssignmentService.CreateAsync(assignment);
+                        //reassign in subscription
+                        var subscription = await _subscripionService.GetActiveSubscriptionByMemberIdAsync(memberId);
+                        if (subscription.ISHaveErrorOrnNot) 
+                            return BadRequest("This member doesn't have an active subscription. Please create a subscription first before assigning plans.");
+                        subscription.Result.DietPlanAssignmentId = result.Result.Id;
+                        var updateResult = await _subscripionService.UpdateAsync(subscription.Result);
+                        if (updateResult.ISHaveErrorOrnNot) return BadRequest(updateResult.ErrorMessage);
+
+                        return Ok(new { message = "AI Diet Plan applied successfully!" });
+                    }
+                }
+                else
+                {
+                    // Create partial workout plan
+                    var workoutPlanVm = new WorkoutPlanVM
+                    {
+                        Name = suggestion.PlanName,
+                        Description = suggestion.Description,
+                        Difficulty = suggestion.DifficultyLevel,
+                        IsActive = true,
+                        workoutPlanItemVMs = suggestion.SuggestedExercises?.Select(e => new WorkoutPlanItemVM
+                        {
+                            ExerciseName = e.ExerciseName,
+                            Sets = e.Sets,
+                            Reps = e.Reps,
+                            Notes = e.Notes,
+                            DayNumber = 1
+                        }).ToList()
+                    };
+
+                    var createResult = await _workoutPlanService.CreateWorkoutPlanAsync(workoutPlanVm);
+                    if (!createResult.ISHaveErrorOrnNot)
+                    {
+                        // Assign it
+                        var assignment = new WorkoutAssignmentVM
+                        {
+                           
+                            WorkoutPlanId = createResult.Result.Id,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(1)
+                        };
+                      var result =await _workoutAssignmentService.CreateAsync(assignment);
+                        //reassign in subscription
+                         var subscription = await _subscripionService.GetActiveSubscriptionByMemberIdAsync(memberId);
+                        if (subscription.ISHaveErrorOrnNot) 
+                            return BadRequest("This member doesn't have an active subscription. Please create a subscription first before assigning plans.");
+                        subscription.Result.WorkoutAssignmentId = result.Result.Id;
+                        var updateResult = await _subscripionService.UpdateAsync(subscription.Result);
+                        if (updateResult.ISHaveErrorOrnNot) return BadRequest(updateResult.ErrorMessage);
+                        return Ok(new { message = "AI Workout Plan applied successfully!" });
+                    }
+                }
+
+                return BadRequest("Failed to apply AI suggestion");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetActivePlans(string type)
+        {
+            if (type.ToLower() == "diet")
+            {
+                var plans = await _dietPlanService.GetActiveDietPlansAsync();
+                return Json(plans.Result.Select(p => new { id = p.Id, name = p.Name }));
+            }
+            else
+            {
+                var plans = await _workoutPlanService.GetActiveWorkoutPlansAsync();
+                return Json(plans.Result.Select(p => new { id = p.Id, name = p.Name }));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReassignPlan(string memberId, int planId, string type)
+        {
+            try
+            {
+                if (type.ToLower() == "diet")
+                {
+                    var assignment = new DietPlanAssignmentVM
+                    {
+                        
+                        DietPlanId = planId,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddMonths(1) // Default 1 month
+                    };
+                    var result = await _dietPlanAssignmentService.CreateAsync(assignment);
+                    if (result.ISHaveErrorOrnNot) return BadRequest(result.ErrorMessage);
+                    //reassign in subscription
+                    var subscription = await _subscripionService.GetActiveSubscriptionByMemberIdAsync(memberId);
+                    if (subscription.ISHaveErrorOrnNot) return BadRequest(subscription.ErrorMessage);
+
+                    subscription.Result.DietPlanAssignmentId = result.Result.Id;
+                    var updateResult = await _subscripionService.UpdateAsync(subscription.Result);
+                    if (updateResult.ISHaveErrorOrnNot) return BadRequest(updateResult.ErrorMessage);
+                }
+                else
+                {
+                    var assignment = new WorkoutAssignmentVM
+                    {
+                       
+                        WorkoutPlanId = planId,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddMonths(1)
+                    };
+                    var result = await _workoutAssignmentService.CreateAsync(assignment);
+                    //reassign in subscription
+                    if (result.ISHaveErrorOrnNot) return BadRequest(result.ErrorMessage);
+                    var subscription = await _subscripionService.GetActiveSubscriptionByMemberIdAsync(memberId);
+                    if (subscription.ISHaveErrorOrnNot) return BadRequest(subscription.ErrorMessage);
+                    subscription.Result.WorkoutAssignmentId = result.Result.Id;
+                    var updateResult = await _subscripionService.UpdateAsync(subscription.Result);
+                    if (updateResult.ISHaveErrorOrnNot) return BadRequest(updateResult.ErrorMessage);
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

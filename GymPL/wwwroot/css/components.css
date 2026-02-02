@@ -402,6 +402,73 @@
   background-color: rgba(0, 123, 255, 0.05);
 }
 
+/* ===== Table Styles ===== */
+.table {
+  color: var(--ink);
+  background-color: transparent !important;
+  --bs-table-bg: transparent !important;
+  --bs-table-color: var(--ink);
+  --bs-table-hover-color: var(--ink);
+  --bs-table-hover-bg: color-mix(in srgb, var(--main-color) 5%, transparent);
+}
+
+.table thead {
+  background: var(--frame);
+  color: var(--ink);
+  border-bottom: 2px solid var(--rule);
+}
+
+.table thead th {
+  background: var(--frame) !important;
+  color: var(--ink) !important;
+  border-bottom: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--rule);
+  transition: background-color 0.2s ease;
+}
+
+.table tbody td {
+  background: transparent !important;
+  color: var(--ink) !important;
+  padding: 1rem;
+  border: none;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--main-color) 5%,
+    transparent
+  ) !important;
+}
+
+.table-responsive {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--frame);
+}
+
+/* ===== List Group Styles ===== */
+.list-group-item {
+  background-color: transparent;
+  color: var(--ink);
+  border-color: var(--rule);
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  background-color: color-mix(in srgb, var(--main-color) 5%, transparent);
+  color: var(--ink);
+}
+
 .border-left-primary {
   border-left-color: #007bff !important;
 }

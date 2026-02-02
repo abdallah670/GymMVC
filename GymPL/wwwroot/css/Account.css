@@ -63,15 +63,15 @@
 .input-group .btn-outline-secondary {
   border: 2px solid #e9ecef;
   border-left: none;
-  background: white;
-  color: #6c757d;
+  background: var(--tile);
+  color: var(--muted);
   transition: all 0.3s;
 }
 
 .input-group .btn-outline-secondary:hover {
-  background: #f8f9fa;
-  border-color: #ced4da;
-  color: #495057;
+  background: var(--frame);
+  border-color: var(--rule);
+  color: var(--ink);
 }
 
 /* Validation Styles */
@@ -100,13 +100,15 @@
 
 .password-strength .progress {
   border-radius: 10px;
-  background: #e9ecef;
+  background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
   height: 8px !important;
 }
 
 .password-strength .progress-bar {
-  transition: width 0.5s ease, background-color 0.5s ease;
+  transition:
+    width 0.5s ease,
+    background-color 0.5s ease;
   border-radius: 10px;
 }
 
@@ -380,7 +382,7 @@
 
 .form-label {
   font-weight: 600;
-  color: #495057;
+  color: var(--ink);
   margin-bottom: 10px;
   display: block;
   font-size: 15px;
@@ -399,7 +401,7 @@
 .form-control:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary {
@@ -429,7 +431,7 @@
   text-align: center;
   margin-top: 25px;
   padding-top: 25px;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--rule);
 }
 
 .back-to-login a {
@@ -519,24 +521,24 @@
 /* Reuse the same styles from change password page */
 .form-label {
   font-weight: 600;
-  color: #495057;
+  color: var(--ink);
   margin-bottom: 10px;
   display: block;
 }
 
 .form-control {
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--frame);
   border-radius: 10px;
   padding: 15px;
   font-size: 16px;
   transition: all 0.3s;
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .form-control:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary {
@@ -563,7 +565,7 @@
 .progress {
   height: 8px;
   border-radius: 10px;
-  background: #e9ecef;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .progress-bar {

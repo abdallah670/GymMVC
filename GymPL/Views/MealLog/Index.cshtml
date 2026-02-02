@@ -1,4 +1,3 @@
-
 @using System.Linq
 @using System.Text.Json
 @model IEnumerable<GymBLL.ModelVM.Nutrition.MealLogVM>
@@ -15,60 +14,60 @@
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient-success text-white">
+            <div class="card border-0 shadow-sm" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
                 <div class="card-body py-3">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">Total Logs</h6>
-                            <h3 class="mb-0">@modelList.Count()</h3>
+                            <h6 class="mb-0 small fw-bold text-uppercase opacity-75">Total Logs</h6>
+                            <h3 class="mb-0 fw-bold" style="color: var(--success);">@modelList.Count()</h3>
                         </div>
-                        <div class="icon-shape bg-white bg-opacity-25 rounded-circle p-3">
-                            <i class="fas fa-list fa-lg"></i>
+                        <div class="icon-shape bg-success bg-opacity-10 text-success rounded-circle p-3">
+                            <i class="fas fa-list"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient-primary text-white">
+            <div class="card border-0 shadow-sm" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
                 <div class="card-body py-3">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">Avg Calories</h6>
-                            <h3 class="mb-0">@(modelList.Any() ? modelList.Average(m => m.CaloriesConsumed).ToString() : "0")</h3>
+                            <h6 class="mb-0 small fw-bold text-uppercase opacity-75">Avg Calories</h6>
+                            <h3 class="mb-0 fw-bold" style="color: var(--primary);">@(modelList.Any() ? modelList.Average(m => m.CaloriesConsumed).ToString() : "0")</h3>
                         </div>
-                        <div class="icon-shape bg-white bg-opacity-25 rounded-circle p-3">
-                            <i class="fas fa-fire fa-lg"></i>
+                        <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-circle p-3">
+                            <i class="fas fa-fire"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient-warning text-white">
+            <div class="card border-0 shadow-sm" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
                 <div class="card-body py-3">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">This Week</h6>
-                            <h3 class="mb-0">@modelList.Count(m => m.Date >= DateTime.Now.AddDays(-7))</h3>
+                            <h6 class="mb-0 small fw-bold text-uppercase opacity-75">This Week</h6>
+                            <h3 class="mb-0 fw-bold" style="color: var(--warning);">@modelList.Count(m => m.Date >= DateTime.Now.AddDays(-7))</h3>
                         </div>
-                        <div class="icon-shape bg-white bg-opacity-25 rounded-circle p-3">
-                            <i class="fas fa-calendar-week fa-lg"></i>
+                        <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-circle p-3">
+                            <i class="fas fa-calendar-week"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card bg-gradient-info text-white">
+            <div class="card border-0 shadow-sm" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
                 <div class="card-body py-3">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">Today</h6>
-                            <h3 class="mb-0">@modelList.Count(m => m.Date.Date == DateTime.Today)</h3>
+                            <h6 class="mb-0 small fw-bold text-uppercase opacity-75">Today</h6>
+                            <h3 class="mb-0 fw-bold" style="color: var(--info);">@modelList.Count(m => m.Date.Date == DateTime.Today)</h3>
                         </div>
-                        <div class="icon-shape bg-white bg-opacity-25 rounded-circle p-3">
-                            <i class="fas fa-calendar-day fa-lg"></i>
+                        <div class="icon-shape bg-info bg-opacity-10 text-info rounded-circle p-3">
+                            <i class="fas fa-calendar-day"></i>
                         </div>
                     </div>
                 </div>
@@ -77,13 +76,13 @@
     </div>
 
     <!-- Main Table Card -->
-    <div class="card border-0 shadow-lg">
-        <div class="card-header bg-dark text-white py-3">
+    <div class="card border-0 shadow-lg" style="background: var(--tile); color: var(--ink); border: 1px solid var(--frame) !important;">
+        <div class="card-header py-3" style="background: var(--tile); border-bottom: 1px solid var(--frame) !important;">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Meal Log History</h5>
+                <h5 class="mb-0" style="color: var(--ink);"><i class="fas fa-table me-2"></i>Meal Log History</h5>
                 <div class="d-flex gap-2">
-                    <input type="date" class="form-control form-control-sm w-auto" id="dateFilter" placeholder="Filter by date">
-                    <button class="btn btn-sm btn-outline-light" id="resetFilter">
+                    <input type="date" class="form-control form-control-sm w-auto" id="dateFilter" placeholder="Filter by date" style="background: var(--bg); color: var(--ink); border: 1px solid var(--frame);">
+                    <button class="btn btn-sm btn-outline-primary" id="resetFilter">
                         <i class="fas fa-redo"></i>
                     </button>
                 </div>
@@ -91,40 +90,25 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-dark mb-0" id="mealLogsTable">
-                    <thead class="thead-dark">
+                <table class="table table-hover mb-0" id="mealLogsTable" style="color: var(--ink); background: transparent;">
+                    <thead style="background: var(--frame);">
                         <tr>
-                            <th class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <span>ID</span>
-                                    <i class="fas fa-sort ms-2 text-muted"></i>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="d-flex align-items-center">
-                                    <span>Date</span>
-                                    <i class="fas fa-sort ms-2 text-muted"></i>
-                                </div>
-                            </th>
-                            <th>Meals</th>
-                            <th>
-                                <div class="d-flex align-items-center">
-                                    <span>Calories</span>
-                                    <i class="fas fa-fire ms-2 text-warning"></i>
-                                </div>
-                            </th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th class="ps-4 py-3 border-0 small fw-bold text-uppercase opacity-75">ID</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Date</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Meals</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Calories</th>
+                            <th class="text-end pe-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="background: transparent;">
                         @if (!modelList.Any())
                         {
                             <tr>
                                 <td colspan="5" class="text-center py-5">
-                                    <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
-                                    <h5 class="text-white">No meal logs found</h5>
-                                    <p class="text-white-50">Start tracking your meals to see your nutrition history.</p>
-                                    <a  asp-controller="DietPlanAssignment" asp-action="TodayMeal" class="btn btn-success mt-2">
+                                    <i class="fas fa-utensils fa-3x text-muted mb-3 opacity-25"></i>
+                                    <h5>No meal logs found</h5>
+                                    <p class="text-muted">Start tracking your meals to see your nutrition history.</p>
+                                    <a  asp-controller="DietPlanAssignment" asp-action="TodayMeal" class="btn btn-primary rounded-pill px-4">
                                         <i class="fas fa-plus me-1"></i> Create First Log
                                     </a>
                                 </td>
@@ -134,7 +118,7 @@
                         {
                             @foreach (var item in modelList.OrderByDescending(m => m.Date))
                             {
-                                <tr class="align-middle">
+                                <tr class="align-middle" style="background: transparent; border-bottom: 1px solid var(--rule);">
                                     <td class="ps-4">
                                         <span class="badge bg-secondary">#@item.Id</span>
                                     </td>
@@ -170,19 +154,21 @@
                                         <div class="d-flex align-items-center">
                                             <div class="progress flex-grow-1 me-2" style="height: 6px;">
                                                 @{
-                                                    // Ensure decimal division
+                                                    // Ensure decimal division and null check for TotalCalories
                                                     var itemCalories = Convert.ToDouble(item.CaloriesConsumed);
-                                                    var progress = Math.Min((itemCalories /(double) item.DietPlanAssignment.DietPlan.TotalCalories) * 100.0, 100.0);
+                                                    var totalCalories = item.DietPlanAssignment?.DietPlan?.TotalCalories ?? 0;
+                                                    var progress = totalCalories > 0
+                                                        ? Math.Min((itemCalories / (double)totalCalories) * 100.0, 100.0)
+                                                        : 0.0;
                                                     var colorClass = progress > 100 ? "bg-danger" : progress > 80 ? "bg-warning" : "bg-success";
                                                     var progressValue = (int)Math.Round(progress);
                                                 }
                                                 <div class="progress-bar @colorClass" role="progressbar" style="width: @(progressValue)%"></div>
                                             </div>
-                                            <span class="fw-bold @(item.CaloriesConsumed > item.DietPlanAssignment.DietPlan.TotalCalories ? "text-danger" :
-                                                item.CaloriesConsumed > item.DietPlanAssignment.DietPlan.TotalCalories ? "text-warning" : "text-success")">
+                                            <span class="fw-bold @(item.CaloriesConsumed > (item.DietPlanAssignment?.DietPlan?.TotalCalories ?? 0) ? "text-danger" :
+                                                item.CaloriesConsumed > (item.DietPlanAssignment?.DietPlan?.TotalCalories ?? 0) ? "text-warning" : "text-success")">
                                                 @item.CaloriesConsumed
-                                            </span>
-                                        </div>
+                                            </div>
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="btn-group btn-group-sm" role="group">
@@ -203,13 +189,13 @@
         </div>
         @if (modelList.Any())
         {
-            <div class="card-footer bg-dark border-top border-secondary py-3">
+            <div class="card-footer py-3" style="background: var(--tile); border-top: 1px solid var(--frame) !important;">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
                         Showing <strong>@modelList.Count()</strong> meal logs
                     </div>
                     <div>
-                        <button class="btn btn-sm btn-outline-light" id="exportCsvBtn">
+                        <button class="btn btn-sm btn-outline-primary" id="exportCsvBtn">
                             <i class="fas fa-download me-1"></i> Export
                         </button>
                     </div>

@@ -1,0 +1,211 @@
+@using GymPL.Extensions
+<div id="ai-bubble" class="ai-bubble-floating">
+    <i class="fas fa-robot"></i>
+</div>
+
+<div id="ai-window" class="ai-window-floating" style="display: none;">
+    <div class="ai-header-floating">
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <div class="ai-avatar-small-floating">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <h4 style="margin: 0; font-size: 0.95rem;" id="ai-title">MenoPro AI</h4>
+                <small style="opacity: 0.8;" id="ai-subtitle">Virtual Assistant</small>
+            </div>
+        </div>
+        <button id="close-ai-floating" class="ai-close-btn-floating">&times;</button>
+    </div>
+    <div id="ai-chat-messages-floating" class="ai-messages-floating">
+        <div class="message-ai-floating">
+            Hello! I'm your MenoPro AI assistant. How can I help you today?
+        </div>
+    </div>
+    <div class="ai-input-container-floating">
+        <input type="text" id="ai-input-floating" placeholder="Type a message..." />
+        <button id="send-ai-msg-floating" class="ai-send-btn-floating">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .ai-bubble-floating {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 3.5rem;
+        height: 3.5rem;
+        background: var(--primary-gradient, linear-gradient(135deg, #4e73df 0%, #224abe 100%));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(34, 74, 190, 0.4);
+        z-index: 2000;
+        transition: transform 0.2s;
+    }
+    .ai-bubble-floating:hover { transform: scale(1.1); }
+
+    .ai-window-floating {
+        position: fixed;
+        bottom: 6rem;
+        right: 2rem;
+        width: 350px;
+        height: 500px;
+        background: var(--tile);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--frame);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-rest);
+        z-index: 2001;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .ai-header-floating {
+        padding: 1rem 1.2rem;
+        background: var(--primary-gradient, linear-gradient(135deg, #4e73df 0%, #224abe 100%));
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ai-messages-floating {
+        flex: 1;
+        padding: 1.2rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .message-ai-floating {
+        background: var(--frame);
+        padding: 0.8rem 1rem;
+        border-radius: 1rem 1rem 1rem 0;
+        font-size: 0.9rem;
+        max-width: 85%;
+        color: var(--ink);
+    }
+
+    .message-user-floating {
+        background: #4e73df;
+        color: white;
+        padding: 0.8rem 1rem;
+        border-radius: 1rem 1rem 0 1rem;
+        font-size: 0.9rem;
+        max-width: 85%;
+        align-self: flex-end;
+    }
+
+    .ai-input-container-floating {
+        padding: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        border-top: 1px solid var(--frame);
+    }
+
+    .ai-input-container-floating input {
+        flex: 1;
+        background: var(--bg);
+        border: 1px solid var(--frame);
+        border-radius: 2rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        outline: none;
+        color: var(--ink);
+    }
+
+    .ai-send-btn-floating {
+        background: #4e73df;
+        color: white;
+        border: none;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .ai-close-btn-floating {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        opacity: 0.8;
+        padding: 0;
+        line-height: 1;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const bubble = document.getElementById('ai-bubble');
+        const windowDiv = document.getElementById('ai-window');
+        const closeBtn = document.getElementById('close-ai-floating');
+        const sendBtn = document.getElementById('send-ai-msg-floating');
+        const input = document.getElementById('ai-input-floating');
+        const messages = document.getElementById('ai-chat-messages-floating');
+        const title = document.getElementById('ai-title');
+        const subtitle = document.getElementById('ai-subtitle');
+
+        const isTrainer = @(User.IsInRole("Trainer") ? "true" : "false");
+        
+        if (isTrainer) {
+            title.innerText = "MenoPro Trainer AI";
+            subtitle.innerText = "Expert Assistant";
+            messages.innerHTML = `<div class="message-ai-floating">Hello Trainer! I'm your expert assistant. I can help you analyze member progress or adjust plans. How can I help?</div>`;
+        }
+
+        bubble.onclick = () => windowDiv.style.display = windowDiv.style.display === 'none' ? 'flex' : 'none';
+        closeBtn.onclick = () => windowDiv.style.display = 'none';
+
+        async function sendMessage() {
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            input.value = '';
+            messages.innerHTML += `<div class="message-user-floating">${msg}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                const response = await fetch('/AI/SendMessage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await response.json();
+                
+                let reply = data.reply;
+                // Add suggested actions if available
+                if (data.suggestedActions && data.suggestedActions.length > 0) {
+                    reply += '<div class="mt-2 d-flex flex-wrap gap-2">';
+                    data.suggestedActions.forEach(action => {
+                        reply += `<button class="btn btn-sm btn-outline-primary ai-action-btn rounded-pill px-3" onclick="sendAction('${action}')">${action}</button>`;
+                    });
+                    reply += '</div>';
+                }
+
+                messages.innerHTML += `<div class="message-ai-floating">${reply}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            } catch (error) {
+                console.error('AI Error:', error);
+                messages.innerHTML += `<div class="message-ai-floating">Sorry, I'm having trouble connecting right now.</div>`;
+            }
+        }
+
+        window.sendAction = (action) => {
+            input.value = action;
+            sendMessage();
+        };
+
+        sendBtn.onclick = sendMessage;
+        input.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+    });
+</script>

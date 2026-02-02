@@ -31,9 +31,14 @@ namespace GymPL.Controllers
         private readonly ITempRegistrationService _tempRegistrationService;
         private readonly IStripePaymentService _stripePaymentService;
         private readonly IMembershipService _membershipService;
+        private readonly IFitnessGoalsService _fitnessGoalsService;
 
 
-        public AccountController(IAccountService _accountService, ITrainerService trainerService, IMemberService memberService, ITempRegistrationService tempRegistrationService, IStripePaymentService stripePaymentService, IMembershipService membershipService)
+        public AccountController(IAccountService _accountService, 
+            ITrainerService trainerService, IMemberService memberService,
+            ITempRegistrationService tempRegistrationService,
+            IStripePaymentService stripePaymentService, 
+            IMembershipService membershipService,IFitnessGoalsService fitnessGoalsService)
         {
             accountService = _accountService;
             this.trainerService = trainerService;
@@ -41,6 +46,7 @@ namespace GymPL.Controllers
             _tempRegistrationService = tempRegistrationService;
             _stripePaymentService = stripePaymentService;
             _membershipService = membershipService;
+            _fitnessGoalsService = fitnessGoalsService;
         }
 
         public IActionResult Index()
@@ -103,7 +109,7 @@ namespace GymPL.Controllers
 
             return View(model);
         }
-        
+        #region Change Password
         [HttpGet]
         [Authorize]
         public IActionResult ChangePassword()
@@ -166,6 +172,8 @@ namespace GymPL.Controllers
                 return View(model);
             }
         }
+        #endregion
+        #region Forgot Password and Reset Password
         // GET: /Account/ForgotPassword
         [HttpGet]
         [AllowAnonymous]
@@ -269,13 +277,15 @@ namespace GymPL.Controllers
         {
             return View();
         }
+        #endregion
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(); // Sign out from custom authentication
             await accountService.SignOut();
             return RedirectToAction("Index", "Home");
         }
-        
+
+        #region Registration with Multi-Step and OTP
 
         [HttpGet]
         [AllowAnonymous]
@@ -347,8 +357,14 @@ namespace GymPL.Controllers
             if (existing.Result == null) return RedirectToAction("RegisterStep1");
 
             // Check if OTP verified? Service handles logic mostly, but good to check status
-           // if (!existing.Result.IsOtpVerified) return RedirectToAction("VerifyOtp", new { email = email });
-
+            if (!existing.Result.IsOtpVerified) return RedirectToAction("VerifyOtp", new { email = email });
+            var fitnessGoals = await _fitnessGoalsService.GetAllFitnessGoalsAsync();
+            if (fitnessGoals.ISHaveErrorOrnNot)
+            {
+                ModelState.AddModelError("", "Failed to load fitness goals.");
+                return View(existing.Result);
+            }
+            ViewBag.FitnessGoals = fitnessGoals.Result;
             return View(existing.Result);
         }
 
@@ -357,6 +373,7 @@ namespace GymPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterStep2(TempRegistrationVM model)
         {
+
              // Validate model
              if (!ModelState.IsValid) return View(model);
 
@@ -416,49 +433,11 @@ namespace GymPL.Controllers
             ViewBag.SessionId = session_id;
             return View();
         }
+        #endregion
 
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult GoogleLogin(string returnUrl = null)
-        {
-            var redirectUrl = Url.Action("GoogleResponse", "Account", new { returnUrl });
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, "Google");
-        }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> GoogleResponse(string returnUrl = null)
-        {
-            var info = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
-            if (info?.Principal == null)
-            {
-                return RedirectToAction("Login");
-            }
 
-            var email = System.Security.Claims.PrincipalExtensions.FindFirstValue(info.Principal, ClaimTypes.Email);
-            var name = System.Security.Claims.PrincipalExtensions.FindFirstValue(info.Principal, ClaimTypes.Name);
-
-            // Check if user already exists
-            var existingMember = await memberService.GetMemberByEmailAsync(email);
-            if (existingMember.Result != null)
-            {
-                // User exists, sign them in
-                await AddMemberClaimsAsync(existingMember.Result);
-                return RedirectToAction("Dashboard", "Member");
-            }
-
-            // New user - start registration flow with pre-filled email
-            var result = await _tempRegistrationService.InitiateregistrationAsync(email);
-            if (!result.ISHaveErrorOrnNot)
-            {
-                // Mark OTP as verified since Google already verified the email
-                await _tempRegistrationService.VerifyOtpAsync(email, result.Result.OtpCode);
-            }
-
-            return RedirectToAction("RegisterStep2", new { email = email });
-        }
-
+        
         private async Task AddTrainerClaimsAsync(TrainerVM result)
         {
             var claims = new List<Claim>();

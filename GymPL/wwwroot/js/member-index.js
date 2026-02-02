@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     memberIds.length,
     "members in",
     viewType,
-    "view"
+    "view",
   );
 
   // Load status for each member with a small delay to prevent overwhelming
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadMemberPlanStatus(memberId, viewType) {
   try {
     const response = await fetch(
-      "/Member/GetMemberPlanStatus?memberId=" + memberId
+      "/Member/GetMemberPlanStatus?memberId=" + memberId,
     );
     if (!response.ok) throw new Error("Network response was not ok");
 
@@ -49,7 +49,7 @@ async function loadMemberPlanStatus(memberId, viewType) {
       hasDiet,
       dietPlanAssignmentId,
       viewType,
-      !isSuccess
+      !isSuccess,
     );
   } catch (error) {
     console.error("Error loading plan status for member", memberId, error);
@@ -64,7 +64,7 @@ function updatePlanStatusUI(
   hasDiet,
   dietPlanAssignmentId,
   viewType,
-  isError
+  isError,
 ) {
   if (isError) {
     showErrorState(memberId, viewType);
@@ -77,7 +77,7 @@ function updatePlanStatusUI(
       hasWorkout,
       workoutAssignmentId,
       hasDiet,
-      dietPlanAssignmentId
+      dietPlanAssignmentId,
     );
   } else {
     updateGridView(
@@ -85,7 +85,7 @@ function updatePlanStatusUI(
       hasWorkout,
       workoutAssignmentId,
       hasDiet,
-      dietPlanAssignmentId
+      dietPlanAssignmentId,
     );
   }
 }
@@ -95,12 +95,12 @@ function updateTableView(
   hasWorkout,
   workoutAssignmentId,
   hasDiet,
-  dietPlanAssignmentId
+  dietPlanAssignmentId,
 ) {
   const workoutElement = document.getElementById("workout-status-" + memberId);
   const dietElement = document.getElementById("diet-status-" + memberId);
   const returnUrl = encodeURIComponent(
-    window.location.pathname + window.location.search
+    window.location.pathname + window.location.search,
   );
 
   if (workoutElement) {
@@ -108,7 +108,7 @@ function updateTableView(
       hasWorkout,
       workoutAssignmentId,
       "WorkoutPlanAssignment",
-      returnUrl
+      returnUrl,
     );
   }
 
@@ -117,7 +117,7 @@ function updateTableView(
       hasDiet,
       dietPlanAssignmentId,
       "DietPlanAssignment",
-      returnUrl
+      returnUrl,
     );
   }
 }
@@ -127,16 +127,16 @@ function updateGridView(
   hasWorkout,
   workoutAssignmentId,
   hasDiet,
-  dietPlanAssignmentId
+  dietPlanAssignmentId,
 ) {
   const workoutContainer = document.getElementById(
-    "grid-workout-container-" + memberId
+    "grid-workout-container-" + memberId,
   );
   const dietContainer = document.getElementById(
-    "grid-diet-container-" + memberId
+    "grid-diet-container-" + memberId,
   );
   const returnUrl = encodeURIComponent(
-    window.location.pathname + window.location.search
+    window.location.pathname + window.location.search,
   );
 
   if (workoutContainer) {
@@ -144,7 +144,7 @@ function updateGridView(
       hasWorkout,
       workoutAssignmentId,
       "WorkoutPlanAssignment",
-      returnUrl
+      returnUrl,
     );
   }
 
@@ -153,27 +153,28 @@ function updateGridView(
       hasDiet,
       dietPlanAssignmentId,
       "DietPlanAssignment",
-      returnUrl
+      returnUrl,
     );
   }
 }
 
 function getPlanStatusContent(hasPlan, assignmentId, controller, returnUrl) {
-    if (hasPlan && assignmentId) {
-        return `
+  if (hasPlan && assignmentId) {
+    return `
             <div class="d-flex flex-column align-items-center">
                 <i class="fas fa-check-circle mb-2" style="color: var(--success); font-size: 1.25rem;"></i>
                 <a href="/${controller}/Details?id=${assignmentId}&returnUrl=${returnUrl}" 
-                   style="padding: 2px 8px; font-size: 0.65rem; background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); border: 1px solid var(--success); border-radius: 4px; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                    <i class="fas fa-eye"></i> Details
+                   class="btn-status-detail"
+                   style="padding: 3px 10px; font-size: 0.6rem; background: var(--frame); color: var(--success); border: 1px solid var(--rule); border-radius: 20px; text-decoration: none; display: flex; align-items: center; gap: 4px; font-weight: 700; transition: all 0.2s ease;">
+                    <i class="fas fa-eye" style="font-size: 0.7rem;"></i> DETAILS
                 </a>
             </div>
         `;
-    } else if (hasPlan) {
-        return '<i class="fas fa-check-circle" style="color: var(--success); font-size: 1.25rem;"></i>';
-    } else {
-        return '<i class="fas fa-times-circle" style="color: var(--error); font-size: 1.25rem;"></i>';
-    }
+  } else if (hasPlan) {
+    return '<i class="fas fa-check-circle" style="color: var(--success); font-size: 1.25rem;"></i>';
+  } else {
+    return '<i class="fas fa-times-circle" style="color: var(--error); font-size: 1.25rem;"></i>';
+  }
 }
 
 function showErrorState(memberId, viewType) {

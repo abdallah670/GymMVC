@@ -146,6 +146,25 @@ namespace GymBLL.Service.Implementation.Workout
                 {
                     return new Response<bool>(false, "Workout plan not found.", true);
                 }
+
+                // [NEW] Manual Cascade: Delete associated assignments first
+                var assignments = await UnitOfWork.WorkoutAssignments.FindAsync(wa => wa.WorkoutPlanId == workoutPlanId);
+                if (assignments != null && assignments.Any())
+                {
+                    // Clean up subscriptions referencing these assignments to avoid orphaned IDs
+                    foreach (var assignment in assignments)
+                    {
+                        var subscriptions = await UnitOfWork.Subscriptions.FindAsync(s => s.WorkoutAssignmentId == assignment.Id);
+                        foreach (var sub in subscriptions)
+                        {
+                            sub.WorkoutAssignmentId = null;
+                            UnitOfWork.Subscriptions.Update(sub);
+                        }
+                    }
+
+                    UnitOfWork.WorkoutAssignments.RemoveRange(assignments);
+                }
+
                 UnitOfWork.WorkoutPlans.Remove(workoutPlan);
                 var result = await UnitOfWork.SaveAsync();
                 if (result > 0)

@@ -51,47 +51,9 @@
             <input type="hidden" asp-for="NewEndDate" />
             <input type="hidden" asp-for="DurationInMonths" />
 
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h4 style="color: var(--ink); margin-bottom: 1rem;">Payment Information</h4>
-                
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label asp-for="PaymentMethod" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Payment Method</label>
-                    <select asp-for="PaymentMethod" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);">
-                        <option value="">Select Payment Method</option>
-                        <option value="CreditCard">Credit Card</option>
-                        <option value="DebitCard">Debit Card</option>
-                        <option value="Cash">Cash</option>
-                        <option value="BankTransfer">Bank Transfer</option>
-                    </select>
-                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h4 style="color: var(--ink); margin-bottom: 1rem;">Billing Details</h4>
-                
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label asp-for="BillingName" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Full Name</label>
-                    <input asp-for="BillingName" class="form-control" placeholder="John Doe" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
-                    <span asp-validation-for="BillingName" class="text-danger"></span>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label asp-for="BillingEmail" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Email</label>
-                    <input asp-for="BillingEmail" type="email" class="form-control" placeholder="john@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);" />
-                    <span asp-validation-for="BillingEmail" class="text-danger"></span>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label asp-for="BillingAddress" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Address</label>
-                    <textarea asp-for="BillingAddress" class="form-control" rows="3" placeholder="123 Main St, City, Country" style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
-                    <span asp-validation-for="BillingAddress" class="text-danger"></span>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label asp-for="Notes" style="display: block; margin-bottom: 0.5rem; color: var(--ink); font-weight: 600;">Notes (Optional)</label>
-                    <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Any additional notes..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--frame); border-radius: var(--radius); background: var(--tile); color: var(--ink);"></textarea>
-                </div>
+            <div style="background: var(--frame); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; border-left: 4px solid var(--main-color);">
+                <h4 style="color: var(--ink); margin-bottom: 0.5rem;">Secure Renewal</h4>
+                <p style="color: var(--muted); font-size: 0.95rem;">You will be redirected to Stripe's secure checkout page to complete your renewal for <strong>$@Model.Amount</strong>.</p>
             </div>
 
             <!-- Action Buttons -->
@@ -99,8 +61,8 @@
                 <a asp-action="Dashboard" class="btn btn-secondary" style="padding: 0.75rem 1.5rem;">
                     <i class="fas fa-times"></i> Cancel
                 </a>
-                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
-                    <i class="fas fa-check"></i> Confirm Renewal - $@Model.Amount
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background: #635bff; border-color: #635bff;">
+                    <i class="fab fa-stripe me-2"></i> Pay with Stripe
                 </button>
             </div>
         </form>

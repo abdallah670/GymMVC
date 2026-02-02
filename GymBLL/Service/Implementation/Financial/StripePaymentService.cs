@@ -9,16 +9,20 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using GymDAL.Repo.Abstract;
+
 namespace GymBLL.Service.Implementation.Financial
 {
     public class StripePaymentService : IStripePaymentService
     {
         private readonly StripeSettings _stripeSettings;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly AsyncRetryPolicy _retryPolicy;
 
-        public StripePaymentService(IOptions<StripeSettings> stripeSettings)
+        public StripePaymentService(IOptions<StripeSettings> stripeSettings, IUnitOfWork unitOfWork)
         {
             _stripeSettings = stripeSettings.Value;
+            _unitOfWork = unitOfWork;
             StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
 
             // Configure Polly retry policy for transient failures
@@ -33,6 +37,9 @@ namespace GymBLL.Service.Implementation.Financial
 
         public async Task<string> CreateCheckoutSessionAsync(string email, int membershipId, int tempRegistrationId, string successUrl, string cancelUrl)
         {
+            var membership = await _unitOfWork.Memberships.GetByIdAsync(membershipId);
+            if (membership == null) throw new Exception("Membership not found");
+
             return await _retryPolicy.ExecuteAsync(async () =>
             {
                 var options = new SessionCreateOptions
@@ -45,7 +52,8 @@ namespace GymBLL.Service.Implementation.Financial
                     Metadata = new Dictionary<string, string>
                     {
                         { "tempRegistrationId", tempRegistrationId.ToString() },
-                        { "membershipId", membershipId.ToString() }
+                        { "membershipId", membershipId.ToString() },
+                        { "actionType", "InitialRegistration" }
                     },
                     LineItems = new List<SessionLineItemOptions>
                     {
@@ -54,10 +62,10 @@ namespace GymBLL.Service.Implementation.Financial
                             PriceData = new SessionLineItemPriceDataOptions
                             {
                                 Currency = "usd",
-                                UnitAmount = GetMembershipPrice(membershipId), // Price in cents
+                                UnitAmount = (long)(membership.Price * 100),
                                 ProductData = new SessionLineItemPriceDataProductDataOptions
                                 {
-                                    Name = GetMembershipName(membershipId),
+                                    Name = membership.MembershipType,
                                     Description = "MenoPro Gym Membership"
                                 }
                             },
@@ -72,27 +80,50 @@ namespace GymBLL.Service.Implementation.Financial
             });
         }
 
-        private long GetMembershipPrice(int membershipId)
+        public async Task<string> CreateSubscriptionCheckoutSessionAsync(string email, int membershipId, string memberId, string actionType, string successUrl, string cancelUrl)
         {
-            // TODO: Fetch from database via MembershipService
-            return membershipId switch
+            var membership = await _unitOfWork.Memberships.GetByIdAsync(membershipId);
+            if (membership == null) throw new Exception("Membership not found");
+
+            return await _retryPolicy.ExecuteAsync(async () =>
             {
-                1 => 2900,  // Basic $29
-                2 => 5900,  // Pro $59
-                3 => 9900,  // Elite $99
-                _ => 2900   // Default
-            };
+                var options = new SessionCreateOptions
+                {
+                    PaymentMethodTypes = new List<string> { "card" },
+                    Mode = "payment",
+                    CustomerEmail = email,
+                    SuccessUrl = successUrl + "?session_id={CHECKOUT_SESSION_ID}",
+                    CancelUrl = cancelUrl,
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "memberId", memberId },
+                        { "membershipId", membershipId.ToString() },
+                        { "actionType", actionType } // "Renew" or "Upgrade"
+                    },
+                    LineItems = new List<SessionLineItemOptions>
+                    {
+                        new SessionLineItemOptions
+                        {
+                            PriceData = new SessionLineItemPriceDataOptions
+                            {
+                                Currency = "usd",
+                                UnitAmount = (long)(membership.Price * 100),
+                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name = $"{membership.MembershipType} ({actionType})",
+                                    Description = "MenoPro Gym Membership"
+                                }
+                            },
+                            Quantity = 1
+                        }
+                    }
+                };
+
+                var service = new SessionService();
+                var session = await service.CreateAsync(options);
+                return session.Url;
+            });
         }
 
-        private string GetMembershipName(int membershipId)
-        {
-            return membershipId switch
-            {
-                1 => "Basic Membership",
-                2 => "Pro Membership",
-                3 => "Elite Membership",
-                _ => "Standard Membership"
-            };
-        }
     }
 }

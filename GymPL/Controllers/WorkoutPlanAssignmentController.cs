@@ -250,7 +250,23 @@ namespace GymPL.Controllers
                 subscriptionResponse.Result?.WorkoutAssignmentVM == null || 
                 !subscriptionResponse.Result.WorkoutAssignmentVM.IsActive)
             {
-                TempData["Error"] = "No active workout plan found.";
+                // Check if the member has an expired subscription instead of just "no plan"
+                var allSubs = await _subscriptionService.GetByMemberIdAsync(memberId);
+                var latestSub = allSubs.Result?.OrderByDescending(s => s.EndDate).FirstOrDefault();
+
+                if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
+                {
+                    TempData["Error"] = "Your subscription has expired. Please renew your subscription to access your workout plan.";
+                    if (User.IsMember())
+                    {
+                        return RedirectToAction("RenewSubscription", "Member");
+                    }
+                }
+                else
+                {
+                    TempData["Error"] = "No active workout plan found.";
+                }
+
                 if (User.IsMember())
                 {
                     return RedirectToAction("Dashboard", "Member");

@@ -58,6 +58,7 @@ namespace GymPL
                 Log.Information("Starting GymMVC Web Application...");
 
                 // Custom Services
+                builder.Services.AddHttpClient();
                 builder.Services.AddSignalR();
                 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
                 builder.Services.AddScoped<IRazorViewRenderer, RazorViewRenderer>();
@@ -77,6 +78,11 @@ namespace GymPL
                     .AddDataAnnotationsLocalization(op =>
                     {
                         op.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(SharedResource));
+                    })
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                        options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
                     });
 
                 // Register FluentValidation
@@ -91,6 +97,7 @@ namespace GymPL
                 builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
                 builder.Services.AddHangfireServer();
                 builder.Services.AddScoped<CleanupJob>();
+                builder.Services.AddScoped<SubscriptionExpiryJob>();
 
                 // Configure Identity
                 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -140,12 +147,7 @@ namespace GymPL
                 builder.Services.Configure<GymSettings>(builder.Configuration.GetSection("GymSettings"));
                 builder.Services.Configure<GymBLL.Common.StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
-                builder.Services.AddAuthentication()
-                    .AddGoogle(options =>
-                    {
-                        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-                        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                    });
+
 
                 builder.Services.AddModularDataAccessLayer();
                 builder.Services.AddModularBusinessLogicLayer();
@@ -174,8 +176,7 @@ namespace GymPL
 
                 var supportedLanguages = new[]
                 {
-                    new CultureInfo("en-US"),
-                    new CultureInfo("ar-EG"),
+                    new CultureInfo("en-US")
                 };
 
                 app.UseRequestLocalization(new RequestLocalizationOptions
@@ -201,6 +202,11 @@ namespace GymPL
                     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
                     recurringJobManager.AddOrUpdate<CleanupJob>(
                         "cleanup-expired-registrations",
+                        job => job.ExecuteAsync(),
+                        Cron.Daily);
+
+                    recurringJobManager.AddOrUpdate<SubscriptionExpiryJob>(
+                        "subscription-expiry-check",
                         job => job.ExecuteAsync(),
                         Cron.Daily);
                 }

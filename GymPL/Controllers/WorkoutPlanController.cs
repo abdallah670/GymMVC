@@ -138,11 +138,23 @@ namespace GymPL.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["ReturnPage"] = returnPage;
                 TempData["Error"] = response.ErrorMessage;
+                return RedirectToReturnUrl(returnUrl, returnPage);
             }
-            else
+            
+            TempData["Success"] = "Workout Plan deleted successfully!";
+            
+            // Check if the current page is now empty
+            if (returnPage > 1)
             {
-                TempData["Success"] = "Workout Plan deleted successfully!";
+                var itemsOnPage = await _workoutPlanService.GetPagedWorkoutPlansAsync(returnPage, 6);
+                if (itemsOnPage.Result.Items.Count == 0)
+                {
+                    returnPage--; // Redirect to previous page
+                    // Don't use returnUrl as it contains the old page number
+                    return RedirectToAction("Index", new { page = returnPage });
+                }
             }
+            
             return RedirectToReturnUrl(returnUrl, returnPage);
         }
 

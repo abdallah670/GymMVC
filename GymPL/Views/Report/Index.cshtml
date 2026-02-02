@@ -7,45 +7,74 @@
 @section Head {
     <style>
         .report-header {
-            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            background: var(--primary-gradient, linear-gradient(135deg, #4e73df 0%, #224abe 100%));
             color: white;
-            padding: 2rem;
-            border-radius: 1rem;
+            padding: 2.5rem 2rem;
+            border-radius: var(--radius);
             margin-bottom: 2rem;
+            box-shadow: var(--shadow-rest);
         }
         .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--tile);
+            border: 1px solid var(--frame);
             border-radius: 1rem;
             padding: 1.5rem;
             text-align: center;
+            box-shadow: var(--shadow-rest);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #0dcaf0;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
         }
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            opacity: 0.7;
+            color: var(--muted);
+            font-weight: 600;
         }
         
         @@media print {
             body { background: white !important; color: black !important; }
             .navbar, .btn, footer, .theme-toggle-btn { display: none !important; }
-            .report-header { background: #f8f9fa !important; color: black !important; border-bottom: 2px solid #000; }
-            .stat-card { border: 1px solid #ddd !important; background: white !important; color: black !important; }
+            .report-header { background: #f8f9fa !important; color: black !important; border-bottom: 2px solid #000; box-shadow: none !important; }
+            .stat-card { border: 1px solid #ddd !important; background: white !important; color: black !important; box-shadow: none !important; }
             .stat-value { color: black !important; }
             .text-white, .text-muted { color: black !important; }
+        }
+        
+        .nav-tabs {
+            border-bottom: 1px solid var(--frame) !important;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--muted);
+            transition: all 0.2s;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+        }
+        .nav-tabs .nav-link:hover {
+            color: var(--ink);
+            background: var(--bg);
+        }
+        .nav-tabs .nav-link.active {
+            background: transparent;
+            color: #0d6efd !important;
+            border-bottom: 3px solid #0d6efd;
         }
     </style>
 }
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
-        <a href="javascript:history.back()" class="btn btn-outline-light">
+        <a href="javascript:history.back()" class="btn btn-outline-primary">
             <i class="fas fa-arrow-left me-2"></i>Back
         </a>
         <button onclick="window.print()" class="btn btn-primary">
@@ -66,16 +95,20 @@
                 }
             </div>
             <div class="col-md-7 text-center text-md-start">
-                <h1 class="mb-1">@Model.Member.FullName</h1>
-                <p class="mb-2 opacity-75"><i class="fas fa-envelope me-2"></i>@Model.Member.Email</p>
-                <div class="d-flex gap-3 justify-content-center justify-content-md-start">
-                    <span class="badge bg-white text-primary">Member since @Model.Member.JoinDate.ToString("MMM yyyy")</span>
-                    <span class="badge bg-warning text-dark">@Model.MembershipType</span>
+                <h1 class="mb-1 fw-bold text-white">@Model.Member.FullName</h1>
+                <p class="mb-3 opacity-75" style="font-size: 1.1rem;"><i class="fas fa-envelope me-2"></i>@Model.Member.Email</p>
+                <div class="d-flex gap-2 justify-content-center justify-content-md-start">
+                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-2">
+                        <i class="fas fa-user-clock me-1"></i> Member since @Model.Member.JoinDate.ToString("MMM yyyy")
+                    </span>
+                    <span class="badge bg-warning text-dark px-3 py-2">
+                        <i class="fas fa-crown me-1"></i> @Model.MembershipType
+                    </span>
                 </div>
             </div>
             <div class="col-md-3 text-center text-md-end mt-3 mt-md-0">
-                <div class="h5 mb-0">Report Date</div>
-                <div class="h3 fw-bold">@DateTime.Now.ToString("MMM dd, yyyy")</div>
+                <div class="small opacity-75 text-uppercase letter-spacing-1 mb-1">Report Date</div>
+                <div class="h4 fw-bold mb-0">@DateTime.Now.ToString("MMM dd, yyyy")</div>
             </div>
         </div>
     </div>
@@ -109,40 +142,142 @@
         </div>
     </div>
 
-    <h3 class="mt-5 mb-3 text-white border-bottom border-secondary pb-2">Recent Activity</h3>
-    <div class="table-responsive">
-        <table class="table table-dark table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Plan</th>
-                    <th>Duration</th>
-                    <th>Exercises</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach(var log in Model.RecentLogs)
-                {
-                    <tr>
-                        <td>@log.Date.ToLocalTime().ToString("MMM dd, hh:mm tt")</td>
-                        <td class="fw-bold text-primary">@log.WorkoutPlanName</td>
-                        <td>@log.DurationMinutes min</td>
-                        <td>
-                            @foreach(var entry in log.Entries.Take(3))
+    <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="workouts-tab" data-bs-toggle="tab" data-bs-target="#workouts" type="button" role="tab">Workout History</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="meals-tab" data-bs-toggle="tab" data-bs-target="#meals" type="button" role="tab">Meal Log</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="weight-tab" data-bs-toggle="tab" data-bs-target="#weight" type="button" role="tab">Weight History</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="reportTabsContent">
+        <!-- Workouts Tab -->
+        <div class="tab-pane fade show active" id="workouts" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="color: var(--ink); background: transparent;">
+                    <thead style="background: var(--frame);">
+                        <tr style="color: var(--ink); border-bottom: 1px solid var(--rule);">
+                            <th class="ps-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Date</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Plan</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Duration</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Exercises</th>
+                            <th class="pe-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentLogs.Any())
+                        {
+                            @foreach(var log in Model.RecentLogs)
                             {
-                                <span class="badge bg-secondary me-1">@entry.ExerciseName</span>
+                                <tr style="background: transparent; border-bottom: 1px solid var(--rule);">
+                                    <td class="ps-4">@log.Date.ToLocalTime().ToString("MMM dd, hh:mm tt")</td>
+                                    <td class="fw-bold" style="color: var(--primary);">@log.WorkoutPlanName</td>
+                                    <td>@log.DurationMinutes min</td>
+                                    <td>
+                                        @foreach(var entry in log.Entries.Take(3))
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 me-1">@entry.ExerciseName</span>
+                                        }
+                                        @if(log.Entries.Count > 3)
+                                        {
+                                            <span class="badge bg-dark bg-opacity-25 text-muted">+@(log.Entries.Count - 3)</span>
+                                        }
+                                    </td>
+                                    <td class="pe-4 small fst-italic" style="color: var(--muted); opacity: 0.9;">@log.Notes</td>
+                                </tr>
                             }
-                            @if(log.Entries.Count > 3)
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="text-center text-muted">No workouts logged yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Meals Tab -->
+        <div class="tab-pane fade" id="meals" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="color: var(--ink); background: transparent;">
+                    <thead style="background: var(--frame);">
+                        <tr>
+                            <th class="ps-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Date</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Calories</th>
+                            <th class="pe-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentMeals.Any())
+                        {
+                            @foreach(var log in Model.RecentMeals)
                             {
-                                <span class="badge bg-dark">+@(log.Entries.Count - 3)</span>
+                                <tr style="background: transparent; border-bottom: 1px solid var(--rule);">
+                                    <td class="ps-4">@log.Date.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                                    <td class="fw-bold" style="color: var(--success);">@(log.CaloriesConsumed.HasValue ? log.CaloriesConsumed + " kcal" : "-")</td>
+                                    <td class="pe-4 small text-muted fst-italic" style="opacity: 0.9;">@log.Notes</td>
+                                </tr>
                             }
-                        </td>
-                        <td class="small text-muted fst-italic">@log.Notes</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        }
+                        else
+                        {
+                            <tr><td colspan="3" class="text-center text-muted">No meals logged yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Weight Tab -->
+        <div class="tab-pane fade" id="weight" role="tabpanel">
+             <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="color: var(--ink); background: transparent;">
+                    <thead style="background: var(--frame);">
+                        <tr>
+                            <th class="ps-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Date</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Weight (kg)</th>
+                            <th class="py-3 border-0 small fw-bold text-uppercase opacity-75">Change</th>
+                            <th class="pe-4 py-3 border-0 small fw-bold text-uppercase opacity-75">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.WeightHistory.Any())
+                        {
+                            double? prevWeight = null;
+                            @foreach(var log in Model.WeightHistory)
+                            {
+                                <tr style="background: transparent; border-bottom: 1px solid var(--rule);">
+                                    <td class="ps-4">@log.DateRecorded.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                                    <td class="fw-bold">@log.Weight</td>
+                                    <td>
+                                        @if (prevWeight.HasValue)
+                                        {
+                                            var change = log.Weight - prevWeight.Value;
+                                            var color = change > 0 ? "text-danger" : (change < 0 ? "text-success" : "text-muted");
+                                            <span class="@color" style="font-weight: 600;">@(change > 0 ? "+" : "")@Math.Round(change, 1)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="pe-4 small text-muted fst-italic" style="opacity: 0.9;">@log.Notes</td>
+                                </tr>
+                                prevWeight = log.Weight;
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4" class="text-center text-muted">No weight history available.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div class="mt-5 p-4 border border-secondary rounded text-center d-none d-print-block">

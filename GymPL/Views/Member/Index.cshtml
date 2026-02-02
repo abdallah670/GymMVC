@@ -18,7 +18,7 @@
                     <span style="font-size: 1rem; color: var(--muted); font-weight: 400; margin-left: 0.5rem;">(@Model.TotalCount total)</span>
                 }
             </h1>
-            <p class="text-muted mb-0">Manage and follow up with your gym members</p>
+            <p class="mb-0" style="color: var(--muted);">Manage and follow up with your gym members</p>
         </div>
         <div class="btn-group" role="group">
             <a href="@Url.Action("Index", new { view = "table", page = 1, pageSize = Model.PageSize })"
@@ -49,17 +49,17 @@
         @if (!isGridView)
         {
             <div class="card mb-4" style="background: var(--tile); border: 1px solid var(--frame); border-radius: var(--radius);">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background: transparent; border-bottom: 1px solid var(--rule);">
-                    <h6 class="m-0 font-weight-bold" style="color: var(--main-color);">Member Directory</h6>
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Member Directory</h6>
                     <div>
-                        <span class="badge" style="background: var(--frame); color: var(--ink); border: 1px solid var(--rule);">Page @Model.PageNumber of @Model.TotalPages</span>
-                        <span class="badge ms-2" style="background: var(--main-color); color: var(--accent-ink);">@Model.TotalCount members</span>
+                        <span class="badge bg-secondary text-white">Page @Model.PageNumber of @Model.TotalPages</span>
+                        <span class="badge bg-primary text-white ms-2">@Model.TotalCount members</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table text-center align-middle" style="color: var(--ink); border-color: var(--rule);">
-                            <thead style="background: var(--frame); color: var(--main-color);">
+                        <table class="table text-center align-middle mb-0">
+                            <thead>
                                 <tr>
                                     <th>Full Name</th>
                                     <th>Email</th>
@@ -73,65 +73,73 @@
                             <tbody>
                                 @foreach (var item in Model.Items)
                                 {
-                                    <tr style="border-bottom: 1px solid var(--rule);">
-                                        <td>
+                                    <tr>
+                                        <td class="px-4 py-3">
                                             <div class="d-flex align-items-center">
                                                 @if (!string.IsNullOrEmpty(item.ProfilePicture))
                                                 {
                                                     <img src="@item.ProfilePicture" alt="@item.FullName"
-                                                            class="member-avatar-sm me-2">
+                                                            class="member-avatar-sm me-3 shadow-sm">
                                                 }
-
-                                                    else
-                                                    {
-
-                                                        <img src="~/uploads/profiles/default-profile.png" class="member-avatar-md rounded-circle mx-auto" />
-                                                    }
-                                                <span style="font-weight: 500;">@item.FullName</span>
+                                                else
+                                                {
+                                                    <div class="member-avatar-sm me-3 d-flex align-items-center justify-content-center" style="background: var(--frame); color: var(--main-color); font-weight: 700; border-radius: 50%;">
+                                                        @item.FullName.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                }
+                                                <span style="font-weight: 600; color: var(--ink);">@item.FullName</span>
                                             </div>
                                         </td>
-                                        <td>@item.Email</td>
-                                        <td>@item.Phone</td>
-                                        <td>@item.JoinDate.ToString("MMM dd, yyyy")</td>
-                                        <td class="text-center">
-                                            <div id="workout-status-@item.Id" class="badge badge-loading">
+                                        <td class="px-4 py-3" style="color: var(--ink); opacity: 0.85;">@item.Email</td>
+                                        <td class="px-4 py-3" style="color: var(--ink); opacity: 0.85;">@item.Phone</td>
+                                        <td class="px-4 py-3 text-center" style="color: var(--ink); opacity: 0.85;">@item.JoinDate.ToString("MMM dd, yyyy")</td>
+                                        <td class="text-center px-4 py-3">
+                                            <div id="workout-status-@item.Id" class="badge bg-opacity-10 rounded-pill px-3" style="background: var(--frame); color: var(--muted);">
                                                 <i class="fas fa-spinner fa-spin me-1"></i> Loading...
                                             </div>
                                         </td>
-                                        <td class="text-center">
-                                            <div id="diet-status-@item.Id" class="badge badge-loading">
+                                        <td class="text-center px-4 py-3">
+                                            <div id="diet-status-@item.Id" class="badge bg-opacity-10 rounded-pill px-3" style="background: var(--frame); color: var(--muted);">
                                                 <i class="fas fa-spinner fa-spin me-1"></i> Loading...
                                             </div>
                                         </td>
-                                        <td class="text-center">
+                                        <td class="text-center px-4 py-3">
                                             <div class="d-flex justify-content-center gap-1">
                                                
-                                                <a asp-action="Details" asp-route-view="@viewType" asp-route-page="@Model.PageNumber" asp-route-id="@item.Id"
-                                                    class="btn btn-sm btn-primary" style="padding: 0.4rem 0.6rem;" title="Details">
-                                                    <i class="fas fa-info-circle"></i>
-                                                </a>
+                                                @if (User.IsInRole("Trainer"))
+                                                {
+                                                    <a asp-controller="Trainer" asp-action="MemberDetails" asp-route-id="@item.Id"
+                                                       class="btn btn-sm btn-primary rounded-pill shadow-sm" style="padding: 0.4rem 0.6rem;" title="Details">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@item.Id"
+                                                       class="btn btn-sm btn-primary rounded-pill shadow-sm" style="padding: 0.4rem 0.6rem;" title="Details">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </a>
+                                                }
                                                     <!-- REPORT BUTTON -->
                                                     <a asp-controller="Report" asp-action="Index"
                                                        asp-route-memberId="@item.Id"
-                                                       asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                                       class="btn btn-sm btn-outline-info"
-                                                       style="padding: 0.4rem 0.6rem; border-color: var(--info);"
+                                                       class="btn btn-sm btn-outline-info rounded-pill shadow-sm"
+                                                       style="padding: 0.4rem 0.6rem; border-color: var(--info) !important;"
                                                        title="View Report">
                                                         <i class="fas fa-chart-bar"></i>
                                                     </a>
                                                 <a asp-controller="Notification" asp-action="Send" asp-route-userId="@item.Id"
-                                                    asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                                    class="btn btn-sm" style="padding: 0.4rem 0.6rem; background: var(--warning); color: #000; border: none;" title="Send Notification">
+                                                    class="btn btn-sm rounded-pill shadow-sm" style="padding: 0.4rem 0.6rem; background: var(--warning); color: #000;" title="Send Notification">
                                                     <i class="fas fa-bell"></i>
                                                 </a>
                                                  <a asp-controller="Chat" asp-action="Index" asp-route-otherUserId="@item.Id"
-                                                    class="btn btn-sm btn-outline-success" style="padding: 0.4rem 0.6rem; border-color: var(--rule);" title="Chat">
+                                                    class="btn btn-sm btn-outline-success rounded-pill shadow-sm" style="padding: 0.4rem 0.6rem; border-color: var(--success) !important;" title="Chat">
                                                      <i class="fas fa-comments"></i>
                                                  </a>
 
                                                  <form asp-action="Delete" asp-route-view="@viewType" asp-route-page="@Model.PageNumber" asp-route-id="@item.Id" method="post"
                                                         class="d-inline" onsubmit="return confirm('Are you sure you want to delete @item.FullName?');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 0.4rem 0.6rem; border-color: color-mix(in srgb, var(--error) 20%, transparent);" title="Delete">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill shadow-sm" style="padding: 0.4rem 0.6rem; border-color: color-mix(in srgb, var(--error) 20%, transparent);" title="Delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -167,7 +175,7 @@
                                                 <img src="~/uploads/profiles/default-profile.png" class="member-avatar-md rounded-circle mx-auto" />
                                             }
                                     </div>
-                                    <h5 class="card-title mb-1" style="color: var(--ink); font-weight: 700;">@member.FullName</h5>
+                                    <h5 class="card-title mb-1 fw-bold" style="color: var(--ink);">@member.FullName</h5>
                                     <p class="small mb-0" style="color: var(--muted);">
                                         <i class="fas fa-calendar-alt me-1" style="color: var(--main-color);"></i>
                                         Joined @member.JoinDate.ToString("MMMM yyyy")
@@ -176,16 +184,16 @@
 
                                 <!-- Contact Info -->
                                 <div class="mb-3">
-                                    <p class="mb-1">
-                                        <i class="fas fa-envelope text-muted me-2"></i>
-                                        <small>@member.Email</small>
-                                    </p>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-envelope me-2" style="color: var(--muted); opacity: 0.7; font-size: 0.85rem;"></i>
+                                        <small style="color: var(--ink); opacity: 0.8;">@member.Email</small>
+                                    </div>
                                     @if (!string.IsNullOrEmpty(member.Phone))
                                     {
-                                        <p class="mb-0">
-                                            <i class="fas fa-phone text-muted me-2"></i>
-                                            <small>@member.Phone</small>
-                                        </p>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-phone me-2" style="color: var(--muted); opacity: 0.7; font-size: 0.85rem;"></i>
+                                            <small style="color: var(--ink); opacity: 0.8;">@member.Phone</small>
+                                        </div>
                                     }
                                 </div>
 
@@ -202,26 +210,26 @@
                                 <!-- Plan Status Section -->
                                 <div class="row g-2 mb-4">
                                     <div class="col-6">
-                                        <div class="status-box" style="background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 0.75rem 0.5rem; text-align: center; border: 1px solid var(--rule);">
+                                        <div class="status-box" style="background: var(--bg); border-radius: var(--radius-sm); padding: 0.75rem 0.5rem; text-align: center; border: 1px solid var(--rule);">
                                             <div class="mb-1">
                                                 <i class="fas fa-dumbbell" id="grid-workout-icon-@member.Id" style="color: var(--muted); font-size: 0.9rem;"></i>
                                             </div>
-                                            <small style="color: var(--muted); display: block; font-size: 0.7rem; text-transform: uppercase;">Workout</small>
-                                            <div id="grid-workout-container-@member.Id" class="mt-2 min-height-30" style="min-height: 45px; display: flex; align-items: center; justify-content: center;">
-                                                <span class="badge" id="grid-workout-@member.Id" style="background: var(--frame); color: var(--muted); font-size: 0.65rem; font-weight: 500;">
+                                            <small style="color: var(--muted); display: block; font-size: 0.7rem; text-transform: uppercase; font-weight: 600;">Workout</small>
+                                            <div id="grid-workout-container-@member.Id" class="mt-2" style="min-height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                <span class="badge" id="grid-workout-@member.Id" style="background: var(--frame); color: var(--muted); font-size: 0.65rem; font-weight: 600; border: 1px solid var(--rule);">
                                                     <i class="fas fa-spinner fa-spin me-1"></i>
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="status-box" style="background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 0.75rem 0.5rem; text-align: center; border: 1px solid var(--rule);">
+                                        <div class="status-box" style="background: var(--bg); border-radius: var(--radius-sm); padding: 0.75rem 0.5rem; text-align: center; border: 1px solid var(--rule);">
                                             <div class="mb-1">
                                                 <i class="fas fa-utensils" id="grid-diet-icon-@member.Id" style="color: var(--muted); font-size: 0.9rem;"></i>
                                             </div>
-                                            <small style="color: var(--muted); display: block; font-size: 0.7rem; text-transform: uppercase;">Diet</small>
-                                            <div id="grid-diet-container-@member.Id" class="mt-2 min-height-30" style="min-height: 45px; display: flex; align-items: center; justify-content: center;">
-                                                <span class="badge" id="grid-diet-@member.Id" style="background: var(--frame); color: var(--muted); font-size: 0.65rem; font-weight: 500;">
+                                            <small style="color: var(--muted); display: block; font-size: 0.7rem; text-transform: uppercase; font-weight: 600;">Diet</small>
+                                            <div id="grid-diet-container-@member.Id" class="mt-2" style="min-height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                <span class="badge" id="grid-diet-@member.Id" style="background: var(--frame); color: var(--muted); font-size: 0.65rem; font-weight: 600; border: 1px solid var(--rule);">
                                                     <i class="fas fa-spinner fa-spin me-1"></i>
                                                 </span>
                                             </div>
@@ -230,32 +238,43 @@
                                 </div>
 
                                 <!-- Action Buttons -->
-                                <div class="member-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                <div class="member-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
                                    
-                                    <a asp-action="Details" asp-route-page="@Model.PageNumber" asp-route-id="@member.Id"
-                                       class="btn btn-primary" style="padding: 0.6rem; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                                        <i class="fas fa-info-circle"></i> Details
+                                    @if (User.IsInRole("Trainer"))
+                                    {
+                                        <a asp-controller="Trainer" asp-action="MemberDetails" asp-route-id="@member.Id"
+                                           asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                           class="btn btn-primary rounded-pill shadow-sm" style="padding: 0.6rem; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 600;">
+                                            <i class="fas fa-info-circle"></i> Details
                                         </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Details" asp-route-page="@Model.PageNumber" asp-route-id="@member.Id"
+                                           class="btn btn-primary rounded-pill shadow-sm" style="padding: 0.6rem; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 600;">
+                                            <i class="fas fa-info-circle"></i> Details
+                                        </a>
+                                    }
                                         <a asp-controller="Report" asp-action="Index"
                                                  asp-route-memberId="@member.Id"
                                                asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                               class="btn btn-sm btn-outline-info"
-                                               style="padding: 0.4rem 0.6rem; border-color: var(--info);"
+                                               class="btn btn-outline-info rounded-pill shadow-sm"
+                                               style="padding: 0.6rem; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 600;"
                                                title="View Report">
-                                            <i class="fas fa-chart-bar"></i>Report
+                                            <i class="fas fa-chart-bar"></i> Report
                                         </a>
                                      <a asp-controller="Chat" asp-action="Index" asp-route-otherUserId="@member.Id" 
-                                        class="btn btn-success" style="padding: 0.6rem; font-size: 0.85rem; border: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                        class="btn btn-success rounded-pill shadow-sm" style="padding: 0.6rem; font-size: 0.8rem; border: none; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 600;">
                                          <i class="fas fa-comments"></i> Chat
                                      </a>
                                      <a asp-controller="Notification" asp-action="Send" asp-route-userId="@member.Id" 
                                        asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                       class="btn btn-warning" style="padding: 0.6rem; font-size: 0.85rem; color: #000; border: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                       class="btn btn-warning rounded-pill shadow-sm" style="padding: 0.6rem; font-size: 0.8rem; color: #000; border: none; display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 600;">
                                         <i class="fas fa-bell"></i> Notify
                                     </a>
                                     <form asp-action="Delete" asp-route-view="@viewType" asp-route-page="@Model.PageNumber" asp-route-id="@member.Id" method="post"
                                           class="w-100" onsubmit="return confirm('Are you sure you want to delete @member.FullName?');">
-                                        <button class="btn btn-outline-danger w-100" type="submit" style="padding: 0.6rem; font-size: 0.85rem; border-color: color-mix(in srgb, var(--error) 30%, transparent); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                        <button class="btn btn-outline-danger w-100 rounded-pill shadow-sm" type="submit" style="padding: 0.6rem; font-size: 0.8rem; border-color: color-mix(in srgb, var(--error) 30%, transparent); display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 600;">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                                     </form>

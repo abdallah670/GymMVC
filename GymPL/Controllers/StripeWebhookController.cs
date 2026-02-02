@@ -95,12 +95,30 @@ namespace GymPL.Controllers
 
         private async Task HandleSuccessfulPayment(Session session)
         {
-            var tempRegistrationId = int.Parse(session.Metadata["tempRegistrationId"]);
+            var actionType = session.Metadata.ContainsKey("actionType") ? session.Metadata["actionType"] : "InitialRegistration";
             var membershipId = int.Parse(session.Metadata["membershipId"]);
 
+            if (actionType == "InitialRegistration")
+            {
+                await HandleInitialRegistration(session, membershipId);
+            }
+            else if (actionType == "Renew")
+            {
+                await HandleRenewal(session, membershipId);
+            }
+            else if (actionType == "Upgrade")
+            {
+                _logger.LogInformation($"Processing Upgrade for Member: {session.Metadata.GetValueOrDefault("memberId", "Unknown")}");
+                await HandleUpgrade(session, membershipId);
+            }
+        }
+
+        private async Task HandleInitialRegistration(Session session, int membershipId)
+        {
+            var tempRegistrationId = int.Parse(session.Metadata["tempRegistrationId"]);
+
             // 1. Get the temp registration
-            var tempReg = await 
-                _tempRegistrationService.GetByIdAsync(tempRegistrationId);
+            var tempReg = await _tempRegistrationService.GetByIdAsync(tempRegistrationId);
             
             if (tempReg == null || tempReg.Result == null)
             {
@@ -120,30 +138,28 @@ namespace GymPL.Controllers
             var member = new MemberProfileVM
             {
                 Email = tempReg.Result.Email,
-                Phone = tempReg.Result.PhoneNumber, // Map Phone
+                Phone = tempReg.Result.PhoneNumber,
                 FullName = $"{tempReg.Result.FirstName} {tempReg.Result.LastName}",
                 Gender = tempReg.Result.Gender,
                 Age = tempReg.Result.DateOfBirth.HasValue ? CalculateAge(tempReg.Result.DateOfBirth.Value) : 0,
                 CurrentWeight = Convert.ToDouble(tempReg.Result.Weight ?? 0),
                 Height = Convert.ToDouble(tempReg.Result.Height ?? 0),
-                ActivityLevel = tempReg.Result.ActivityLevel, // Map Activity Level
-                FitnessGoalId = fitnessGoalId, // Map Fitness Goal ID
+                ActivityLevel = tempReg.Result.ActivityLevel,
+                FitnessGoalId = fitnessGoalId,
                 HasCompletedProfile = true,
                 JoinDate = System.DateTime.UtcNow
             };
 
-
             // Generate a simpler password
-            var randomPassword = "MenoPro" + new Random().Next(1000, 9999) ;
-            member.Password = randomPassword; // Assign generated password
-            _logger.LogInformation($"Generated Password for {member.Email}: {randomPassword}"); // Debug log
+            var randomPassword = "MenoPro" + new Random().Next(1000, 9999);
+            member.Password = randomPassword;
+            _logger.LogInformation($"Generated Password for {member.Email}: {randomPassword}");
 
             // 3. Register the Member
             var result = await _memberService.Register(member);
 
             if (result.Succeeded)
             {
-                // 3a. Retrieve the created user's ID
                 var createdUserResponse = await _memberService.GetMemberByEmailAsync(member.Email);
                 if (createdUserResponse.ISHaveErrorOrnNot || createdUserResponse.Result == null)
                 {
@@ -156,9 +172,7 @@ namespace GymPL.Controllers
                 var membershipResponse = await _membershipService.GetByIdAsync(membershipId);
                 if (membershipResponse.Result == null)
                 {
-                    // Log error or handle failure
                     _logger.LogError($"Membership with ID {membershipId} not found.");
-
                     return;
                 }
                 var selectedMembership = membershipResponse.Result;
@@ -171,16 +185,12 @@ namespace GymPL.Controllers
                     PaymentDate = DateTime.UtcNow,
                     PaymentMethod = "Credit Card - Stripe",
                     Description = $"Membership Payment: {selectedMembership.MembershipType}",
-                    PaymentType = "Membership Fee"
+                    PaymentType = "Membership Fee",
+                    Status = "Completed",
+                    ProcessedDate = DateTime.UtcNow
                 };
 
                 var paymentResult = await _paymentService.CreateAsync(paymentModel);
-                if (paymentResult.ISHaveErrorOrnNot)
-                {
-                    // Log error
-                    _logger.LogError($"Payment creation failed for Member ID {memberId}: {paymentResult.ErrorMessage}");
-
-                }
 
                 // 6. Create Subscription
                 if (paymentResult?.Result != null)
@@ -190,7 +200,7 @@ namespace GymPL.Controllers
                         MemberId = memberId,
                         MembershipId = membershipId,
                         StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.UtcNow.AddMonths(selectedMembership.DurationInMonths), 
+                        EndDate = DateTime.UtcNow.AddMonths(selectedMembership.DurationInMonths),
                         PaymentId = paymentResult.Result.Id,
                         Status = "Active",
                         MemberName = member.FullName,
@@ -203,7 +213,7 @@ namespace GymPL.Controllers
                 // 7. Mark temp registration as completed
                 await _tempRegistrationService.CompleteRegistrationAsync(tempRegistrationId);
 
-                // 8. Send welcome email with login instructions
+                // 8. Send welcome email
                 var subject = "Welcome to MenoPro Gym!";
                 var body = $@"
                     <h1>Welcome, {member.FullName}!</h1>
@@ -218,14 +228,115 @@ namespace GymPL.Controllers
                     <a href='https://localhost:5000/Account/Login'>Login Here</a>
                 ";
                 await _emailService.SendEmailAsync(member.Email, subject, body);
-
-                
-              
             }
             else
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 _logger.LogError($"Failed to register member {member.Email}: {errors}");
+            }
+        }
+
+        private async Task HandleRenewal(Session session, int membershipId)
+        {
+            var memberId = session.Metadata["memberId"];
+
+            // 1. Find subscription(s) for the member
+            var currentSubResponse = await _subscriptionService.GetActiveSubscriptionByMemberIdAsync(memberId);
+            if (currentSubResponse.ISHaveErrorOrnNot || currentSubResponse.Result == null)
+            {
+                _logger.LogError($"Active subscription not found for renewal: Member {memberId}");
+                return;
+            }
+
+            var subscription = currentSubResponse.Result;
+            var membershipResponse = await _membershipService.GetByIdAsync(membershipId);
+            var membership = membershipResponse.Result;
+
+            // 2. Prepare Payment Model
+            var paymentModel = new PaymentVM
+            {
+                MemberId = memberId,
+                Amount = membership.Price,
+                PaymentDate = DateTime.UtcNow,
+                PaymentMethod = "Credit Card - Stripe",
+                Description = $"Subscription Renewal: {membership.MembershipType}",
+                PaymentType = "Subscription Renewal",
+                Status = "Completed",
+                ProcessedDate = DateTime.UtcNow
+            };
+
+            // 3. Renew Subscription (Atomicly handles payment and sub update)
+            var renewResult = await _subscriptionService.RenewSubscriptionAsync(subscription.Id, paymentModel);
+            
+            if (!renewResult.ISHaveErrorOrnNot)
+            {
+                _logger.LogInformation($"Successfully renewed subscription {subscription.Id} for member {memberId}");
+                
+                // 4. Notify Member
+                var notification = new NotificationVM
+                {
+                    UserId = memberId,
+                    Type = "SubscriptionRenewal",
+                    Message = $"Your {membership.MembershipType} subscription has been renewed successfully!",
+                    Status = "Unread",
+                    DeliveryMethod = "InApp",
+                    SendTime = DateTime.UtcNow
+                };
+                await _notificationService.CreateAsync(notification);
+            }
+            else
+            {
+                _logger.LogError($"Failed to renew subscription {subscription.Id}: {renewResult.ErrorMessage}");
+            }
+        }
+
+        private async Task HandleUpgrade(Session session, int membershipId)
+        {
+            var memberId = session.Metadata["memberId"];
+
+            // 1. Find the current active subscription
+            var currentSubResponse = await _subscriptionService.GetActiveSubscriptionByMemberIdAsync(memberId);
+            if (currentSubResponse.ISHaveErrorOrnNot || currentSubResponse.Result == null)
+            {
+                _logger.LogError($"Active subscription not found for upgrade: Member {memberId}");
+                return;
+            }
+
+            var currentSub = currentSubResponse.Result;
+            var newMembershipResponse = await _membershipService.GetByIdAsync(membershipId);
+            var newMembership = newMembershipResponse.Result;
+
+            // 2. Create Payment for the upgrade (Stripe session already charged full price of new plan or difference as configured in controller)
+            var paymentModel = new PaymentVM
+            {
+                MemberId = memberId,
+                Amount = newMembership.Price, // We charged the full price of the new plan in this implementation
+                PaymentDate = DateTime.UtcNow,
+                PaymentMethod = "Credit Card - Stripe",
+                Description = $"Subscription Upgrade to: {newMembership.MembershipType}",
+                PaymentType = "Subscription Upgrade",
+                Status = "Completed",
+                ProcessedDate = DateTime.UtcNow
+            };
+
+            // 3. Upgrade Subscription
+            var upgradeResult = await _subscriptionService.UpgradeSubscriptionAsync(currentSub.Id, membershipId, paymentModel);
+            
+            if (!upgradeResult.ISHaveErrorOrnNot)
+            {
+                _logger.LogInformation($"Successfully upgraded subscription for member {memberId} to membership {membershipId}");
+                
+                // 4. Notify Member
+                var notification = new NotificationVM
+                {
+                    UserId = memberId,
+                    Type = "SubscriptionUpgrade",
+                    Message = $"Your subscription has been upgraded to {newMembership.MembershipType}!",
+                    Status = "Unread",
+                    DeliveryMethod = "InApp",
+                    SendTime = DateTime.UtcNow
+                };
+                await _notificationService.CreateAsync(notification);
             }
         }
 
