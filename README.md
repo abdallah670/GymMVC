@@ -1,6 +1,6 @@
 # 🏋️‍♂️ MenoPro - Premium Gym Management System
 
-**MenoPro** is a modern, full-stack gym management application built with **ASP.NET Core MVC**. It moves beyond standard CRUD operations to offer a premium user experience with **Glassmorphism UI**, real-time interactive charts, and role-based portals for Members and Trainers.
+**MenoPro** is a modern, full-stack gym management application built with **ASP.NET Core MVC**. It moves beyond standard CRUD operations to offer a premium user experience with **Glassmorphism UI**, real-time interactive charts, and role-based portals for Members and Trainer.
 
 ---
 
@@ -63,16 +63,8 @@
 
 ---
 
-## 📸 Screenshots
 
-_(Add your screenshots here)_
-
-| Member Dashboard                            | Dark Mode                                   |
-| ------------------------------------------- | ------------------------------------------- |
-| ![Dashboard Placehoder](docs/dashboard.png) | ![Dark Mode Placeholder](docs/darkmode.png) |
-
----
 
 ## 👨‍💻 Author
 
-Built by **[Your Name]** as a showcase of modern Full Stack .NET development.
+Built by **Abdallah Mohamed** as a showcase of modern Full Stack .NET development.

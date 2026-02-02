@@ -44,8 +44,8 @@ namespace GymBLL.ModelVM.AI
     public class GeneratedExercise
     {
         public string Name { get; set; }
-        public int Sets { get; set; }
-        public int Reps { get; set; } // Keep simple int for now, or string if range
+        public string Sets { get; set; }
+        public string Reps { get; set; } // Changed to string to handle ranges like "10-12"
         public string Note { get; set; }
     }
 }

@@ -204,7 +204,7 @@ REQUIRED JSON FORMAT:
       ""DayNumber"": 1,
       ""DayName"": ""e.g. Chest & Triceps"",
       ""Exercises"": [
-        {{ ""Name"": ""Bench Press"", ""Sets"": 3, ""Reps"": 10, ""Note"": ""Focus on control"" }}
+        {{ ""Name"": ""Bench Press"", ""Sets"": ""3"", ""Reps"": ""10"", ""Note"": ""Focus on control"" }}
       ]
     }}
   ]
