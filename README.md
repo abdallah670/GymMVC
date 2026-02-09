@@ -63,7 +63,49 @@
 
 ---
 
+## 🔑 Configuration & Secrets
 
+The application requires several API keys and secrets to function correctly. These are configured in `GymPL/appsettings.json`.
+
+### 💳 Stripe (Payments)
+
+1.  Sign up or log in to the [Stripe Dashboard](https://dashboard.stripe.com/).
+2.  Enable **Test Mode**.
+3.  Go to **Developers > API keys** to get your `Publishable key` and `Secret key`.
+4.  To get the `WebhookSecret`:
+    - Install the [Stripe CLI](https://stripe.com/docs/stripe-cli).
+    - Run `.\stripe login` and then `.\stripe listen --forward-to https://localhost:5000/StripeWebhook`.
+    - The CLI will provide a webhook signing secret starting with `whsec_`.
+
+### 📧 Email (SMTP)
+
+The app uses Gmail for sending notifications.
+
+1.  Go to your [Google Account Settings](https://myaccount.google.com/security).
+2.  Enable **2-Step Verification**.
+3.  Search for **App Passwords**.
+4.  Create a new app password (e.g., named "GymMVC").
+5.  Use this 16-character code as your `SmtpPass` in `appsettings.json`.
+
+### 🌐 Google Authentication
+
+1.  Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2.  Create a new project.
+3.  Navigate to **APIs & Services > Credentials**.
+4.  Click **Create Credentials > OAuth client ID**.
+5.  Configure the **OAuth consent screen** if prompted.
+6.  Set the application type to **Web application**.
+7.  Add `https://localhost:5000/signin-google` to **Authorized redirect URIs**.
+8.  Copy the `Client ID` and `Client Secret`.
+
+### 🤖 Gemini AI
+
+1.  Go to [Google AI Studio](https://aistudio.google.com/).
+2.  Click on **Get API key**.
+3.  Create a new API key in a new or existing project.
+4.  Copy the key to the `GeminiSettings:ApiKey` section.
+
+---
 
 ## 👨‍💻 Author
 
