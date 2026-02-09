@@ -74,7 +74,7 @@ The application requires several API keys and secrets to function correctly. The
 3.  Go to **Developers > API keys** to get your `Publishable key` and `Secret key`.
 4.  To get the `WebhookSecret`:
     - Install the [Stripe CLI](https://stripe.com/docs/stripe-cli).
-    - Run `.\stripe login` and then `.\stripe listen --forward-to https://localhost:5000/StripeWebhook`.
+    - Run `.\stripe login` and then `.\stripe listen --forward-to https://localhost:5000/api/StripeWebhook`.
     - The CLI will provide a webhook signing secret starting with `whsec_`.
 
 ### 📧 Email (SMTP)
