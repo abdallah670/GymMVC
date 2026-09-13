@@ -19,10 +19,10 @@ namespace GymBLL.Service.Implementation.AI
     public class AIService : IAIService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly GeminiSettings _geminiSettings;
+        private readonly AISettings _geminiSettings;
         private readonly HttpClient _httpClient;
 
-        public AIService(IUnitOfWork unitOfWork, IOptions<GeminiSettings> geminiOptions, HttpClient httpClient)
+        public AIService(IUnitOfWork unitOfWork, IOptions<AISettings> geminiOptions, HttpClient httpClient)
         {
             _unitOfWork = unitOfWork;
             _geminiSettings = geminiOptions.Value;

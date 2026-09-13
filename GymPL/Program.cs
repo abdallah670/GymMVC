@@ -92,7 +92,7 @@ namespace GymPL
                 builder.Services.AddFluentValidationAutoValidation();
                 builder.Services.AddValidatorsFromAssemblyContaining<LoginUserVMValidator>();
 
-                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                var connectionString = builder.Configuration.GetConnectionString("GymDbConnection") ?? throw new InvalidOperationException("Connection string 'GymDbConnection' not found.");
                 builder.Services.AddDbContext<GymDbContext>(options =>
                     options.UseSqlServer(connectionString));
 
@@ -169,7 +169,7 @@ namespace GymPL
                 builder.Services.Configure<GymSettings>(builder.Configuration.GetSection("GymSettings"));
                 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
                 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-                builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
+                builder.Services.Configure<AISettings>(builder.Configuration.GetSection("AI"));
 
                 // AIService as a typed HTTP client instead of a raw scoped HttpClient
                 builder.Services.AddHttpClient<IAIService, AIService>();
