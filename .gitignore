@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# GymMVC: never commit binaries or runtime user data
+stripe.exe
+*.exe
+GymPL/wwwroot/uploads/**
+!GymPL/wwwroot/uploads/profiles/
+GymPL/wwwroot/uploads/profiles/*
+!GymPL/wwwroot/uploads/profiles/default-profile.png
+.kilo/
+PLAN.md

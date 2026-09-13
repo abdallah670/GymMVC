@@ -1,4 +1,4 @@
-using GymBLL.Common;
+﻿using GymBLL.Common;
 using GymDAL.Entities.Users;
 using GymPL.Global;
 using GymBLL.Service.Abstract;
@@ -22,13 +22,9 @@ using GymPL.Middleware;
 using GymBLL.Service.Abstract.Communication;
 using GymBLL.Service.Abstract.Financial;
 using GymBLL.Service.Implementation.Financial;
-using GymBLL.Service.Implementation.Financial;
 using GymBLL.Service.Implementation.Communication;
-using GymBLL.Service.Implementation.Communication;
-using GymBLL.Service.Abstract.Workout;
 using GymBLL.Service.Abstract.Workout;
 using GymBLL.Service.Implementation.Workout;
-using GymBLL.Service.Abstract.Report;
 using GymBLL.Service.Abstract.Report;
 using GymBLL.Service.Implementation.Report;
 using GymBLL.Service.Abstract.AI;
@@ -58,7 +54,6 @@ namespace GymPL
                 Log.Information("Starting GymMVC Web Application...");
 
                 // Custom Services
-                builder.Services.AddHttpClient();
                 builder.Services.AddSignalR();
                 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
                 builder.Services.AddScoped<IRazorViewRenderer, RazorViewRenderer>();
@@ -68,9 +63,9 @@ namespace GymPL
                 builder.Services.AddScoped<ITrainerReviewService, TrainerReviewService>();
                 builder.Services.AddScoped<IWorkoutLogService, WorkoutLogService>();
                 builder.Services.AddScoped<IReportService, ReportService>();
-                builder.Services.AddScoped<IAIService, AIService>();
+                // AIService is registered as a typed HTTP client (see AddHttpClient below).
                 builder.Services.AddScoped<IWeightLogService, WeightLogService>();
-                builder.Services.AddScoped<IEmailService, EmailService>();
+                // IEmailService is registered in AddModularBusinessLogicLayer().
                 
                 // 2. Configure Controllers and FluentValidation
                 builder.Services.AddControllersWithViews()
@@ -83,6 +78,14 @@ namespace GymPL
                     {
                         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                         options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
+                    })
+                    .AddMvcOptions(options =>
+                    {
+                        // Global CSRF protection: every unsafe (POST/PUT/DELETE) request must
+                        // carry a valid anti-forgery token. Actions that legitimately cannot
+                        // carry one (e.g. the Stripe webhook) are opted out with
+                        // [IgnoreAntiforgeryToken].
+                        options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
                     });
 
                 // Register FluentValidation
@@ -99,33 +102,36 @@ namespace GymPL
                 builder.Services.AddScoped<CleanupJob>();
                 builder.Services.AddScoped<SubscriptionExpiryJob>();
 
-                // Configure Identity
+                // Configure Identity (hardened password policy)
                 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
-                    options.Password.RequireDigit = false;
-                    options.Password.RequireLowercase = false;
-                    options.Password.RequiredLength = 4;
-                    options.Password.RequireUppercase = false;
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireLowercase = true;
+                    options.Password.RequiredLength = 8;
+                    options.Password.RequireUppercase = true;
                     options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequiredUniqueChars = 4;
                     options.SignIn.RequireConfirmedAccount = false;
                     options.User.RequireUniqueEmail = true;
                     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                    options.Lockout.MaxFailedAccessAttempts = 5;
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 }).AddEntityFrameworkStores<GymDbContext>()
                   .AddDefaultTokenProviders();
 
+                // Configure CORS from configuration (no hardcoded origins)
+                var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                                     ?? Array.Empty<string>();
                 builder.Services.AddCors(options =>
                 {
                     options.AddPolicy("AllowSpecificOrigins",
                         policy =>
                         {
-                            policy.WithOrigins(
-                                    "https://localhost:139",
-                                    "http://localhost:139",
-                                    "https://localhost:5001",
-                                    "http://localhost:5000")
-                                   .AllowAnyHeader()
-                                   .AllowAnyMethod()
-                                   .AllowCredentials();
+                            if (allowedOrigins.Length > 0)
+                                policy.WithOrigins(allowedOrigins)
+                                      .AllowAnyHeader()
+                                      .AllowAnyMethod()
+                                      .AllowCredentials();
                         });
                 });
 
@@ -144,8 +150,29 @@ namespace GymPL
                     options.Cookie.IsEssential = true;
                 });
 
+                // Google OAuth (enabled only when credentials are provided via
+                // user-secrets / environment variables)
+                var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+                var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                if (!string.IsNullOrWhiteSpace(googleClientId) && !googleClientId.StartsWith("YOUR_") &&
+                    !string.IsNullOrWhiteSpace(googleClientSecret) && !googleClientSecret.StartsWith("YOUR_"))
+                {
+                    builder.Services.AddAuthentication()
+                        .AddGoogle(options =>
+                        {
+                            options.ClientId = googleClientId;
+                            options.ClientSecret = googleClientSecret;
+                        });
+                }
+
+                // Strongly-typed options (values come from appsettings / user-secrets / env vars)
                 builder.Services.Configure<GymSettings>(builder.Configuration.GetSection("GymSettings"));
-                builder.Services.Configure<GymBLL.Common.StripeSettings>(builder.Configuration.GetSection("Stripe"));
+                builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+                builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+                builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
+
+                // AIService as a typed HTTP client instead of a raw scoped HttpClient
+                builder.Services.AddHttpClient<IAIService, AIService>();
 
 
 
@@ -153,6 +180,14 @@ namespace GymPL
                 builder.Services.AddModularBusinessLogicLayer();
              
                 var app = builder.Build();
+
+                // Apply EF Core migrations on startup so deployment does not depend on
+                // the hand-managed deploy_db.sql script.
+                using (var migrateScope = app.Services.CreateScope())
+                {
+                    var db = migrateScope.ServiceProvider.GetRequiredService<GymDbContext>();
+                    db.Database.Migrate();
+                }
 
                 // 4. Global Error Handling
                 app.UseGlobalExceptionMiddleware();
@@ -194,7 +229,11 @@ namespace GymPL
                     }
                 });
 
-                app.UseHangfireDashboard("/TasksDashboard");
+                // Hangfire dashboard restricted to privileged roles
+                app.UseHangfireDashboard("/TasksDashboard", new DashboardOptions
+                {
+                    Authorization = new[] { new HangfireDashboardAuthFilter() }
+                });
 
                 // 5. Register Recurring Jobs
                 using (var scope = app.Services.CreateScope())

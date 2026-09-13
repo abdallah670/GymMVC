@@ -65,7 +65,37 @@
 
 ## 🔑 Configuration & Secrets
 
-The application requires several API keys and secrets to function correctly. These are configured in `GymPL/appsettings.json`.
+No real secrets are stored in the repository. Configuration is layered:
+
+1. **`appsettings.json`** — non-secret structure only (hosts, ports, flags).
+2. **Development** — use [user-secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets):
+
+   ```bash
+   cd GymPL
+   dotnet user-secrets init
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=.;Database=GymAppV2;Integrated Security=SSPI;TrustServerCertificate=True"
+   dotnet user-secrets set "EmailSettings:SmtpUser" "you@gmail.com"
+   dotnet user-secrets set "EmailSettings:SmtpPass" "your-app-password"
+   dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
+   dotnet user-secrets set "Stripe:PublishableKey" "pk_test_..."
+   dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
+   dotnet user-secrets set "Authentication:Google:ClientId" "..."
+   dotnet user-secrets set "Authentication:Google:ClientSecret" "..."
+   dotnet user-secrets set "GeminiSettings:ApiKey" "..."
+   ```
+
+3. **Production** — environment variables (double underscore = section separator):
+
+   ```
+   ConnectionStrings__DefaultConnection
+   EmailSettings__SmtpUser, EmailSettings__SmtpPass
+   Stripe__SecretKey, Stripe__PublishableKey, Stripe__WebhookSecret
+   Authentication__Google__ClientId, Authentication__Google__ClientSecret
+   GeminiSettings__ApiKey
+   ```
+
+Features degrade gracefully when keys are missing: the AI chat and email sending report
+"not configured" instead of crashing, and Google sign-in stays disabled.
 
 ### 💳 Stripe (Payments)
 
@@ -85,7 +115,7 @@ The app uses Gmail for sending notifications.
 2.  Enable **2-Step Verification**.
 3.  Search for **App Passwords**.
 4.  Create a new app password (e.g., named "GymMVC").
-5.  Use this 16-character code as your `SmtpPass` in `appsettings.json`.
+5.  Store it as the `EmailSettings:SmtpPass` user-secret (see Configuration & Secrets above).
 
 ### 🌐 Google Authentication
 
@@ -103,7 +133,7 @@ The app uses Gmail for sending notifications.
 1.  Go to [Google AI Studio](https://aistudio.google.com/).
 2.  Click on **Get API key**.
 3.  Create a new API key in a new or existing project.
-4.  Copy the key to the `GeminiSettings:ApiKey` section.
+4.  Copy the key to the `GeminiSettings:ApiKey` user-secret (see Configuration & Secrets above).
 
 ---
 

@@ -60,6 +60,10 @@ namespace GymPL.Controllers
         }
 
         [HttpPost]
+        // The Stripe webhook cannot carry an anti-forgery token (it is called by
+        // Stripe's servers), so it is opted out of the global auto-validation.
+        // Its authenticity is instead guaranteed by the Stripe-Signature check below.
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> HandleWebhook()
         {
             _logger.LogInformation("Stripe Webhook Received: Starting processing...");

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -19,13 +19,13 @@ namespace GymBLL.Service.Implementation.AI
     public class AIService : IAIService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
+        private readonly GeminiSettings _geminiSettings;
         private readonly HttpClient _httpClient;
 
-        public AIService(IUnitOfWork unitOfWork, IConfiguration configuration, HttpClient httpClient)
+        public AIService(IUnitOfWork unitOfWork, IOptions<GeminiSettings> geminiOptions, HttpClient httpClient)
         {
             _unitOfWork = unitOfWork;
-            _configuration = configuration;
+            _geminiSettings = geminiOptions.Value;
             _httpClient = httpClient;
         }
 
@@ -33,10 +33,9 @@ namespace GymBLL.Service.Implementation.AI
         {
             try
             {
-                var apiKey = _configuration["GeminiSettings:ApiKey"];
-                if (string.IsNullOrEmpty(apiKey) || apiKey == "YOUR_GEMINI_API_KEY_HERE")
+                if (!_geminiSettings.IsConfigured)
                 {
-                    return new AIChatResponse { Reply = "AI Chat is not configured. Please add your Gemini API Key to appsettings.json.", IsError = true };
+                    return new AIChatResponse { Reply = "AI Chat is not configured. Please set GeminiSettings:ApiKey via user-secrets or environment variables.", IsError = true };
                 }
 
                 // 1. Gather Context
@@ -79,7 +78,7 @@ namespace GymBLL.Service.Implementation.AI
                 };
 
                 // 3. Call Gemini API
-                var response = await _httpClient.PostAsJsonAsync($"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={apiKey}", requestBody);
+                var response = await _httpClient.PostAsJsonAsync($"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={_geminiSettings.ApiKey}", requestBody);
                 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -288,7 +287,7 @@ Return ONLY the RAW JSON object. No markdown.";
 
         private async Task<T> CallGeminiForStructuredData<T>(string prompt)
         {
-            var apiKey = _configuration["GeminiSettings:ApiKey"];
+            var apiKey = _geminiSettings.ApiKey;
             var requestBody = new
             {
                 contents = new[] { new { parts = new[] { new { text = prompt } } } }

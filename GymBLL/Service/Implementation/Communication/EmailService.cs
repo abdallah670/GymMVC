@@ -1,29 +1,29 @@
+using GymBLL.Common;
 using GymBLL.Response;
 using GymBLL.ModelVM;
 using GymBLL.ModelVM.Communication;
 using GymBLL.Service.Abstract.Communication;
 using GymBLL.Service.Abstract;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using System; 
-using GymBLL.Service.Abstract.Communication;
+using System;
 
 namespace GymBLL.Service.Implementation.Communication
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _configuration;
+        private readonly EmailSettings _settings;
         private readonly ILogger<EmailService> _logger;
-        private readonly IRazorViewRenderer _viewRenderer; // Added IRazorViewRenderer
+        private readonly IRazorViewRenderer _viewRenderer;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger, IRazorViewRenderer viewRenderer) // Updated constructor
+        public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger, IRazorViewRenderer viewRenderer)
         {
-            _configuration = configuration;
+            _settings = settings.Value;
             _logger = logger;
-            _viewRenderer = viewRenderer; // Initialized IRazorViewRenderer
+            _viewRenderer = viewRenderer;
         }
 
         public async Task<bool> SendPasswordResetEmailAsync(string userEmail, string userName, string resetLink) // Updated method signature
@@ -48,19 +48,19 @@ namespace GymBLL.Service.Implementation.Communication
         {
             try
             {
-                var smtpHost = _configuration["EmailSettings:SmtpHost"] ?? "smtp.gmail.com";
-                var smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
-                var smtpUser = _configuration["EmailSettings:SmtpUser"];
-                var smtpPass = _configuration["EmailSettings:SmtpPass"];
-                var fromEmail = _configuration["EmailSettings:FromEmail"] ?? "noreply@menopro.com";
-                var fromName = _configuration["EmailSettings:FromName"] ?? "MenoPro Gym";
-                using (var client = new SmtpClient(smtpHost, smtpPort))
+                if (!_settings.IsConfigured)
                 {
-                    client.Credentials = new NetworkCredential(smtpUser, smtpPass);
+                    _logger.LogWarning("Email is not configured (EmailSettings:SmtpUser/SmtpPass missing). Skipping email to {Email}. Set credentials via user-secrets or environment variables.", toEmail);
+                    return false;
+                }
+
+                using (var client = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort))
+                {
+                    client.Credentials = new NetworkCredential(_settings.SmtpUser, _settings.SmtpPass);
                     client.EnableSsl = true;
                     var mailMessage = new MailMessage
                     {
-                        From = new MailAddress(fromEmail, fromName),
+                        From = new MailAddress(_settings.FromEmail, _settings.FromName),
                         Subject = subject,
                         Body = body,
                         IsBodyHtml = true
