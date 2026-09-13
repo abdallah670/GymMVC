@@ -1,5 +1,12 @@
 // Advanced Scroll Animations
 document.addEventListener("DOMContentLoaded", function () {
+  if (!("IntersectionObserver" in window)) {
+    document.querySelectorAll(".reveal-on-scroll").forEach(function (el) {
+      el.classList.add("revealed");
+    });
+    return;
+  }
+
   const observerOptions = {
     threshold: 0.1,
     rootMargin: "0px 0px -50px 0px",

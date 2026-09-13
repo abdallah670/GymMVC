@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c757d;
+  color: var(--muted);
 }
 
 .profile-camera-btn {
@@ -76,11 +76,11 @@
 }
 
 .member-profile-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--grad-main);
   padding: 2rem;
   border-radius: 8px;
   margin-bottom: 2rem;
-  color: white;
+  color: var(--accent-ink);
 }
 
 .member-header-content {

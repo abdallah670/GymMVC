@@ -328,6 +328,8 @@
   );
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   position: relative;
@@ -364,17 +366,18 @@
 
 /* Glass Buttons */
 .glass-btn {
-  background: rgba(var(--main-color-rgb, 14, 165, 233), 0.2);
+  background: rgba(69, 255, 202, 0.2);
   backdrop-filter: blur(5px);
-  border: 1px solid rgba(var(--main-color-rgb, 14, 165, 233), 0.4);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(69, 255, 202, 0.4);
   color: #fff;
   transition: all 0.3s ease;
 }
 
 .glass-btn:hover {
-  background: rgba(var(--main-color-rgb, 14, 165, 233), 0.4);
+  background: rgba(69, 255, 202, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(var(--main-color-rgb, 14, 165, 233), 0.3);
+  box-shadow: 0 5px 15px rgba(69, 255, 202, 0.3);
 }
 
 .glass-btn-outline {
@@ -382,6 +385,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .glass-btn-outline:hover {
@@ -399,6 +403,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.5px;
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .sub-status-badge.badge-success {

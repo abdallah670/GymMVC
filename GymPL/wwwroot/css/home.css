@@ -55,9 +55,10 @@
   line-height: 1.05;
   margin-bottom: 1.5rem;
   letter-spacing: -0.03em;
-  background: linear-gradient(to bottom, #fff, #a1a1aa);
+  background: linear-gradient(to bottom, var(--ink), var(--muted));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-content h1 span {
@@ -300,7 +301,6 @@
   overflow: hidden;
   position: relative;
   height: 400px;
-  group: hover;
 }
 
 .service-card img {
@@ -341,12 +341,12 @@
 
 .service-title {
   font-size: 1.75rem;
-  color: #fff;
+  color: var(--ink);
   margin-bottom: 0.5rem;
 }
 
 .service-description {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   opacity: 0;
@@ -434,7 +434,8 @@
   border: 1px solid var(--frame);
   padding: 3rem 2rem;
   border-radius: 24px;
-  width: 340px;
+  max-width: 340px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -508,7 +509,9 @@
     grid-template-columns: 1fr;
     text-align: center;
     padding-top: 8rem;
+    padding-bottom: 3rem;
     gap: 3rem;
+    min-height: auto;
   }
 
   .hero-buttons {
@@ -521,12 +524,17 @@
 
   .hero-visual {
     height: 400px;
+    max-height: 50vh;
   }
 }
 
 @media (max-width: 768px) {
   .hero h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(2rem, 8vw, 3rem);
   }
 
   .stats-glass {

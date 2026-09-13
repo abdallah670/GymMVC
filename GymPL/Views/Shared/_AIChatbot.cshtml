@@ -36,15 +36,15 @@
         right: 2rem;
         width: 3.5rem;
         height: 3.5rem;
-        background: var(--primary-gradient, linear-gradient(135deg, #4e73df 0%, #224abe 100%));
+        background: var(--main-color);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: var(--accent-ink);
         font-size: 1.5rem;
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(34, 74, 190, 0.4);
+        box-shadow: 0 4px 15px rgba(69, 255, 202, 0.4);
         z-index: 2000;
         transition: transform 0.2s;
     }
@@ -58,6 +58,7 @@
         height: 500px;
         background: var(--tile);
         backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid var(--frame);
         border-radius: 1.5rem;
         box-shadow: var(--shadow-rest);
@@ -69,8 +70,8 @@
 
     .ai-header-floating {
         padding: 1rem 1.2rem;
-        background: var(--primary-gradient, linear-gradient(135deg, #4e73df 0%, #224abe 100%));
-        color: white;
+        background: var(--grad-main);
+        color: var(--accent-ink);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -95,8 +96,8 @@
     }
 
     .message-user-floating {
-        background: #4e73df;
-        color: white;
+        background: var(--main-color);
+        color: var(--accent-ink);
         padding: 0.8rem 1rem;
         border-radius: 1rem 1rem 0 1rem;
         font-size: 0.9rem;
@@ -123,8 +124,8 @@
     }
 
     .ai-send-btn-floating {
-        background: #4e73df;
-        color: white;
+        background: var(--main-color);
+        color: var(--accent-ink);
         border: none;
         width: 2.5rem;
         height: 2.5rem;
@@ -135,7 +136,7 @@
     .ai-close-btn-floating {
         background: none;
         border: none;
-        color: white;
+        color: var(--ink);
         font-size: 1.5rem;
         cursor: pointer;
         opacity: 0.8;

@@ -2,7 +2,7 @@
 .password-card {
   border: none;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-rest);
   overflow: hidden;
 }
 
@@ -131,7 +131,7 @@
 .requirements-alert {
   border: none;
   border-radius: 10px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, var(--warning) 0%, var(--error) 100%);
   color: white;
   padding: 1.25rem;
   margin: 1.5rem 0;
@@ -165,13 +165,13 @@
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(69, 255, 202, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  box-shadow: 0 6px 20px rgba(69, 255, 202, 0.4);
+  background: var(--grad-main);
 }
 
 .btn-primary:active {
@@ -186,14 +186,14 @@
 
 /* Forgot Password Link */
 .btn-link {
-  color: #667eea;
+  color: var(--main-color);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
 }
 
 .btn-link:hover {
-  color: #764ba2;
+  color: var(--secondary-color);
   text-decoration: underline;
 }
 
@@ -207,9 +207,9 @@
 }
 
 .history-card .card-header {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: var(--grad-main);
   border: none;
-  color: white;
+  color: var(--accent-ink);
   padding: 1rem 1.5rem;
   font-size: 0.95rem;
 }
@@ -295,25 +295,25 @@
 
 /* Password strength colors */
 .bg-danger {
-  background: linear-gradient(90deg, #ff6b6b 0%, #ff8e8e 100%) !important;
+  background: linear-gradient(90deg, var(--error) 0%, rgba(239, 68, 68, 0.8) 100%) !important;
 }
 
 .bg-warning {
-  background: linear-gradient(90deg, #ffd166 0%, #ffdf8e 100%) !important;
+  background: linear-gradient(90deg, var(--warning) 0%, rgba(245, 158, 11, 0.8) 100%) !important;
 }
 
 .bg-success {
-  background: linear-gradient(90deg, #06d6a0 0%, #4df0c5 100%) !important;
+  background: linear-gradient(90deg, var(--success) 0%, rgba(16, 185, 129, 0.8) 100%) !important;
 }
 
 /* Match indicator colors */
 .text-success {
-  color: #06d6a0 !important;
+  color: var(--success) !important;
   font-weight: 600;
 }
 
 .text-danger {
-  color: #ff6b6b !important;
+  color: var(--error) !important;
   font-weight: 600;
 }
 

@@ -109,6 +109,8 @@ ul {
 
 .navbar {
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 95%, transparent) !important;
   border-bottom: 1px solid var(--frame);
 }
@@ -190,7 +192,9 @@ header {
   top: 0;
   left: 0;
   right: 0;
+  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 95%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   z-index: 1030;
   border-bottom: 1px solid var(--frame);
@@ -343,6 +347,54 @@ footer::before {
     width: 100%;
     border-radius: 10px;
   }
+}
+
+.social-links a:hover {
+  background: var(--main-color) !important;
+  color: var(--bg) !important;
+  transform: translateY(-3px);
+}
+
+.footer-column ul a:hover {
+  color: var(--main-color) !important;
+}
+
+/* Reveal fallback for no-JS */
+noscript .reveal-on-scroll {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Mobile auth nav for member/trainer headers */
+@media (max-width: 991.98px) {
+  .member-header .navbar-collapse .navbar-nav.auth-nav,
+  .trainer-header .navbar-collapse .navbar-nav.auth-nav {
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    padding: 1rem 0;
+    border-top: 1px solid var(--rule);
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .member-header .navbar-collapse .navbar-nav.auth-nav > li,
+  .trainer-header .navbar-collapse .navbar-nav.auth-nav > li {
+    margin: 0 !important;
+  }
+}
+
+.social-links a:hover {
+  background: var(--main-color) !important;
+  color: var(--bg) !important;
+  transform: translateY(-3px);
+}
+
+.footer-column ul a:hover {
+  color: var(--main-color) !important;
 }
 
 .footer-column h3 {
@@ -546,6 +598,30 @@ footer::before {
   color: var(--ink) !important;
 }
 
+.text-primary {
+  color: var(--main-color) !important;
+}
+
+.text-secondary {
+  color: var(--muted) !important;
+}
+
+.text-success {
+  color: var(--success) !important;
+}
+
+.text-warning {
+  color: var(--warning) !important;
+}
+
+.text-danger {
+  color: var(--error) !important;
+}
+
+.text-info {
+  color: var(--info) !important;
+}
+
 .bg-light {
   background-color: var(--tile) !important;
   color: var(--ink) !important;
@@ -554,6 +630,31 @@ footer::before {
 .bg-white {
   background-color: var(--tile) !important;
   color: var(--ink) !important;
+}
+
+.bg-primary {
+  background-color: var(--main-color) !important;
+  color: var(--accent-ink) !important;
+}
+
+.bg-success {
+  background-color: var(--success) !important;
+  color: var(--accent-ink) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning) !important;
+  color: var(--accent-ink) !important;
+}
+
+.bg-danger {
+  background-color: var(--error) !important;
+  color: var(--accent-ink) !important;
+}
+
+.bg-info {
+  background-color: var(--info) !important;
+  color: var(--accent-ink) !important;
 }
 
 .badge-counter {
